@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { logout } from "@/app/admin/(dashboard)/actions";
 import PresenceIndicator from "@/components/admin/PresenceIndicator";
 
@@ -7,38 +11,172 @@ interface AdminNavProps {
   email: string;
 }
 
-export default function AdminNav({ userId, email }: AdminNavProps) {
+function HomeIcon({ className }: { className?: string }) {
   return (
-    <header className="border-b border-border bg-card">
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.8} stroke="currentColor" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.25 12 11.204 3.045a1.125 1.125 0 0 1 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+      />
+    </svg>
+  );
+}
+
+function InboxIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.8} stroke="currentColor" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 9h4.125c.504 0 .933.348 1.09.827a2.997 2.997 0 0 0 5.696 0c.157-.48.586-.827 1.09-.827H20.25M3.75 9l1.5-5.25A1.125 1.125 0 0 1 6.324 3h11.352a1.125 1.125 0 0 1 1.074.75L20.25 9M3.75 9v9.375c0 .621.504 1.125 1.125 1.125h14.25c.621 0 1.125-.504 1.125-1.125V9"
+      />
+    </svg>
+  );
+}
+
+function DocumentIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.8} stroke="currentColor" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+      />
+    </svg>
+  );
+}
+
+function ShieldIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.8} stroke="currentColor" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12.75 11.25 15 15 9.75M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v6.646c0 5.108-3.246 9.542-8.086 11.343a1.115 1.115 0 0 1-.828 0C7.246 21.03 4 16.594 4 11.486V4.774c0-.54.384-1.007.917-1.096A48.32 48.32 0 0 1 12 3Z"
+      />
+    </svg>
+  );
+}
+
+const NAV_ITEMS = [
+  { href: "/admin", label: "Tin thuê", icon: HomeIcon },
+  { href: "/admin/leads", label: "Leads", icon: InboxIcon },
+  { href: "/admin/blog", label: "Blog", icon: DocumentIcon },
+  { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon },
+];
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/admin") return pathname === "/admin";
+  return pathname.startsWith(href);
+}
+
+export default function AdminNav({ userId, email }: AdminNavProps) {
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 z-40 border-b border-border bg-card/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/admin" className="text-lg font-bold text-primary-700 dark:text-primary-300">
-          Quản trị Tổ Thuê TP.HCM
+        <Link href="/admin" className="flex items-center gap-2 text-lg font-bold text-primary-700 dark:text-primary-300">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-primary-800 text-white shadow-sm">
+            TT
+          </span>
+          <span className="hidden sm:inline">Quản trị Tổ Thuê TP.HCM</span>
         </Link>
 
-        <nav className="flex items-center gap-4 text-sm font-medium">
-          <Link href="/admin" className="text-foreground hover:text-primary-700 dark:hover:text-primary-300">
-            Tin thuê
-          </Link>
-          <Link href="/admin/leads" className="text-foreground hover:text-primary-700 dark:hover:text-primary-300">
-            Leads
-          </Link>
-          <Link href="/admin/blog" className="text-foreground hover:text-primary-700 dark:hover:text-primary-300">
-            Blog
-          </Link>
-          <Link href="/admin/security" className="text-foreground hover:text-primary-700 dark:hover:text-primary-300">
-            Bảo mật
-          </Link>
-          <PresenceIndicator userId={userId} email={email} />
-          <form action={logout}>
-            <button
-              type="submit"
-              className="rounded-lg border border-border px-3 py-1.5 text-foreground hover:bg-muted"
-            >
-              Đăng xuất
-            </button>
-          </form>
+        <nav className="hidden items-center gap-1 md:flex">
+          {NAV_ITEMS.map((item) => {
+            const active = isActive(pathname, item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition ${
+                  active
+                    ? "bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
+
+        <div className="flex items-center gap-3">
+          <PresenceIndicator userId={userId} email={email} />
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-semibold text-white shadow-sm transition hover:brightness-110"
+              aria-label="Tài khoản"
+            >
+              {(email[0] || "?").toUpperCase()}
+            </button>
+
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                <div className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+                  <div className="border-b border-border px-4 py-3">
+                    <p className="text-xs text-muted-foreground">Đăng nhập với</p>
+                    <p className="truncate text-sm font-medium text-foreground">{email}</p>
+                  </div>
+                  <form action={logout}>
+                    <button
+                      type="submit"
+                      className="w-full px-4 py-2.5 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                    >
+                      Đăng xuất
+                    </button>
+                  </form>
+                </div>
+              </>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setMobileOpen((v) => !v)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground md:hidden"
+            aria-label="Mở menu"
+          >
+            <span className="text-lg">{mobileOpen ? "✕" : "☰"}</span>
+          </button>
+        </div>
       </div>
+
+      {mobileOpen && (
+        <nav className="border-t border-border bg-card md:hidden">
+          <div className="flex flex-col gap-1 px-4 py-3">
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(pathname, item.href);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
+                    active
+                      ? "bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      )}
     </header>
   );
 }

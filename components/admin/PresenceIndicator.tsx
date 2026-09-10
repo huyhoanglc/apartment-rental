@@ -63,9 +63,10 @@ export default function PresenceIndicator({ userId, email }: PresenceIndicatorPr
         <span
           key={admin.userId}
           title={admin.userId === userId ? `${admin.email} (Bạn)` : admin.email}
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-xs font-semibold text-white ring-2 ring-card"
+          className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-xs font-semibold text-white ring-2 ring-card"
         >
           {admin.email[0]?.toUpperCase()}
+          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-status-available ring-2 ring-card" />
         </span>
       ))}
     </div>
