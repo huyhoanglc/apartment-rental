@@ -8,6 +8,7 @@
     "navDistricts": "Khu vực",
     "navAiFinder": "Trợ lý tìm nhà",
     "navTrust": "Vì sao chọn chúng tôi",
+    "navBlog": "Blog",
     "openMenu": "Mở menu",
     "zaloCta": "Nhắn Zalo tư vấn"
   },
@@ -115,6 +116,17 @@
     "con_phong": "Còn phòng",
     "hot": "Hot",
     "het_phong": "Hết phòng"
+  },
+  "Blog": {
+    "title": "Blog",
+    "subtitle": "Mẹo và kinh nghiệm thuê nhà tại TP.HCM",
+    "readMore": "Đọc thêm",
+    "empty": "Chưa có bài viết nào.",
+    "prev": "Trang trước",
+    "next": "Trang sau",
+    "pageInfo": "Trang {page}/{totalPages}",
+    "breadcrumbHome": "Trang chủ",
+    "breadcrumbBlog": "Blog"
   },
   "LocaleSwitcher": {
     "ariaLabel": "Chọn ngôn ngữ",

@@ -35,8 +35,38 @@ export default async function ListingDetailPage({ params: { locale, code } }: Pa
 
   const gallery = listing.image_urls.length > 0 ? listing.image_urls : [listing.image_url];
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: listing.title,
+    description: listing.description || undefined,
+    url: `${siteUrl}/tin/${listing.code}`,
+    image: listing.image_url,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: listing.district,
+      addressRegion: "Hồ Chí Minh",
+      addressCountry: "VN",
+    },
+    offers: {
+      "@type": "Offer",
+      price: listing.price_million * 1_000_000,
+      priceCurrency: "VND",
+      availability:
+        listing.status === "het_phong"
+          ? "https://schema.org/SoldOut"
+          : "https://schema.org/InStock",
+    },
+  };
+
   return (
     <div className="container-page py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <nav className="text-sm text-muted-foreground">
         <Link href="/" className="hover:text-primary-700 dark:hover:text-primary-300">
           {t("breadcrumbHome")}

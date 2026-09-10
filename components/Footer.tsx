@@ -1,9 +1,11 @@
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 
 const ZALO_CONTACT = process.env.NEXT_PUBLIC_ZALO_CONTACT || "0901234567";
 
 export default async function Footer() {
   const t = await getTranslations("Footer");
+  const tHeader = await getTranslations("Header");
 
   return (
     <footer className="border-t border-border bg-card">
@@ -16,6 +18,12 @@ export default async function Footer() {
             Tổ Thuê TP.HCM
           </div>
           <p className="mt-3 text-sm text-muted-foreground">{t("tagline")}</p>
+          <Link
+            href="/blog"
+            className="mt-3 inline-block text-sm font-medium text-primary-700 hover:underline dark:text-primary-300"
+          >
+            {tHeader("navBlog")}
+          </Link>
         </div>
 
         <div>

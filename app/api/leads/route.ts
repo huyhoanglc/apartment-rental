@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createLead } from "@/lib/leads";
+import { sendTelegramMessage } from "@/lib/telegram";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
@@ -12,14 +13,25 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await createLead({
+    const lead = {
       phone: body.phone.trim(),
       zalo: typeof body.zalo === "string" ? body.zalo.trim() : undefined,
       district: typeof body.district === "string" ? body.district.trim() : undefined,
       budget_million:
         typeof body.budget_million === "number" ? body.budget_million : undefined,
       note: typeof body.note === "string" ? body.note.trim() : undefined,
-    });
+    };
+    await createLead(lead);
+
+    // Tuỳ chọn: báo Telegram khi có lead mới, không chặn response nếu lỗi.
+    void sendTelegramMessage(
+      `📩 <b>Lead mới</b>\n` +
+        `SĐT/Zalo: ${lead.phone}\n` +
+        (lead.district ? `Khu vực: ${lead.district}\n` : "") +
+        (lead.budget_million != null ? `Ngân sách: ${lead.budget_million} triệu\n` : "") +
+        (lead.note ? `Ghi chú: ${lead.note}` : "")
+    );
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[POST /api/leads]", error);

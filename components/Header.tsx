@@ -39,6 +39,12 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/blog"
+            className="text-sm font-medium text-muted-foreground transition hover:text-primary-700 dark:hover:text-primary-300"
+          >
+            {t("navBlog")}
+          </Link>
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
@@ -80,6 +86,13 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/blog"
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+            >
+              {t("navBlog")}
+            </Link>
             <div className="mt-1">
               <LocaleSwitcher />
             </div>

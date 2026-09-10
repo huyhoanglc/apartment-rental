@@ -75,6 +75,27 @@ export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
   het_phong: "Hết phòng",
 };
 
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  content: string;
+  cover_image_url: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Field admin nhập ở form thêm/sửa bài blog. */
+export type BlogPostInput = Omit<
+  BlogPost,
+  "id" | "created_at" | "updated_at" | "published_at" | "cover_image_url"
+> & { cover_image_url?: string };
+
 export const DISTRICTS = [
   "Quận 1",
   "Quận 3",

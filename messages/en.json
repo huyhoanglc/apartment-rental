@@ -8,6 +8,7 @@
     "navDistricts": "Districts",
     "navAiFinder": "AI Finder",
     "navTrust": "Why choose us",
+    "navBlog": "Blog",
     "openMenu": "Open menu",
     "zaloCta": "Chat on Zalo"
   },
@@ -115,6 +116,17 @@
     "con_phong": "Available",
     "hot": "Hot",
     "het_phong": "Fully booked"
+  },
+  "Blog": {
+    "title": "Blog",
+    "subtitle": "Tips and experience for renting in Ho Chi Minh City",
+    "readMore": "Read more",
+    "empty": "No posts yet.",
+    "prev": "Previous",
+    "next": "Next",
+    "pageInfo": "Page {page}/{totalPages}",
+    "breadcrumbHome": "Home",
+    "breadcrumbBlog": "Blog"
   },
   "LocaleSwitcher": {
     "ariaLabel": "Select language",

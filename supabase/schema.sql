@@ -155,3 +155,89 @@ create policy "authenticated can update listing images"
 
 -- Tạo tài khoản admin: vào Supabase Dashboard → Authentication → Users →
 -- Add user (nhập email/password thủ công).
+
+-- ==========================================================================
+-- Lịch sử đăng nhập admin (trang /admin/security)
+-- ==========================================================================
+create table if not exists admin_login_events (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  ip_address text,
+  user_agent text,
+  created_at timestamptz not null default now()
+);
+
+alter table admin_login_events enable row level security;
+
+drop policy if exists "authenticated can select own login events" on admin_login_events;
+create policy "authenticated can select own login events"
+  on admin_login_events for select
+  to authenticated
+  using (auth.uid() = user_id);
+
+drop policy if exists "authenticated can insert own login events" on admin_login_events;
+create policy "authenticated can insert own login events"
+  on admin_login_events for insert
+  to authenticated
+  with check (auth.uid() = user_id);
+
+-- ==========================================================================
+-- Blog (SEO)
+-- ==========================================================================
+create table if not exists blog_posts (
+  id uuid primary key default gen_random_uuid(),
+  slug text unique not null,
+  title text not null,
+  excerpt text,
+  content text not null, -- markdown
+  cover_image_url text,
+  meta_title text,
+  meta_description text,
+  published boolean not null default false,
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table blog_posts enable row level security;
+
+drop policy if exists "published posts are publicly readable" on blog_posts;
+create policy "published posts are publicly readable"
+  on blog_posts for select
+  using (published = true);
+
+drop policy if exists "authenticated can manage all posts" on blog_posts;
+create policy "authenticated can manage all posts"
+  on blog_posts for all
+  to authenticated
+  using (true)
+  with check (true);
+
+drop trigger if exists blog_posts_set_updated_at on blog_posts;
+create trigger blog_posts_set_updated_at
+  before update on blog_posts
+  for each row
+  execute function set_updated_at();
+
+-- Bucket ảnh cover cho blog, cùng cấu trúc policy như listing-images.
+insert into storage.buckets (id, name, public)
+values ('blog-images', 'blog-images', true)
+on conflict (id) do nothing;
+
+drop policy if exists "public read access to blog images" on storage.objects;
+create policy "public read access to blog images"
+  on storage.objects for select
+  using (bucket_id = 'blog-images');
+
+drop policy if exists "authenticated can upload blog images" on storage.objects;
+create policy "authenticated can upload blog images"
+  on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'blog-images');
+
+drop policy if exists "authenticated can update blog images" on storage.objects;
+create policy "authenticated can update blog images"
+  on storage.objects for update
+  to authenticated
+  using (bucket_id = 'blog-images')
+  with check (bucket_id = 'blog-images');

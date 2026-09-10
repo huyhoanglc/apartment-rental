@@ -12,7 +12,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
 
   return (
     <div className="min-h-screen bg-background">
-      <AdminNav />
+      <AdminNav userId={user.id} email={user.email ?? ""} />
       <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
     </div>
   );

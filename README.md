@@ -112,14 +112,57 @@ giữ nguyên cho cả 2 chế độ.
 4. Deploy. Vercel cấp domain tạm dạng `*.vercel.app`; gắn domain riêng sau trong
    **Project Settings > Domains** khi đã mua domain.
 
+## 7. Bảo mật đăng nhập & thông báo Telegram
+
+`/admin/security` hiển thị 20 lần đăng nhập gần nhất của tài khoản đang dùng (bảng
+`admin_login_events`, IP lấy từ header `x-forwarded-for`, Vercel tự set khi deploy), và nút "Đăng
+xuất khỏi tất cả thiết bị khác" (`supabase.auth.signOut({ scope: 'others' })`).
+
+**Thông báo Telegram khi có admin đăng nhập / lead mới** (tuỳ chọn, bỏ trống 2 biến env thì tự
+tắt, không lỗi):
+
+1. Mở Telegram, nhắn cho [@BotFather](https://t.me/BotFather) → gõ `/newbot` → làm theo hướng dẫn
+   để tạo bot, lấy `TELEGRAM_BOT_TOKEN`.
+2. Nhắn thử 1 tin bất kỳ cho bot vừa tạo (hoặc thêm bot vào 1 group).
+3. Mở trình duyệt vào `https://api.telegram.org/bot<TOKEN>/getUpdates`, tìm field
+   `"chat":{"id": ...}` — đó là `TELEGRAM_CHAT_ID`.
+4. Thêm 2 biến này vào `.env.local` (và Vercel Environment Variables khi deploy thật).
+
+`TELEGRAM_BOT_TOKEN` chỉ dùng trong `lib/telegram.ts`, gọi từ Server Action/Route Handler — không
+bao giờ lộ ra client.
+
+## 8. Blog (chuẩn SEO cơ bản)
+
+`/blog` (danh sách, phân trang) và `/blog/[slug]` (chi tiết, render Markdown qua `react-markdown`,
+có JSON-LD `Article`). Quản lý bài viết ở `/admin/blog` — tạo/sửa dùng chung `BlogPostForm`, có
+đếm ký tự cảnh báo khi `meta_title` > 60 hoặc `meta_description` > 160 ký tự (chuẩn SEO cơ bản),
+toggle xuất bản/nháp ngay trên bảng danh sách.
+
+**Viết bài đầu tiên:**
+
+1. Đăng nhập `/admin`, vào **Blog → Viết bài mới**.
+2. Nhập tiêu đề (slug tự tạo theo tiêu đề, có thể sửa tay), nội dung viết bằng Markdown (`##` cho
+   heading, `**...**` in đậm...), chọn ảnh cover, tick **Xuất bản ngay** rồi Lưu.
+3. Kiểm tra tại `/blog` và `/blog/<slug>`.
+
+Ảnh cover lưu ở bucket Storage riêng `blog-images` (public, cùng kiểu policy với
+`listing-images`). `app/sitemap.ts`/`app/robots.ts` tự liệt kê mọi bài đã xuất bản + mọi tin thuê —
+không cần cập nhật tay. Nhớ set `NEXT_PUBLIC_SITE_URL` đúng domain thật khi deploy (mặc định
+`http://localhost:3000`) để sitemap ra đúng URL tuyệt đối.
+
+**Bảng mới trong `supabase/schema.sql`** (đã gồm trong file, chạy lại toàn bộ file là đủ):
+`admin_login_events` (lịch sử đăng nhập, RLS chỉ cho user xem/ghi dòng của chính mình),
+`blog_posts` (bài viết, RLS: đọc công khai bài `published = true`, ghi cho user đã đăng nhập).
+
 ## Cấu trúc chính
 
 - `app/[locale]/` — route công khai đa ngôn ngữ: trang chủ (`page.tsx`), trang chi tiết tin
-  (`tin/[code]`), layout gốc (`layout.tsx`, bọc `NextIntlClientProvider` + `ThemeProvider` +
-  Header/Footer)
+  (`tin/[code]`), blog (`blog/`, `blog/[slug]`), layout gốc (`layout.tsx`, bọc
+  `NextIntlClientProvider` + `ThemeProvider` + Header/Footer)
 - `app/admin/` — trang quản trị, root layout riêng (không đa ngôn ngữ); `login/` (đăng nhập công
-  khai); `(dashboard)/` (route group yêu cầu đăng nhập — danh sách tin, thêm/sửa tin, leads)
+  khai); `(dashboard)/` (route group yêu cầu đăng nhập — tin thuê, leads, blog, bảo mật)
 - `app/api/` — route handlers `listings`, `leads` (dùng chung cho cả trang công khai)
+- `app/sitemap.ts`, `app/robots.ts` — SEO, tự liệt kê tin thuê + bài blog đã xuất bản
 - `middleware.ts` — kết hợp routing đa ngôn ngữ (next-intl) và chặn `/admin/**` khi chưa đăng nhập
 - `i18n/` — cấu hình next-intl (`routing.ts`, `navigation.ts`, `request.ts`)
 - `messages/` — nội dung dịch UI tĩnh theo từng ngôn ngữ
@@ -127,13 +170,16 @@ giữ nguyên cho cả 2 chế độ.
   TrustSection, Footer, ZaloButton, LeadForm, LocaleSwitcher, ThemeToggle
 - `components/admin/` — component riêng cho trang quản trị (form, bảng, nút xoá/toggle)
 - `lib/` — `types.ts` (kiểu dữ liệu), `supabase.ts` (client anon, đọc công khai + gửi lead),
-  `listings.ts`/`leads.ts` (truy vấn công khai, fallback dữ liệu mẫu khi chưa cấu hình Supabase)
+  `listings.ts`/`leads.ts`/`blog.ts` (truy vấn công khai, fallback dữ liệu mẫu khi chưa cấu hình
+  Supabase), `telegram.ts`, `slugify.ts`
 - `lib/supabase/` — `server.ts`/`middleware.ts`: client Supabase gắn session admin (đăng nhập)
-- `lib/admin/` — thao tác ghi dữ liệu (tạo/sửa/xoá tin, upload ảnh, quản lý leads) dùng client admin
-- `data/listings.ts` — dữ liệu mẫu/seed, dùng làm fallback dev và nguồn cho `npm run seed`
+- `lib/admin/` — thao tác ghi dữ liệu (tin thuê, blog, leads, upload ảnh, lịch sử đăng nhập) dùng
+  client admin
+- `data/listings.ts`, `data/blogPosts.ts` — dữ liệu mẫu/seed, dùng làm fallback dev và nguồn cho
+  `npm run seed`
 - `supabase/schema.sql` — script khởi tạo bảng, RLS, bucket Storage, policy cho admin
 
 ## Việc chưa làm (giai đoạn sau)
 
-Trợ lý AI tìm nhà thật (hiện là UI demo), dịch nội dung tin thuê theo ngôn ngữ, bản đồ hiển thị tin
-thuê.
+Trợ lý AI tìm nhà thật (hiện là UI demo), dịch nội dung tin thuê/bài blog theo ngôn ngữ, bản đồ
+hiển thị tin thuê.

@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { logout } from "@/app/admin/(dashboard)/actions";
+import PresenceIndicator from "@/components/admin/PresenceIndicator";
 
-export default function AdminNav() {
+interface AdminNavProps {
+  userId: string;
+  email: string;
+}
+
+export default function AdminNav({ userId, email }: AdminNavProps) {
   return (
     <header className="border-b border-border bg-card">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
@@ -16,6 +22,13 @@ export default function AdminNav() {
           <Link href="/admin/leads" className="text-foreground hover:text-primary-700 dark:hover:text-primary-300">
             Leads
           </Link>
+          <Link href="/admin/blog" className="text-foreground hover:text-primary-700 dark:hover:text-primary-300">
+            Blog
+          </Link>
+          <Link href="/admin/security" className="text-foreground hover:text-primary-700 dark:hover:text-primary-300">
+            Bảo mật
+          </Link>
+          <PresenceIndicator userId={userId} email={email} />
           <form action={logout}>
             <button
               type="submit"
