@@ -22,11 +22,11 @@ Supabase thật vì cần đăng nhập (xem mục 4).
 ## 2. Kết nối Supabase (bắt buộc để có dữ liệu thật)
 
 1. Tạo project mới tại [supabase.com](https://supabase.com) (gói Free).
-2. Vào **SQL Editor**, dán toàn bộ nội dung [supabase/schema.sql](supabase/schema.sql) và chạy
-   một lần — script này tạo bảng `listings`, `leads`, bật Row Level Security, tạo bucket Storage
+2. Vào **SQL Editor**, dán toàn bộ nội dung [supabase/schema.sql](supabase/schema.sql) và chạy —
+   script này tạo bảng `listings`, `leads`, bật Row Level Security, tạo bucket Storage
    `listing-images` (public), và các policy cho phép admin (user đã đăng nhập) quản lý dữ liệu.
-   Nếu project của bạn đã chạy phần đầu file từ trước (trước khi có trang admin), chỉ cần chạy lại
-   toàn bộ file — các câu lệnh đều an toàn để chạy lại nhiều lần.
+   File idempotent — cứ dán và chạy lại toàn bộ mỗi khi pull code có cập nhật schema, kể cả trên
+   project đã chạy file này trước đó.
 3. Vào **Project Settings > API**, copy `Project URL` và khoá `anon public`.
 4. Tạo file `.env.local` ở gốc dự án (đã nằm trong `.gitignore`, không commit) theo mẫu
    [.env.example](.env.example):
