@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { sendTelegramMessage } from "@/lib/telegram";
 
 export interface LoginEvent {
   id: string;
@@ -25,6 +26,27 @@ export async function logLoginEvent(userId: string): Promise<void> {
   });
 
   if (error) console.error("[logLoginEvent]", error);
+}
+
+/**
+ * Ghi log + báo Telegram cho 1 lần đăng nhập thành công — dùng chung cho cả
+ * luồng email/password (app/admin/login/actions.ts) và OAuth
+ * (app/auth/callback/route.ts) để 2 cách đăng nhập được audit như nhau.
+ */
+export async function recordAdminLogin(userId: string, email: string | null): Promise<void> {
+  await logLoginEvent(userId);
+
+  const headerList = headers();
+  const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "không rõ";
+  const device = parseUserAgent(headerList.get("user-agent"));
+
+  await sendTelegramMessage(
+    `🔐 <b>Đăng nhập admin</b>\n` +
+      `Email: ${email ?? "?"}\n` +
+      `Thời gian: ${new Date().toLocaleString("vi-VN")}\n` +
+      `IP: ${ip}\n` +
+      `Thiết bị: ${device}`
+  );
 }
 
 export async function getLoginEvents(): Promise<LoginEvent[]> {

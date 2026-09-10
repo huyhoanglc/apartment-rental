@@ -31,5 +31,7 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|.*\\..*).*)"],
+  // /auth/* (route callback OAuth) bỏ qua cả intl lẫn admin-guard — nó xử lý
+  // xong tự redirect vào /admin, không phải trang cần bảo vệ hay đa ngôn ngữ.
+  matcher: ["/((?!api|auth|_next|.*\\..*).*)"],
 };

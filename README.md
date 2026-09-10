@@ -73,6 +73,30 @@ công khai (mặc định), ai đó vẫn có thể tự tạo tài khoản th�
 của web) rồi có toàn quyền admin. Vào **Authentication → Providers → Email** và tắt "Allow new
 users to sign up" để chặn việc này.
 
+### Đăng nhập bằng Google (tuỳ chọn)
+
+Trang login hỗ trợ thêm nút "Đăng nhập với Google" cạnh form email/password.
+
+1. Tạo OAuth Client ở [Google Cloud Console](https://console.cloud.google.com/apis/credentials) →
+   **Create Credentials → OAuth client ID** → Application type: **Web application**.
+2. Vào Supabase Dashboard → **Authentication → Providers → Google**, bật lên, copy **Callback URL
+   (for OAuth)** Supabase hiển thị sẵn ở đó (dạng `https://<project>.supabase.co/auth/v1/callback`)
+   → dán vào **Authorized redirect URIs** ở Google Cloud Console.
+3. Copy `Client ID` + `Client secret` từ Google dán ngược lại vào Supabase Provider Google, Save.
+   Không cần thêm biến env nào ở phía app cho bước này — Supabase tự xử lý phần trao đổi token với
+   Google.
+4. **Bắt buộc** thêm `ADMIN_ALLOWED_EMAILS` vào `.env.local` — danh sách email Gmail được phép vào
+   `/admin`, cách nhau bằng dấu phẩy (vd `ADMIN_ALLOWED_EMAILS=you@gmail.com,other@gmail.com`).
+   Supabase OAuth mặc định **tự tạo tài khoản mới** cho bất kỳ ai đăng nhập Google thành công —
+   khác với luồng email/password (chỉ tạo tài khoản được qua Dashboard) — nên nếu bỏ trống biến
+   này, `app/auth/callback/route.ts` sẽ **chặn tất cả** đăng nhập Google (fail closed) thay vì mặc
+   định cho qua.
+5. Đăng nhập thử ở `/admin/login`. Nếu Google báo lỗi redirect URI mismatch, kiểm tra lại URL ở
+   bước 2 khớp chính xác (kể cả https, không có dấu `/` thừa cuối).
+
+Đăng nhập Zalo chưa làm (cần tự build OAuth flow riêng vì Supabase không hỗ trợ sẵn Zalo — sẽ làm
+sau khi có Zalo Developer App).
+
 ## 4. Đa ngôn ngữ (vi / en / zh)
 
 Site có 3 ngôn ngữ: Tiếng Việt (mặc định, không có prefix — vd `/`), English (`/en`), 中文 (`/zh`).
@@ -183,6 +207,8 @@ phòng. Chưa có trang công khai duyệt riêng theo Dự án (`/du-an`) — c
   khai); `(dashboard)/` (route group yêu cầu đăng nhập — phòng, dự án, leads, blog, nhân viên,
   bảo mật)
 - `app/api/` — route handlers `listings`, `leads` (dùng chung cho cả trang công khai)
+- `app/auth/callback/route.ts` — callback OAuth (Google...), ngoài `/admin` và ngoài matcher của
+  `middleware.ts` để không bị chặn/redirect ngôn ngữ giữa chừng
 - `app/sitemap.ts`, `app/robots.ts` — SEO, tự liệt kê phòng + bài blog đã xuất bản
 - `middleware.ts` — kết hợp routing đa ngôn ngữ (next-intl) và chặn `/admin/**` khi chưa đăng nhập
 - `i18n/` — cấu hình next-intl (`routing.ts`, `navigation.ts`, `request.ts`)
