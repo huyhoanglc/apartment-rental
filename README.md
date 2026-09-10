@@ -41,7 +41,7 @@ Supabase thật vì cần đăng nhập (xem mục 4).
    `SUPABASE_SERVICE_ROLE_KEY` chỉ dùng cho script seed dữ liệu chạy local, **không** được dùng
    trong code app và không commit lên git.
 
-5. Nạp dữ liệu mẫu vào Supabase (tuỳ chọn, để có sẵn vài tin thuê demo):
+5. Nạp dữ liệu mẫu vào Supabase (tuỳ chọn, để có sẵn vài dự án/phòng/bài blog demo):
 
    ```bash
    npm run seed
@@ -51,8 +51,9 @@ Supabase thật vì cần đăng nhập (xem mục 4).
 
 ## 3. Trang quản trị (/admin)
 
-Trang admin cho phép đăng nhập rồi tự thêm/sửa/xoá tin thuê và xem danh sách lead — không cần vào
-thẳng Supabase Dashboard nữa (dù vẫn dùng được nếu muốn).
+Trang admin cho phép đăng nhập rồi tự quản lý dự án, phòng, blog, nhân viên và xem danh sách lead —
+không cần vào thẳng Supabase Dashboard nữa (dù vẫn dùng được nếu muốn). Chi tiết cấu trúc Dự
+án/Phòng/Nhân viên xem mục 9.
 
 **Tạo tài khoản admin** (chỉ làm 1 lần, không có trang tự đăng ký):
 
@@ -154,15 +155,35 @@ không cần cập nhật tay. Nhớ set `NEXT_PUBLIC_SITE_URL` đúng domain th
 `admin_login_events` (lịch sử đăng nhập, RLS chỉ cho user xem/ghi dòng của chính mình),
 `blog_posts` (bài viết, RLS: đọc công khai bài `published = true`, ghi cho user đã đăng nhập).
 
+## 9. Dự án → Phòng, Nhân viên
+
+Mỗi phòng cho thuê giờ thuộc về 1 **Dự án** (tòa nhà/chung cư) — địa chỉ, quận/phường, tiện ích
+chung nằm ở dự án; phòng chỉ giữ thông tin riêng (giá, diện tích, loại hình, ảnh, tiện ích riêng).
+**Phải tạo Dự án trước khi thêm Phòng** — `/admin/listings/new` sẽ nhắc tạo dự án nếu chưa có cái
+nào. Quản lý ở `/admin/projects` (CRUD dự án, dùng chung `ProjectForm`) — xoá 1 dự án sẽ báo lỗi
+nếu dự án đó vẫn còn phòng (xoá hết phòng trước).
+
+`/admin/staff` là **danh bạ nhân viên nội bộ** đơn giản (tên, SĐT, email, chức vụ, đang làm/nghỉ)
+— không liên quan tài khoản đăng nhập `/admin` (tài khoản đăng nhập vẫn tạo thủ công qua Supabase
+Dashboard như mục 3).
+
+Trang chi tiết phòng (`/tin/[code]`) hiện thêm mục "Phòng khác cùng dự án" nếu dự án có nhiều
+phòng. Chưa có trang công khai duyệt riêng theo Dự án (`/du-an`) — có thể làm sau, bảng `projects`
+đã có sẵn `slug` để dùng ngay không cần đổi schema.
+
+**Bảng mới:** `projects` (RLS: đọc công khai, ghi cho user đã đăng nhập), `staff` (RLS: không có
+đọc công khai, chỉ user đã đăng nhập). Bucket Storage mới `project-images`.
+
 ## Cấu trúc chính
 
-- `app/[locale]/` — route công khai đa ngôn ngữ: trang chủ (`page.tsx`), trang chi tiết tin
+- `app/[locale]/` — route công khai đa ngôn ngữ: trang chủ (`page.tsx`), trang chi tiết phòng
   (`tin/[code]`), blog (`blog/`, `blog/[slug]`), layout gốc (`layout.tsx`, bọc
   `NextIntlClientProvider` + `ThemeProvider` + Header/Footer)
 - `app/admin/` — trang quản trị, root layout riêng (không đa ngôn ngữ); `login/` (đăng nhập công
-  khai); `(dashboard)/` (route group yêu cầu đăng nhập — tin thuê, leads, blog, bảo mật)
+  khai); `(dashboard)/` (route group yêu cầu đăng nhập — phòng, dự án, leads, blog, nhân viên,
+  bảo mật)
 - `app/api/` — route handlers `listings`, `leads` (dùng chung cho cả trang công khai)
-- `app/sitemap.ts`, `app/robots.ts` — SEO, tự liệt kê tin thuê + bài blog đã xuất bản
+- `app/sitemap.ts`, `app/robots.ts` — SEO, tự liệt kê phòng + bài blog đã xuất bản
 - `middleware.ts` — kết hợp routing đa ngôn ngữ (next-intl) và chặn `/admin/**` khi chưa đăng nhập
 - `i18n/` — cấu hình next-intl (`routing.ts`, `navigation.ts`, `request.ts`)
 - `messages/` — nội dung dịch UI tĩnh theo từng ngôn ngữ
@@ -170,13 +191,14 @@ không cần cập nhật tay. Nhớ set `NEXT_PUBLIC_SITE_URL` đúng domain th
   TrustSection, Footer, ZaloButton, LeadForm, LocaleSwitcher, ThemeToggle
 - `components/admin/` — component riêng cho trang quản trị (form, bảng, nút xoá/toggle)
 - `lib/` — `types.ts` (kiểu dữ liệu), `supabase.ts` (client anon, đọc công khai + gửi lead),
-  `listings.ts`/`leads.ts`/`blog.ts` (truy vấn công khai, fallback dữ liệu mẫu khi chưa cấu hình
-  Supabase), `telegram.ts`, `slugify.ts`
-- `lib/supabase/` — `server.ts`/`middleware.ts`: client Supabase gắn session admin (đăng nhập)
-- `lib/admin/` — thao tác ghi dữ liệu (tin thuê, blog, leads, upload ảnh, lịch sử đăng nhập) dùng
-  client admin
-- `data/listings.ts`, `data/blogPosts.ts` — dữ liệu mẫu/seed, dùng làm fallback dev và nguồn cho
-  `npm run seed`
+  `listings.ts`/`projects.ts`/`leads.ts`/`blog.ts` (truy vấn công khai, fallback dữ liệu mẫu khi
+  chưa cấu hình Supabase), `telegram.ts`, `slugify.ts`
+- `lib/supabase/` — `server.ts`/`middleware.ts`/`client.ts`: client Supabase gắn session admin
+  (đăng nhập) + client browser cho Realtime Presence
+- `lib/admin/` — thao tác ghi dữ liệu (phòng, dự án, blog, nhân viên, leads, upload ảnh, lịch sử
+  đăng nhập) dùng client admin
+- `data/listings.ts`, `data/projects.ts`, `data/blogPosts.ts` — dữ liệu mẫu/seed, dùng làm fallback
+  dev và nguồn cho `npm run seed`
 - `supabase/schema.sql` — script khởi tạo bảng, RLS, bucket Storage, policy cho admin
 
 ## Việc chưa làm (giai đoạn sau)

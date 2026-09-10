@@ -12,8 +12,8 @@ export default async function AdminListingsPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Tin thuê</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">{listings.length} tin đang quản lý</p>
+          <h1 className="text-xl font-bold text-foreground">Phòng</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">{listings.length} phòng đang quản lý</p>
         </div>
         <Link
           href="/admin/listings/new"
@@ -22,7 +22,7 @@ export default async function AdminListingsPage() {
           <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-4 w-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          Thêm tin mới
+          Thêm phòng mới
         </Link>
       </div>
 
@@ -39,9 +39,9 @@ export default async function AdminListingsPage() {
               </svg>
             </div>
             <div>
-              <p className="font-medium text-foreground">Chưa có tin thuê nào</p>
+              <p className="font-medium text-foreground">Chưa có phòng nào</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Bấm &quot;Thêm tin mới&quot; để đăng tin đầu tiên.
+                Bấm &quot;Thêm phòng mới&quot; để đăng phòng đầu tiên.
               </p>
             </div>
           </div>
@@ -52,7 +52,7 @@ export default async function AdminListingsPage() {
                 <th className="px-4 py-3">Ảnh</th>
                 <th className="px-4 py-3">Mã</th>
                 <th className="px-4 py-3">Tiêu đề</th>
-                <th className="px-4 py-3">Quận</th>
+                <th className="px-4 py-3">Dự án</th>
                 <th className="px-4 py-3">Loại</th>
                 <th className="px-4 py-3">Giá</th>
                 <th className="px-4 py-3">Trạng thái</th>
@@ -72,7 +72,10 @@ export default async function AdminListingsPage() {
                   </td>
                   <td className="px-4 py-3 font-medium text-foreground">{listing.code}</td>
                   <td className="max-w-xs truncate px-4 py-3 text-foreground">{listing.title}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{listing.district}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    <p className="text-foreground">{listing.project.name}</p>
+                    <p className="text-xs">{listing.project.district}</p>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{LISTING_TYPE_LABELS[listing.type]}</td>
                   <td className="px-4 py-3 font-medium text-foreground">{listing.price_million} triệu</td>
                   <td className="px-4 py-3">

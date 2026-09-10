@@ -4,18 +4,19 @@ import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
 import {
-  DISTRICTS,
   LISTING_STATUS_LABELS,
   LISTING_TYPE_LABELS,
-  type Listing,
   type ListingStatus,
   type ListingType,
+  type ListingWithProject,
+  type Project,
 } from "@/lib/types";
 import type { SaveListingState } from "@/app/admin/(dashboard)/listings/actions";
 
 interface ListingFormProps {
   action: (state: SaveListingState, formData: FormData) => Promise<SaveListingState>;
-  initialListing?: Listing;
+  projects: Project[];
+  initialListing?: ListingWithProject;
 }
 
 const TYPE_OPTIONS = Object.entries(LISTING_TYPE_LABELS) as [ListingType, string][];
@@ -34,7 +35,7 @@ function SubmitButton() {
   );
 }
 
-export default function ListingForm({ action, initialListing }: ListingFormProps) {
+export default function ListingForm({ action, projects, initialListing }: ListingFormProps) {
   const [state, formAction] = useFormState<SaveListingState, FormData>(action, {});
   const [amenities, setAmenities] = useState<string[]>(initialListing?.amenities ?? []);
   const [amenityInput, setAmenityInput] = useState("");
@@ -98,33 +99,30 @@ export default function ListingForm({ action, initialListing }: ListingFormProps
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium text-foreground">Quận *</label>
-          <select
-            name="district"
-            required
-            defaultValue={initialListing?.district ?? ""}
-            className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-          >
-            <option value="" disabled>
-              Chọn quận
+      <div>
+        <label className="text-sm font-medium text-foreground">Dự án *</label>
+        <select
+          name="project_id"
+          required
+          defaultValue={initialListing?.project_id ?? ""}
+          className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
+        >
+          <option value="" disabled>
+            Chọn dự án
+          </option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name} — {p.district}
             </option>
-            {DISTRICTS.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="text-sm font-medium text-foreground">Phường</label>
-          <input
-            name="ward"
-            defaultValue={initialListing?.ward ?? ""}
-            className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-          />
-        </div>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Chưa thấy dự án cần tìm? Vào{" "}
+          <a href="/admin/projects/new" className="text-primary-700 hover:underline dark:text-primary-300">
+            Dự án → Thêm dự án mới
+          </a>{" "}
+          trước.
+        </p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

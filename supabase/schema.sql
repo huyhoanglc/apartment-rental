@@ -241,3 +241,102 @@ create policy "authenticated can update blog images"
   to authenticated
   using (bucket_id = 'blog-images')
   with check (bucket_id = 'blog-images');
+
+-- ==========================================================================
+-- Dự án (tòa nhà/chung cư) — Phòng (listings) giờ thuộc về 1 dự án.
+-- ==========================================================================
+create table if not exists projects (
+  id uuid primary key default gen_random_uuid(),
+  slug text unique not null,
+  name text not null,
+  district text not null,
+  ward text,
+  address text,
+  description text,
+  cover_image_url text,
+  image_urls text[] not null default '{}',
+  amenities text[] not null default '{}',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table projects enable row level security;
+
+drop policy if exists "projects are publicly readable" on projects;
+create policy "projects are publicly readable"
+  on projects for select
+  using (true);
+
+drop policy if exists "authenticated can manage projects" on projects;
+create policy "authenticated can manage projects"
+  on projects for all
+  to authenticated
+  using (true)
+  with check (true);
+
+drop trigger if exists projects_set_updated_at on projects;
+create trigger projects_set_updated_at
+  before update on projects
+  for each row
+  execute function set_updated_at();
+
+-- Bucket ảnh dự án, cùng policy pattern với listing-images/blog-images.
+insert into storage.buckets (id, name, public)
+values ('project-images', 'project-images', true)
+on conflict (id) do nothing;
+
+drop policy if exists "public read access to project images" on storage.objects;
+create policy "public read access to project images"
+  on storage.objects for select
+  using (bucket_id = 'project-images');
+
+drop policy if exists "authenticated can upload project images" on storage.objects;
+create policy "authenticated can upload project images"
+  on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'project-images');
+
+drop policy if exists "authenticated can update project images" on storage.objects;
+create policy "authenticated can update project images"
+  on storage.objects for update
+  to authenticated
+  using (bucket_id = 'project-images')
+  with check (bucket_id = 'project-images');
+
+-- Chuyển listings sang thuộc về 1 dự án: xoá district/ward khỏi listings (dời
+-- lên projects), thêm project_id bắt buộc. An toàn chạy trên DB đang trống
+-- listings; nếu bạn đã có dữ liệu thật, tạo dự án + backfill project_id cho
+-- các dòng hiện có TRƯỚC khi chạy đoạn này (not null sẽ lỗi nếu còn dòng null).
+alter table listings add column if not exists project_id uuid references projects(id) on delete restrict;
+alter table listings drop column if exists district;
+alter table listings drop column if exists ward;
+alter table listings alter column project_id set not null;
+
+-- ==========================================================================
+-- Nhân viên (danh bạ nội bộ — không liên quan tài khoản đăng nhập admin)
+-- ==========================================================================
+create table if not exists staff (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  phone text,
+  email text,
+  role text,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table staff enable row level security;
+
+drop policy if exists "authenticated can manage staff" on staff;
+create policy "authenticated can manage staff"
+  on staff for all
+  to authenticated
+  using (true)
+  with check (true);
+
+drop trigger if exists staff_set_updated_at on staff;
+create trigger staff_set_updated_at
+  before update on staff
+  for each row
+  execute function set_updated_at();

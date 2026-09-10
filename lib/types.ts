@@ -7,9 +7,30 @@ export type ListingType =
   | "can_ho_dich_vu"
   | "nha_nguyen_can";
 
+export interface Project {
+  id: string;
+  slug: string;
+  name: string;
+  district: string;
+  ward: string | null;
+  address: string | null;
+  description: string | null;
+  cover_image_url: string | null;
+  image_urls: string[];
+  amenities: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+/** Field admin nhập ở form thêm/sửa dự án. */
+export type ProjectInput = Omit<
+  Project,
+  "id" | "created_at" | "updated_at" | "image_urls" | "cover_image_url"
+> & { image_urls?: string[]; cover_image_url?: string };
+
 /**
- * Nội dung tin thuê (title, amenities, description) hiện chỉ lưu 1 ngôn ngữ.
- * Muốn hỗ trợ đa ngôn ngữ cho nội dung tin (khác với UI tĩnh đã dịch qua
+ * Nội dung phòng (title, amenities, description) hiện chỉ lưu 1 ngôn ngữ.
+ * Muốn hỗ trợ đa ngôn ngữ cho nội dung phòng (khác với UI tĩnh đã dịch qua
  * next-intl) thì cần thêm cột title_en/title_zh, amenities_en/amenities_zh...
  * vào bảng `listings` — chưa làm ở giai đoạn này.
  */
@@ -17,8 +38,7 @@ export interface Listing {
   id: string;
   code: string;
   title: string;
-  district: string;
-  ward: string | null;
+  project_id: string;
   price_million: number;
   type: ListingType;
   area: number;
@@ -31,7 +51,12 @@ export interface Listing {
   created_at: string;
 }
 
-/** Field admin nhập ở form thêm/sửa tin (không gồm id/timestamps do DB tự sinh). */
+/** Listing kèm dự án cha — kiểu trả về của mọi hàm đọc công khai (lib/listings.ts). */
+export interface ListingWithProject extends Listing {
+  project: Project;
+}
+
+/** Field admin nhập ở form thêm/sửa phòng (không gồm id/timestamps do DB tự sinh). */
 export type ListingInput = Omit<Listing, "id" | "created_at" | "updated_at" | "image_urls">;
 
 export interface ListingFilters {
@@ -60,6 +85,20 @@ export interface LeadRecord extends Required<Pick<Lead, "id" | "phone" | "create
   note: string | null;
   contacted: boolean;
 }
+
+export interface Staff {
+  id: string;
+  full_name: string;
+  phone: string | null;
+  email: string | null;
+  role: string | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Field admin nhập ở form thêm/sửa nhân viên. */
+export type StaffInput = Omit<Staff, "id" | "created_at" | "updated_at">;
 
 export const LISTING_TYPE_LABELS: Record<ListingType, string> = {
   phong_tro: "Phòng trọ",

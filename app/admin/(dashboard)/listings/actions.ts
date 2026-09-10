@@ -33,8 +33,7 @@ export async function saveListing(
 ): Promise<SaveListingState> {
   const code = String(formData.get("code") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
-  const district = String(formData.get("district") ?? "").trim();
-  const ward = String(formData.get("ward") ?? "").trim();
+  const project_id = String(formData.get("project_id") ?? "").trim();
   const priceRaw = String(formData.get("price_million") ?? "");
   const type = String(formData.get("type") ?? "") as ListingType;
   const areaRaw = String(formData.get("area") ?? "");
@@ -43,7 +42,7 @@ export async function saveListing(
   const amenities = formData.getAll("amenities").map(String).filter(Boolean);
   const imageFile = formData.get("image");
 
-  if (!code || !title || !district || !type || !status) {
+  if (!code || !title || !project_id || !type || !status) {
     return { error: "Vui lòng nhập đầy đủ các trường bắt buộc." };
   }
   if (!LISTING_TYPES.includes(type)) {
@@ -87,8 +86,7 @@ export async function saveListing(
   const baseFields: Omit<ListingInput, "image_url"> = {
     code,
     title,
-    district,
-    ward: ward || null,
+    project_id,
     price_million,
     type,
     area,
@@ -108,7 +106,12 @@ export async function saveListing(
     }
   } catch (err) {
     console.error("[saveListing]", err);
-    return { error: "Lưu tin thất bại, vui lòng thử lại." };
+    const code23503 = typeof err === "object" && err && "code" in err && err.code === "23503";
+    return {
+      error: code23503
+        ? "Dự án đã chọn không hợp lệ, vui lòng chọn lại."
+        : "Lưu tin thất bại, vui lòng thử lại.",
+    };
   }
 
   revalidatePath("/admin");

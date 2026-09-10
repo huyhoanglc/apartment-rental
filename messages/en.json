@@ -98,6 +98,8 @@
     "areaLabel": "Area",
     "typeLabel": "Property type",
     "priceValue": "{price} million",
+    "projectLabel": "Part of {name}",
+    "sameProjectTitle": "Other units in {name}",
     "descriptionTitle": "Description",
     "amenitiesTitle": "Amenities",
     "contactBox": "Contact us now to reserve",

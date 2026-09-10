@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import ListingCard from "@/components/ListingCard";
-import { DISTRICTS, type Listing, type ListingType } from "@/lib/types";
+import { DISTRICTS, type ListingType, type ListingWithProject } from "@/lib/types";
 
 interface ListingSectionProps {
-  initialListings: Listing[];
+  initialListings: ListingWithProject[];
   initialDistrict?: string;
 }
 
@@ -31,7 +31,7 @@ export default function ListingSection({ initialListings, initialDistrict = "" }
   const [district, setDistrict] = useState(initialDistrict);
   const [type, setType] = useState<ListingType | "">("");
   const [priceIdx, setPriceIdx] = useState<number | "">("");
-  const [listings, setListings] = useState<Listing[]>(initialListings);
+  const [listings, setListings] = useState<ListingWithProject[]>(initialListings);
   const [loading, setLoading] = useState(false);
   const isFirstRun = useRef(true);
 

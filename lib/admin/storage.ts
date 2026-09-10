@@ -26,3 +26,7 @@ export function uploadListingImage(file: File): Promise<string> {
 export function uploadBlogImage(file: File): Promise<string> {
   return uploadImage("blog-images", file);
 }
+
+export function uploadProjectImage(file: File): Promise<string> {
+  return uploadImage("project-images", file);
+}

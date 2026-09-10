@@ -4,15 +4,15 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import ZaloButton from "@/components/ZaloButton";
-import type { Listing } from "@/lib/types";
+import type { ListingWithProject } from "@/lib/types";
 
-const STATUS_STYLES: Record<Listing["status"], string> = {
+const STATUS_STYLES: Record<ListingWithProject["status"], string> = {
   con_phong: "bg-status-available/10 text-status-available",
   hot: "bg-status-hot/10 text-status-hot",
   het_phong: "bg-status-full/10 text-status-full",
 };
 
-export default function ListingCard({ listing }: { listing: Listing }) {
+export default function ListingCard({ listing }: { listing: ListingWithProject }) {
   const t = useTranslations("ListingCard");
   const tTypes = useTranslations("ListingTypes");
   const tStatus = useTranslations("ListingStatus");
@@ -42,8 +42,8 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           {listing.title}
         </Link>
         <p className="text-sm text-muted-foreground">
-          {listing.ward ? `${listing.ward}, ` : ""}
-          {listing.district}
+          {listing.project.name} · {listing.project.ward ? `${listing.project.ward}, ` : ""}
+          {listing.project.district}
         </p>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span className="font-semibold text-primary-700">

@@ -98,6 +98,8 @@
     "areaLabel": "面积",
     "typeLabel": "房型",
     "priceValue": "{price} 百万",
+    "projectLabel": "属于 {name}",
+    "sameProjectTitle": "{name} 的其他房源",
     "descriptionTitle": "描述",
     "amenitiesTitle": "配套设施",
     "contactBox": "立即联系预订",

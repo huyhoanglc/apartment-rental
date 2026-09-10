@@ -98,6 +98,8 @@
     "areaLabel": "Diện tích",
     "typeLabel": "Loại hình",
     "priceValue": "{price} triệu",
+    "projectLabel": "Thuộc dự án {name}",
+    "sameProjectTitle": "Phòng khác cùng dự án {name}",
     "descriptionTitle": "Mô tả",
     "amenitiesTitle": "Tiện ích",
     "contactBox": "Liên hệ ngay để giữ chỗ",

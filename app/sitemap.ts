@@ -13,7 +13,12 @@ function localizedPath(locale: string, path: string): string {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [posts, listings] = await Promise.all([
     getAllPublishedSlugsForSitemap(),
-    getListings(),
+    // Sitemap build không được phép làm sập cả `next build` — vd DB chưa chạy
+    // bản schema.sql mới nhất (bảng/cột mới chưa tồn tại).
+    getListings().catch((err) => {
+      console.error("[sitemap] getListings thất bại:", err instanceof Error ? err.message : err);
+      return [];
+    }),
   ]);
 
   const entries: MetadataRoute.Sitemap = [];

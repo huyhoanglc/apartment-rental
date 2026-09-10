@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import LeadForm from "@/components/LeadForm";
+import ListingCard from "@/components/ListingCard";
 import ZaloButton from "@/components/ZaloButton";
-import { getListingByCode } from "@/lib/listings";
+import { getListingByCode, getListingsByProject } from "@/lib/listings";
 
 interface PageProps {
   params: { locale: string; code: string };
@@ -29,6 +30,8 @@ export default async function ListingDetailPage({ params: { locale, code } }: Pa
   const listing = await getListingByCode(code);
   if (!listing) notFound();
 
+  const sameProjectListings = await getListingsByProject(listing.project, listing.code);
+
   const t = await getTranslations("ListingDetail");
   const tTypes = await getTranslations("ListingTypes");
   const tStatus = await getTranslations("ListingStatus");
@@ -45,7 +48,8 @@ export default async function ListingDetailPage({ params: { locale, code } }: Pa
     image: listing.image_url,
     address: {
       "@type": "PostalAddress",
-      addressLocality: listing.district,
+      streetAddress: listing.project.address || undefined,
+      addressLocality: listing.project.district,
       addressRegion: "Hồ Chí Minh",
       addressCountry: "VN",
     },
@@ -119,8 +123,9 @@ export default async function ListingDetailPage({ params: { locale, code } }: Pa
 
           <h1 className="mt-3 text-2xl font-bold text-foreground">{listing.title}</h1>
           <p className="mt-1 text-muted-foreground">
-            {listing.ward ? `${listing.ward}, ` : ""}
-            {listing.district}
+            {t("projectLabel", { name: listing.project.name })} ·{" "}
+            {listing.project.ward ? `${listing.project.ward}, ` : ""}
+            {listing.project.district}
           </p>
 
           <div className="mt-4 flex flex-wrap gap-6 rounded-xl2 bg-card p-5 shadow-card">
@@ -181,6 +186,19 @@ export default async function ListingDetailPage({ params: { locale, code } }: Pa
           </div>
         </aside>
       </div>
+
+      {sameProjectListings.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-xl font-bold text-foreground">
+            {t("sameProjectTitle", { name: listing.project.name })}
+          </h2>
+          <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {sameProjectListings.map((other) => (
+              <ListingCard key={other.code} listing={other} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
