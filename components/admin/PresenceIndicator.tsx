@@ -9,6 +9,11 @@ import { createClient } from "@/lib/supabase/client";
  * thái online vào bảng DB nào, tự dọn khi đóng tab/mất kết nối (hành vi mặc
  * định của Realtime, không cần code thêm).
  *
+ * Gộp danh sách theo email (không phải theo key kết nối): 1 người có thể tạo
+ * ra nhiều kết nối Realtime cùng lúc (nhiều tab, hoặc kết nối cũ bị leak lúc
+ * dev do Fast Refresh chưa kịp đóng) — email mới là danh tính thật cần hiện,
+ * nên luôn chỉ 1 avatar cho mỗi người dù họ mở bao nhiêu tab.
+ *
  * Giới hạn: chỉ phản ánh "đang mở tab ở khu vực admin", không biết đang thao
  * tác cụ thể gì (vd đang sửa tin nào) — muốn mức chi tiết đó (kiểu Google Docs
  * cùng sửa 1 tài liệu) cần thiết kế riêng, phức tạp hơn nhiều, ngoài phạm vi
@@ -26,7 +31,7 @@ interface PresenceMeta {
 }
 
 export default function PresenceIndicator({ userId, email }: PresenceIndicatorProps) {
-  const [online, setOnline] = useState<{ userId: string; email: string }[]>([]);
+  const [onlineEmails, setOnlineEmails] = useState<string[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -37,13 +42,11 @@ export default function PresenceIndicator({ userId, email }: PresenceIndicatorPr
     channel
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState<PresenceMeta>();
-        // dedupe theo userId phòng khi 1 tab bị leak nhiều kết nối cùng lúc
-        // (vd Fast Refresh lúc dev) — chỉ hiện 1 avatar cho mỗi người thật.
-        const byUserId = new Map<string, string>();
-        for (const [id, metas] of Object.entries(state)) {
-          byUserId.set(id, metas[0]?.email ?? "?");
+        const emails = new Set<string>();
+        for (const metas of Object.values(state)) {
+          if (metas[0]?.email) emails.add(metas[0].email);
         }
-        setOnline(Array.from(byUserId, ([id, mail]) => ({ userId: id, email: mail })));
+        setOnlineEmails(Array.from(emails));
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
@@ -56,17 +59,17 @@ export default function PresenceIndicator({ userId, email }: PresenceIndicatorPr
     };
   }, [userId, email]);
 
-  if (online.length === 0) return null;
+  if (onlineEmails.length === 0) return null;
 
   return (
     <div className="flex items-center -space-x-2">
-      {online.map((admin) => (
+      {onlineEmails.map((adminEmail) => (
         <span
-          key={admin.userId}
-          title={admin.userId === userId ? `${admin.email} (Bạn)` : admin.email}
+          key={adminEmail}
+          title={adminEmail === email ? `${adminEmail} (Bạn)` : adminEmail}
           className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-xs font-semibold text-white ring-2 ring-card"
         >
-          {admin.email[0]?.toUpperCase()}
+          {adminEmail[0]?.toUpperCase()}
           <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-status-available ring-2 ring-card" />
         </span>
       ))}
