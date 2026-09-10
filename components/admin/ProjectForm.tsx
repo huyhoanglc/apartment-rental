@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
+import Link from "next/link";
 import { slugify } from "@/lib/slugify";
 import { DISTRICTS, type Project } from "@/lib/types";
 import type { SaveProjectState } from "@/app/admin/(dashboard)/projects/actions";
@@ -12,13 +13,18 @@ interface ProjectFormProps {
   initialProject?: Project;
 }
 
+const LABEL = "block text-xs font-semibold uppercase tracking-wide text-muted-foreground";
+const FIELD =
+  "mt-1.5 w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm text-foreground shadow-sm transition focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/10";
+const SECTION = "space-y-4 p-6";
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       disabled={pending}
-      className="rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
+      className="rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 disabled:opacity-60"
     >
       {pending ? "Đang lưu..." : "Lưu dự án"}
     </button>
@@ -58,146 +64,174 @@ export default function ProjectForm({ action, initialProject }: ProjectFormProps
   }
 
   return (
-    <form action={formAction} className="max-w-2xl space-y-4">
-      <div>
-        <label className="text-sm font-medium text-foreground">Tên dự án *</label>
-        <input
-          name="name"
-          required
-          value={name}
-          onChange={(e) => handleNameChange(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-        />
-      </div>
+    <form action={formAction} className="max-w-2xl overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
+      <div className="divide-y divide-border">
+        <div className={SECTION}>
+          <h2 className="text-sm font-semibold text-foreground">Thông tin dự án</h2>
+          <div>
+            <label className={LABEL}>Tên dự án *</label>
+            <input
+              name="name"
+              required
+              value={name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              className={FIELD}
+            />
+          </div>
 
-      <div>
-        <label className="text-sm font-medium text-foreground">Slug</label>
-        <input
-          name="slug"
-          value={slug}
-          onChange={(e) => {
-            setSlugTouched(true);
-            setSlug(e.target.value);
-          }}
-          placeholder="tự tạo từ tên nếu để trống"
-          className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium text-foreground">Quận *</label>
-          <select
-            name="district"
-            required
-            defaultValue={initialProject?.district ?? ""}
-            className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-          >
-            <option value="" disabled>
-              Chọn quận
-            </option>
-            {DISTRICTS.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className={LABEL}>Slug</label>
+            <input
+              name="slug"
+              value={slug}
+              onChange={(e) => {
+                setSlugTouched(true);
+                setSlug(e.target.value);
+              }}
+              placeholder="tự tạo từ tên nếu để trống"
+              className={FIELD}
+            />
+          </div>
         </div>
-        <div>
-          <label className="text-sm font-medium text-foreground">Phường</label>
-          <input
-            name="ward"
-            defaultValue={initialProject?.ward ?? ""}
-            className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-          />
+
+        <div className={SECTION}>
+          <h2 className="text-sm font-semibold text-foreground">Vị trí</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={LABEL}>Quận *</label>
+              <select name="district" required defaultValue={initialProject?.district ?? ""} className={FIELD}>
+                <option value="" disabled>
+                  Chọn quận
+                </option>
+                {DISTRICTS.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={LABEL}>Phường</label>
+              <input name="ward" defaultValue={initialProject?.ward ?? ""} className={FIELD} />
+            </div>
+          </div>
+
+          <div>
+            <label className={LABEL}>Địa chỉ</label>
+            <input
+              name="address"
+              defaultValue={initialProject?.address ?? ""}
+              placeholder="Số nhà, tên đường"
+              className={FIELD}
+            />
+          </div>
         </div>
-      </div>
 
-      <div>
-        <label className="text-sm font-medium text-foreground">Địa chỉ</label>
-        <input
-          name="address"
-          defaultValue={initialProject?.address ?? ""}
-          placeholder="Số nhà, tên đường"
-          className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-        />
-      </div>
+        <div className={SECTION}>
+          <h2 className="text-sm font-semibold text-foreground">Mô tả &amp; tiện ích chung</h2>
+          <div>
+            <label className={LABEL}>Mô tả</label>
+            <textarea
+              name="description"
+              rows={3}
+              defaultValue={initialProject?.description ?? ""}
+              className={FIELD}
+            />
+          </div>
 
-      <div>
-        <label className="text-sm font-medium text-foreground">Mô tả</label>
-        <textarea
-          name="description"
-          rows={3}
-          defaultValue={initialProject?.description ?? ""}
-          className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm font-medium text-foreground">Tiện ích chung</label>
-        <div className="mt-1 flex gap-2">
-          <input
-            value={amenityInput}
-            onChange={(e) => setAmenityInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addAmenity();
-              }
-            }}
-            placeholder="Vd: Hồ bơi — nhấn Enter để thêm"
-            className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-          />
-          <button
-            type="button"
-            onClick={addAmenity}
-            className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
-          >
-            Thêm
-          </button>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {amenities.map((a) => (
-            <span
-              key={a}
-              className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground"
-            >
-              {a}
-              <input type="hidden" name="amenities" value={a} />
+          <div>
+            <label className={LABEL}>Tiện ích chung</label>
+            <div className="mt-1.5 flex gap-2">
+              <input
+                value={amenityInput}
+                onChange={(e) => setAmenityInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addAmenity();
+                  }
+                }}
+                placeholder="Vd: Hồ bơi — nhấn Enter để thêm"
+                className={FIELD + " mt-0 flex-1"}
+              />
               <button
                 type="button"
-                onClick={() => removeAmenity(a)}
-                className="ml-1 text-muted-foreground hover:text-rose-600"
-                aria-label={`Xoá ${a}`}
+                onClick={addAmenity}
+                className="mt-1.5 shrink-0 rounded-lg border border-border px-4 text-sm font-medium text-foreground transition hover:bg-muted"
               >
-                ✕
+                Thêm
               </button>
-            </span>
-          ))}
+            </div>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              {amenities.map((a) => (
+                <span
+                  key={a}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground"
+                >
+                  {a}
+                  <input type="hidden" name="amenities" value={a} />
+                  <button
+                    type="button"
+                    onClick={() => removeAmenity(a)}
+                    className="text-muted-foreground hover:text-rose-600"
+                    aria-label={`Xoá ${a}`}
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className={SECTION}>
+          <h2 className="text-sm font-semibold text-foreground">Ảnh cover</h2>
+          <label
+            htmlFor="project-cover-image"
+            className="flex cursor-pointer items-center gap-4 rounded-lg border border-dashed border-border bg-background p-4 transition hover:border-primary-400 hover:bg-muted/50"
+          >
+            {previewUrl ? (
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-border">
+                <Image src={previewUrl} alt="Xem trước ảnh cover" fill className="object-cover" unoptimized />
+              </div>
+            ) : (
+              <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18v18H3V3zm12.75 5.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+                  />
+                </svg>
+              </div>
+            )}
+            <div className="text-sm">
+              <p className="font-medium text-foreground">Chọn ảnh {isEdit ? "mới (tuỳ chọn)" : ""}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {isEdit ? "Để trống nếu giữ ảnh cũ" : "PNG, JPG — ảnh đại diện toà nhà"}
+              </p>
+            </div>
+          </label>
+          <input
+            id="project-cover-image"
+            type="file"
+            name="cover_image"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="hidden"
+          />
         </div>
       </div>
 
-      <div>
-        <label className="text-sm font-medium text-foreground">
-          Ảnh cover {isEdit ? "(để trống nếu giữ ảnh cũ)" : ""}
-        </label>
-        <input
-          type="file"
-          name="cover_image"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="mt-1 w-full text-sm text-foreground"
-        />
-        {previewUrl && (
-          <div className="relative mt-3 h-40 w-72 overflow-hidden rounded-lg border border-border">
-            <Image src={previewUrl} alt="Xem trước ảnh cover" fill className="object-cover" unoptimized />
-          </div>
-        )}
+      <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/30 px-6 py-4">
+        <Link href="/admin/projects" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+          Huỷ
+        </Link>
+        <div className="flex items-center gap-3">
+          {state.error && <p className="text-sm text-rose-600">{state.error}</p>}
+          <SubmitButton />
+        </div>
       </div>
-
-      {state.error && <p className="text-sm text-rose-600">{state.error}</p>}
-
-      <SubmitButton />
     </form>
   );
 }

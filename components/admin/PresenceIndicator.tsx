@@ -37,12 +37,13 @@ export default function PresenceIndicator({ userId, email }: PresenceIndicatorPr
     channel
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState<PresenceMeta>();
-        setOnline(
-          Object.entries(state).map(([id, metas]) => ({
-            userId: id,
-            email: metas[0]?.email ?? "?",
-          }))
-        );
+        // dedupe theo userId phòng khi 1 tab bị leak nhiều kết nối cùng lúc
+        // (vd Fast Refresh lúc dev) — chỉ hiện 1 avatar cho mỗi người thật.
+        const byUserId = new Map<string, string>();
+        for (const [id, metas] of Object.entries(state)) {
+          byUserId.set(id, metas[0]?.email ?? "?");
+        }
+        setOnline(Array.from(byUserId, ([id, mail]) => ({ userId: id, email: mail })));
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
