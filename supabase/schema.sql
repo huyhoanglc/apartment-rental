@@ -86,3 +86,57 @@ create policy "public read access to listing images"
 
 -- Upload/xoá ảnh chỉ thực hiện qua service role (script seed hoặc trang admin
 -- sau này), nên không cần policy insert/update/delete cho anon ở đây.
+
+-- ==========================================================================
+-- Bổ sung cho Admin Dashboard (Supabase Auth) — chạy thêm đoạn dưới đây nếu
+-- project của bạn đã chạy phần schema ở trên từ trước. An toàn để chạy lại
+-- nhiều lần (idempotent).
+-- ==========================================================================
+
+-- Cột đánh dấu đã liên hệ lead hay chưa
+alter table leads add column if not exists contacted boolean not null default false;
+
+-- Cho phép user đã đăng nhập (admin) toàn quyền quản lý listings.
+-- Vẫn giữ nguyên policy select public ở trên cho khách truy cập trang chủ.
+create policy "authenticated can insert listings"
+  on listings for insert
+  to authenticated
+  with check (true);
+
+create policy "authenticated can update listings"
+  on listings for update
+  to authenticated
+  using (true)
+  with check (true);
+
+create policy "authenticated can delete listings"
+  on listings for delete
+  to authenticated
+  using (true);
+
+-- Cho phép admin xem và cập nhật (đánh dấu đã liên hệ) leads.
+create policy "authenticated can select leads"
+  on leads for select
+  to authenticated
+  using (true);
+
+create policy "authenticated can update leads"
+  on leads for update
+  to authenticated
+  using (true)
+  with check (true);
+
+-- Cho phép admin upload ảnh tin thuê (bucket vẫn public cho việc đọc).
+create policy "authenticated can upload listing images"
+  on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'listing-images');
+
+create policy "authenticated can update listing images"
+  on storage.objects for update
+  to authenticated
+  using (bucket_id = 'listing-images')
+  with check (bucket_id = 'listing-images');
+
+-- Tạo tài khoản admin: vào Supabase Dashboard → Authentication → Users →
+-- Add user (nhập email/password thủ công). Không có trang tự đăng ký.

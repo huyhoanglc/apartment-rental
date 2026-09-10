@@ -1,0 +1,125 @@
+{
+  "Metadata": {
+    "title": "To Thue TP.HCM — 胡志明市租房平台",
+    "description": "在胡志明市寻找房间、公寓式酒店和公寓出租。按区域、预算和房型筛选。真实照片,实时更新有房/满房状态。"
+  },
+  "Header": {
+    "navListings": "房源",
+    "navDistricts": "区域",
+    "navAiFinder": "AI找房助手",
+    "navTrust": "为什么选择我们",
+    "openMenu": "打开菜单",
+    "zaloCta": "Zalo咨询"
+  },
+  "Hero": {
+    "eyebrow": "在胡志明市寻找房间 · 公寓式酒店 · 公寓",
+    "title": "快速透明租房 —— 真实照片、真实价格,有房立即可用Zalo联系",
+    "subtitle": "数百条房源实时更新,覆盖胡志明市各郡。按区域、预算和房型筛选,几秒钟即可找到心仪住处。",
+    "ctaListings": "立即查看房源",
+    "ctaAiFinder": "让助手帮我找房"
+  },
+  "ListingSection": {
+    "title": "最新房源",
+    "subtitle": "按区域、预算和房型筛选,快速找到合适的住处。",
+    "matchCount": "{count} 条符合条件的房源",
+    "allDistricts": "所有区域",
+    "allTypes": "所有房型",
+    "allBudgets": "不限预算",
+    "priceUnder3": "3百万以下",
+    "price3to6": "3 - 6百万",
+    "price6to10": "6 - 10百万",
+    "priceOver10": "10百万以上",
+    "clearFilters": "清除筛选",
+    "loading": "加载中...",
+    "empty": "没有符合当前筛选条件的房源。"
+  },
+  "DistrictLinks": {
+    "title": "按区域查找",
+    "subtitle": "选择您想居住的区域,立即查看可租房源。"
+  },
+  "AiFinder": {
+    "badge": "即将推出",
+    "title": "AI找房助手",
+    "subtitle": "用自然语言描述您的需求,助手将为您推荐最合适的房源。目前这是演示界面,帮助您预览体验。",
+    "greeting": "你好!请告诉我你想找的区域、预算和房型。",
+    "demoReply": "这是界面演示 —— 真正的AI找房助手将在后续上线。在此之前,您可以使用「最新房源」中的筛选功能,或通过Zalo直接咨询我们。",
+    "placeholder": "例如:我想在第7郡找一间700万以下的公寓式酒店...",
+    "send": "发送"
+  },
+  "TrustSection": {
+    "title": "为什么选择在这里租房",
+    "point1Title": "真实照片,拒绝盗图",
+    "point1Desc": "每条房源都配有房间/公寓的实拍照片,如有变动会及时更新。",
+    "point2Title": "实时更新状态",
+    "point2Desc": "有房、热门或已满房状态持续更新,避免白跑一趟。",
+    "point3Title": "租客零收费",
+    "point3Desc": "所有联系方式及Zalo咨询对租客完全免费。",
+    "point4Title": "贴心现场支持",
+    "point4Desc": "我们的团队协助预约看房,并在Zalo上当天解答您的疑问。"
+  },
+  "Footer": {
+    "tagline": "胡志明市房间、公寓式酒店、公寓租赁平台 —— 真实照片,实时更新有房/满房状态。",
+    "contactTitle": "联系方式",
+    "hotline": "热线/Zalo: {contact}",
+    "email": "邮箱: lienhe@tothuetphcm.vn",
+    "address": "地址: 越南胡志明市",
+    "districtsTitle": "热门区域",
+    "copyright": "© {year} To Thue TP.HCM。所有房源信息仅供参考。"
+  },
+  "LeadForm": {
+    "phoneLabel": "电话/Zalo号码 *",
+    "phonePlaceholder": "09xxxxxxxx",
+    "districtLabel": "意向区域",
+    "districtPlaceholder": "选择区域",
+    "budgetLabel": "预算(百万越南盾)",
+    "noteLabel": "备注",
+    "notePlaceholder": "例如:需要有阁楼、靠近学校...",
+    "defaultNoteForCode": "对房源编号 {code} 感兴趣",
+    "error": "出现错误,请重试。",
+    "submit": "提交需求",
+    "submitting": "提交中...",
+    "success": "已收到您的需求!我们的团队将尽快通过电话/Zalo与您联系。"
+  },
+  "ListingCard": {
+    "pricePerMonth": "{price} 百万/月",
+    "area": "{area} 平方米"
+  },
+  "ZaloButton": {
+    "cta": "通过Zalo咨询房源 {code}",
+    "copied": "(消息已复制)",
+    "messageWithTitle": "你好,我对「{title}」(房源编号 {code})感兴趣,请问还有房吗?",
+    "messageWithoutTitle": "你好,我对房源编号 {code} 感兴趣,请问还有房吗?"
+  },
+  "ListingDetail": {
+    "breadcrumbHome": "首页",
+    "code": "房源编号: {code}",
+    "priceLabel": "租金",
+    "areaLabel": "面积",
+    "typeLabel": "房型",
+    "priceValue": "{price} 百万",
+    "descriptionTitle": "描述",
+    "amenitiesTitle": "配套设施",
+    "contactBox": "立即联系预订",
+    "perMonth": "/月",
+    "leadPrompt": "或留下您的需求,我们将回电联系",
+    "notFoundTitle": "未找到该房源"
+  },
+  "ListingTypes": {
+    "phong_tro": "单间",
+    "studio": "开间公寓",
+    "can_ho_mini": "迷你公寓",
+    "can_ho_dich_vu": "服务式公寓",
+    "nha_nguyen_can": "整栋住宅"
+  },
+  "ListingStatus": {
+    "con_phong": "有房",
+    "hot": "热门",
+    "het_phong": "已满房"
+  },
+  "LocaleSwitcher": {
+    "ariaLabel": "选择语言",
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "zh": "中文"
+  }
+}

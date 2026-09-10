@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface ZaloButtonProps {
   code: string;
@@ -11,9 +12,12 @@ interface ZaloButtonProps {
 const ZALO_CONTACT = process.env.NEXT_PUBLIC_ZALO_CONTACT || "0901234567";
 
 export default function ZaloButton({ code, title, className = "" }: ZaloButtonProps) {
+  const t = useTranslations("ZaloButton");
   const [copied, setCopied] = useState(false);
 
-  const message = `Chào bạn, mình quan tâm ${title ? `tin "${title}" ` : ""}mã căn ${code}, còn phòng không ạ?`;
+  const message = title
+    ? t("messageWithTitle", { title, code })
+    : t("messageWithoutTitle", { code });
 
   async function handleClick() {
     try {
@@ -33,8 +37,8 @@ export default function ZaloButton({ code, title, className = "" }: ZaloButtonPr
       onClick={handleClick}
       className={`inline-flex items-center justify-center gap-2 rounded-full bg-zalo px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 ${className}`}
     >
-      Nhắn Zalo về mã {code}
-      {copied && <span className="text-xs font-normal opacity-90">(đã copy tin nhắn)</span>}
+      {t("cta", { code })}
+      {copied && <span className="text-xs font-normal opacity-90">{t("copied")}</span>}
     </a>
   );
 }

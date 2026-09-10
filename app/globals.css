@@ -2,8 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --border: 214 32% 91%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+}
+
+.dark {
+  --background: 222 47% 7%;
+  --foreground: 210 40% 98%;
+  --card: 222 39% 12%;
+  --border: 217 33% 20%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+}
+
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-background text-foreground antialiased;
 }
 
 .container-page {

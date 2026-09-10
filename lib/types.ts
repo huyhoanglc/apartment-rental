@@ -7,6 +7,12 @@ export type ListingType =
   | "can_ho_dich_vu"
   | "nha_nguyen_can";
 
+/**
+ * Nội dung tin thuê (title, amenities, description) hiện chỉ lưu 1 ngôn ngữ.
+ * Muốn hỗ trợ đa ngôn ngữ cho nội dung tin (khác với UI tĩnh đã dịch qua
+ * next-intl) thì cần thêm cột title_en/title_zh, amenities_en/amenities_zh...
+ * vào bảng `listings` — chưa làm ở giai đoạn này.
+ */
 export interface Listing {
   id: string;
   code: string;
@@ -25,6 +31,9 @@ export interface Listing {
   created_at: string;
 }
 
+/** Field admin nhập ở form thêm/sửa tin (không gồm id/timestamps do DB tự sinh). */
+export type ListingInput = Omit<Listing, "id" | "created_at" | "updated_at" | "image_urls">;
+
 export interface ListingFilters {
   district?: string;
   type?: ListingType;
@@ -41,6 +50,15 @@ export interface Lead {
   budget_million?: number;
   note?: string;
   created_at?: string;
+}
+
+/** Lead đã lưu trong Supabase, đọc ở trang admin. */
+export interface LeadRecord extends Required<Pick<Lead, "id" | "phone" | "created_at">> {
+  zalo: string | null;
+  district: string | null;
+  budget_million: number | null;
+  note: string | null;
+  contacted: boolean;
 }
 
 export const LISTING_TYPE_LABELS: Record<ListingType, string> = {

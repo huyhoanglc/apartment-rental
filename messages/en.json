@@ -1,0 +1,125 @@
+{
+  "Metadata": {
+    "title": "To Thue TP.HCM — Rent rooms, studios, and apartments",
+    "description": "Find rooms, studios, and apartments for rent in Ho Chi Minh City. Filter by district, budget, and property type. Real photos, real-time availability."
+  },
+  "Header": {
+    "navListings": "Listings",
+    "navDistricts": "Districts",
+    "navAiFinder": "AI Finder",
+    "navTrust": "Why choose us",
+    "openMenu": "Open menu",
+    "zaloCta": "Chat on Zalo"
+  },
+  "Hero": {
+    "eyebrow": "Find rooms · Studios · Apartments in Ho Chi Minh City",
+    "title": "Rent fast and transparently — real photos, real prices, message us on Zalo the moment a room is available",
+    "subtitle": "Hundreds of listings updated in real time across every district of Ho Chi Minh City. Filter by area, budget, and property type in seconds.",
+    "ctaListings": "Browse listings",
+    "ctaAiFinder": "Ask our AI finder"
+  },
+  "ListingSection": {
+    "title": "Latest listings",
+    "subtitle": "Filter by district, budget, and property type to find a place fast.",
+    "matchCount": "{count} matching listings",
+    "allDistricts": "All districts",
+    "allTypes": "All property types",
+    "allBudgets": "Any budget",
+    "priceUnder3": "Under 3 million",
+    "price3to6": "3 - 6 million",
+    "price6to10": "6 - 10 million",
+    "priceOver10": "Over 10 million",
+    "clearFilters": "Clear filters",
+    "loading": "Loading...",
+    "empty": "No listings match the current filters."
+  },
+  "DistrictLinks": {
+    "title": "Browse by district",
+    "subtitle": "Pick the district you want to live in to see available listings right away."
+  },
+  "AiFinder": {
+    "badge": "Coming soon",
+    "title": "AI rental finder",
+    "subtitle": "Describe what you need in plain language and the assistant will suggest the best-matching listings. This is currently a demo interface to preview the experience.",
+    "greeting": "Hi! Tell me the area, budget, and room type you're looking for.",
+    "demoReply": "This is a UI demo — the real AI finder will be connected later. In the meantime, use the filters in \"Latest listings\" or message us on Zalo for direct help.",
+    "placeholder": "E.g. I need a studio under 7 million in District 7...",
+    "send": "Send"
+  },
+  "TrustSection": {
+    "title": "Why rent with us",
+    "point1Title": "Real photos, no stock images",
+    "point1Desc": "Every listing has real photos of the actual room/apartment, updated whenever something changes.",
+    "point2Title": "Real-time availability",
+    "point2Desc": "Available, hot, or fully booked status is updated continuously, so you never waste a trip.",
+    "point3Title": "No fees for renters",
+    "point3Desc": "All contact info and Zalo consultation are completely free for renters.",
+    "point4Title": "On-the-ground support",
+    "point4Desc": "Our team helps schedule viewings and answers questions on Zalo the same day."
+  },
+  "Footer": {
+    "tagline": "Your channel for renting rooms, studios, and apartments in Ho Chi Minh City — real photos, real-time available/full status.",
+    "contactTitle": "Contact",
+    "hotline": "Hotline/Zalo: {contact}",
+    "email": "Email: lienhe@tothuetphcm.vn",
+    "address": "Address: Ho Chi Minh City, Vietnam",
+    "districtsTitle": "Popular districts",
+    "copyright": "© {year} To Thue TP.HCM. All listing information is for reference only."
+  },
+  "LeadForm": {
+    "phoneLabel": "Phone / Zalo number *",
+    "phonePlaceholder": "09xxxxxxxx",
+    "districtLabel": "Preferred district",
+    "districtPlaceholder": "Choose a district",
+    "budgetLabel": "Budget (million VND)",
+    "noteLabel": "Note",
+    "notePlaceholder": "E.g. need a loft, close to a school...",
+    "defaultNoteForCode": "Interested in unit {code}",
+    "error": "Something went wrong, please try again.",
+    "submit": "Send request",
+    "submitting": "Sending...",
+    "success": "Your request has been received! Our team will contact you by phone/Zalo shortly."
+  },
+  "ListingCard": {
+    "pricePerMonth": "{price} million/month",
+    "area": "{area} m²"
+  },
+  "ZaloButton": {
+    "cta": "Message on Zalo about {code}",
+    "copied": "(message copied)",
+    "messageWithTitle": "Hi, I'm interested in the listing \"{title}\" (unit {code}), is it still available?",
+    "messageWithoutTitle": "Hi, I'm interested in unit {code}, is it still available?"
+  },
+  "ListingDetail": {
+    "breadcrumbHome": "Home",
+    "code": "Unit code: {code}",
+    "priceLabel": "Rent",
+    "areaLabel": "Area",
+    "typeLabel": "Property type",
+    "priceValue": "{price} million",
+    "descriptionTitle": "Description",
+    "amenitiesTitle": "Amenities",
+    "contactBox": "Contact us now to reserve",
+    "perMonth": "/month",
+    "leadPrompt": "Or leave your details and we'll call you back",
+    "notFoundTitle": "Listing not found"
+  },
+  "ListingTypes": {
+    "phong_tro": "Room",
+    "studio": "Studio",
+    "can_ho_mini": "Mini apartment",
+    "can_ho_dich_vu": "Serviced apartment",
+    "nha_nguyen_can": "Whole house"
+  },
+  "ListingStatus": {
+    "con_phong": "Available",
+    "hot": "Hot",
+    "het_phong": "Fully booked"
+  },
+  "LocaleSwitcher": {
+    "ariaLabel": "Select language",
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "zh": "中文"
+  }
+}

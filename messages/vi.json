@@ -1,0 +1,125 @@
+{
+  "Metadata": {
+    "title": "Tổ Thuê TP.HCM — Tìm phòng trọ, studio, căn hộ cho thuê",
+    "description": "Tìm phòng trọ, studio, căn hộ cho thuê tại TP.HCM. Lọc theo quận, ngân sách, loại hình. Ảnh thật, cập nhật trạng thái còn phòng/hết phòng."
+  },
+  "Header": {
+    "navListings": "Tin thuê",
+    "navDistricts": "Khu vực",
+    "navAiFinder": "Trợ lý tìm nhà",
+    "navTrust": "Vì sao chọn chúng tôi",
+    "openMenu": "Mở menu",
+    "zaloCta": "Nhắn Zalo tư vấn"
+  },
+  "Hero": {
+    "eyebrow": "Tìm phòng trọ · Studio · Căn hộ tại TP.HCM",
+    "title": "Thuê nhà nhanh, minh bạch — ảnh thật, giá thật, còn phòng là nhắn Zalo được ngay",
+    "subtitle": "Hàng trăm tin đăng được cập nhật trạng thái theo thời gian thực từ khắp các quận TP.HCM. Lọc theo khu vực, ngân sách và loại hình chỉ trong vài giây.",
+    "ctaListings": "Xem tin thuê ngay",
+    "ctaAiFinder": "Nhờ trợ lý tìm giúp"
+  },
+  "ListingSection": {
+    "title": "Tin thuê mới cập nhật",
+    "subtitle": "Lọc theo khu vực, ngân sách và loại hình để tìm nhanh chỗ ở phù hợp.",
+    "matchCount": "{count} tin phù hợp",
+    "allDistricts": "Tất cả khu vực",
+    "allTypes": "Tất cả loại hình",
+    "allBudgets": "Mọi ngân sách",
+    "priceUnder3": "Dưới 3 triệu",
+    "price3to6": "3 - 6 triệu",
+    "price6to10": "6 - 10 triệu",
+    "priceOver10": "Trên 10 triệu",
+    "clearFilters": "Xoá lọc",
+    "loading": "Đang tải...",
+    "empty": "Không có tin nào phù hợp với bộ lọc hiện tại."
+  },
+  "DistrictLinks": {
+    "title": "Tìm theo khu vực",
+    "subtitle": "Chọn quận bạn muốn ở để xem ngay các tin thuê đang có."
+  },
+  "AiFinder": {
+    "badge": "Sắp ra mắt",
+    "title": "Trợ lý AI tìm nhà",
+    "subtitle": "Mô tả nhu cầu bằng ngôn ngữ tự nhiên, trợ lý sẽ gợi ý những tin thuê phù hợp nhất. Hiện tại đây là giao diện demo để bạn hình dung trải nghiệm.",
+    "greeting": "Chào bạn! Cho mình biết khu vực, ngân sách và loại phòng bạn đang tìm nhé.",
+    "demoReply": "Đây là bản demo giao diện — trợ lý AI tìm nhà thật sẽ được kết nối ở giai đoạn sau. Trong lúc chờ, bạn có thể dùng bộ lọc ở mục \"Tin thuê mới cập nhật\" hoặc nhắn Zalo để được tư vấn trực tiếp.",
+    "placeholder": "Vd: mình cần studio dưới 7 triệu ở Quận 7...",
+    "send": "Gửi"
+  },
+  "TrustSection": {
+    "title": "Vì sao nên tìm thuê tại đây",
+    "point1Title": "Ảnh thật, không dùng ảnh minh hoạ",
+    "point1Desc": "Mỗi tin đăng đều có ảnh chụp thực tế phòng/căn hộ, cập nhật khi có thay đổi.",
+    "point2Title": "Trạng thái theo thời gian thực",
+    "point2Desc": "Còn phòng, đang hot hay đã hết phòng đều được cập nhật liên tục, tránh mất thời gian đi xem hụt.",
+    "point3Title": "Không thu phí người thuê",
+    "point3Desc": "Toàn bộ thông tin liên hệ và tư vấn qua Zalo đều miễn phí cho người tìm nhà.",
+    "point4Title": "Hỗ trợ tận nơi",
+    "point4Desc": "Đội ngũ tư vấn hỗ trợ đặt lịch xem phòng và giải đáp thắc mắc qua Zalo trong ngày."
+  },
+  "Footer": {
+    "tagline": "Kênh tìm phòng trọ, studio, căn hộ cho thuê tại TP.HCM — tin đăng có ảnh thật, cập nhật trạng thái còn phòng/hết phòng theo thời gian thực.",
+    "contactTitle": "Liên hệ",
+    "hotline": "Hotline/Zalo: {contact}",
+    "email": "Email: lienhe@tothuetphcm.vn",
+    "address": "Địa chỉ: TP. Hồ Chí Minh, Việt Nam",
+    "districtsTitle": "Khu vực nổi bật",
+    "copyright": "© {year} Tổ Thuê TP.HCM. Mọi thông tin tin đăng mang tính chất tham khảo."
+  },
+  "LeadForm": {
+    "phoneLabel": "Số điện thoại / Zalo *",
+    "phonePlaceholder": "09xxxxxxxx",
+    "districtLabel": "Khu vực mong muốn",
+    "districtPlaceholder": "Chọn khu vực",
+    "budgetLabel": "Ngân sách (triệu)",
+    "noteLabel": "Ghi chú",
+    "notePlaceholder": "Vd: cần phòng có gác, gần trường học...",
+    "defaultNoteForCode": "Quan tâm mã căn {code}",
+    "error": "Có lỗi xảy ra, vui lòng thử lại.",
+    "submit": "Gửi nhu cầu",
+    "submitting": "Đang gửi...",
+    "success": "Đã ghi nhận nhu cầu của bạn! Đội ngũ tư vấn sẽ liên hệ qua số điện thoại/Zalo sớm nhất."
+  },
+  "ListingCard": {
+    "pricePerMonth": "{price} triệu/tháng",
+    "area": "{area} m²"
+  },
+  "ZaloButton": {
+    "cta": "Nhắn Zalo về mã {code}",
+    "copied": "(đã copy tin nhắn)",
+    "messageWithTitle": "Chào bạn, mình quan tâm tin \"{title}\" mã căn {code}, còn phòng không ạ?",
+    "messageWithoutTitle": "Chào bạn, mình quan tâm mã căn {code}, còn phòng không ạ?"
+  },
+  "ListingDetail": {
+    "breadcrumbHome": "Trang chủ",
+    "code": "Mã căn: {code}",
+    "priceLabel": "Giá thuê",
+    "areaLabel": "Diện tích",
+    "typeLabel": "Loại hình",
+    "priceValue": "{price} triệu",
+    "descriptionTitle": "Mô tả",
+    "amenitiesTitle": "Tiện ích",
+    "contactBox": "Liên hệ ngay để giữ chỗ",
+    "perMonth": "/tháng",
+    "leadPrompt": "Hoặc để lại nhu cầu, tư vấn sẽ gọi lại",
+    "notFoundTitle": "Không tìm thấy tin thuê"
+  },
+  "ListingTypes": {
+    "phong_tro": "Phòng trọ",
+    "studio": "Studio",
+    "can_ho_mini": "Căn hộ mini",
+    "can_ho_dich_vu": "Căn hộ dịch vụ",
+    "nha_nguyen_can": "Nhà nguyên căn"
+  },
+  "ListingStatus": {
+    "con_phong": "Còn phòng",
+    "hot": "Hot",
+    "het_phong": "Hết phòng"
+  },
+  "LocaleSwitcher": {
+    "ariaLabel": "Chọn ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "zh": "中文"
+  }
+}
