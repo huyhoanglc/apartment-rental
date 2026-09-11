@@ -66,8 +66,13 @@ không cần vào thẳng Supabase Dashboard nữa (dù vẫn dùng được n�
 3. Vào `/admin/login` trên web, đăng nhập bằng email/mật khẩu vừa tạo.
 
 **Tạo thêm tài khoản khác** — từ tài khoản đầu tiên trở đi có thể tạo ngay trong app, không cần
-vào Supabase Dashboard nữa: đăng nhập → **Tài khoản** (`/admin/accounts`) → điền email + mật khẩu
-+ chọn **vai trò** → Tạo tài khoản. Gửi email/mật khẩu đó cho người dùng để họ tự đăng nhập.
+vào Supabase Dashboard nữa: đăng nhập → **Tài khoản** (`/admin/accounts`) → điền họ và tên + email
++ mật khẩu + chọn **vai trò** → Tạo tài khoản. Gửi email/mật khẩu đó cho người dùng để họ tự đăng
+nhập. Họ và tên lưu ở `user_metadata.full_name` (khác `app_metadata.role` — user tự sửa được field
+này qua Supabase Auth API nếu muốn, không ảnh hưởng phân quyền), hiện ở sidebar thay cho email.
+Tài khoản đầu tiên tạo qua Supabase Dashboard không có field này — sidebar sẽ tự dùng email làm
+tên hiển thị cho tới khi bạn cập nhật `user_metadata.full_name` thủ công (Dashboard → user đó →
+Edit → User Metadata).
 
 Sau khi đăng nhập, `/admin` hiển thị danh sách phòng (đổi trạng thái nhanh bằng dropdown, sửa/xoá
 từng phòng), `/admin/listings/new` để thêm phòng mới, `/admin/leads` để xem và đánh dấu đã liên hệ

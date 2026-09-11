@@ -5,6 +5,7 @@ import type { AdminRole } from "@/lib/admin/roles";
 export interface AdminAccount {
   id: string;
   email: string;
+  full_name: string | null;
   role: AdminRole;
   created_at: string;
   last_sign_in_at: string | null;
@@ -40,6 +41,7 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
     .map((u) => ({
       id: u.id,
       email: u.email ?? "",
+      full_name: typeof u.user_metadata?.full_name === "string" ? u.user_metadata.full_name : null,
       role: roleOf(u.app_metadata),
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at ?? null,
@@ -51,7 +53,8 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
 export async function createAdminAccount(
   email: string,
   password: string,
-  role: AdminRole
+  role: AdminRole,
+  fullName: string
 ): Promise<void> {
   await requireAuthenticated();
   const admin = createAdminClient();
@@ -61,6 +64,7 @@ export async function createAdminAccount(
     password,
     email_confirm: true,
     app_metadata: { role },
+    user_metadata: { full_name: fullName },
   });
 
   if (error) throw error;

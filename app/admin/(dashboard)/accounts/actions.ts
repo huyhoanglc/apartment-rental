@@ -20,8 +20,12 @@ export async function createAccountAction(
 
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const fullName = String(formData.get("full_name") ?? "").trim();
   const role = formData.get("role") === "admin" ? "admin" : "member";
 
+  if (!fullName) {
+    return { error: "Vui lòng nhập họ và tên." };
+  }
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
     return { error: "Email không hợp lệ." };
   }
@@ -30,7 +34,7 @@ export async function createAccountAction(
   }
 
   try {
-    await createAdminAccount(email, password, role);
+    await createAdminAccount(email, password, role, fullName);
   } catch (err) {
     console.error("[createAccountAction]", err);
     const message = err instanceof Error ? err.message : "";

@@ -35,6 +35,10 @@ export default function CreateAccountForm() {
       <div className="space-y-4 p-6">
         <h2 className="text-sm font-semibold text-foreground">Tạo tài khoản đăng nhập mới</h2>
         <div>
+          <label className={LABEL}>Họ và tên *</label>
+          <input type="text" name="full_name" required className={FIELD} />
+        </div>
+        <div>
           <label className={LABEL}>Email *</label>
           <input type="email" name="email" required className={FIELD} />
         </div>

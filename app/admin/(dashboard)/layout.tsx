@@ -12,10 +12,11 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   if (!user) redirect("/admin/login");
 
   const role = await getCurrentRole();
+  const fullName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null;
 
   return (
     <div className="flex min-h-screen bg-background">
-      <AdminNav userId={user.id} email={user.email ?? ""} role={role} />
+      <AdminNav userId={user.id} email={user.email ?? ""} fullName={fullName} role={role} />
       <main className="min-w-0 flex-1 px-4 py-8 md:px-8">
         <div className="mx-auto max-w-6xl">{children}</div>
       </main>

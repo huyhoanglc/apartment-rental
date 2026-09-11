@@ -10,8 +10,14 @@ import type { AdminRole } from "@/lib/admin/roles";
 interface AdminNavProps {
   userId: string;
   email: string;
+  fullName: string | null;
   role: AdminRole;
 }
+
+const ROLE_LABELS: Record<AdminRole, string> = {
+  admin: "Admin",
+  member: "Cá nhân",
+};
 
 /** Thời gian chờ trước khi thu gọn lại sau khi rê chuột ra khỏi sidebar. */
 const COLLAPSE_DELAY_MS = 2500;
@@ -128,8 +134,9 @@ function isActive(pathname: string, href: string): boolean {
   return pathname.startsWith(href);
 }
 
-export default function AdminNav({ userId, email, role }: AdminNavProps) {
+export default function AdminNav({ userId, email, fullName, role }: AdminNavProps) {
   const pathname = usePathname();
+  const displayName = fullName || email;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -196,7 +203,7 @@ export default function AdminNav({ userId, email, role }: AdminNavProps) {
           }`}
         >
           <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-semibold text-white shadow-sm">
-            {(email[0] || "?").toUpperCase()}
+            {(displayName[0] || "?").toUpperCase()}
             <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-status-available ring-2 ring-card" />
           </span>
           <span
@@ -204,7 +211,8 @@ export default function AdminNav({ userId, email, role }: AdminNavProps) {
               collapsed ? "md:w-0 md:opacity-0" : "w-auto opacity-100"
             }`}
           >
-            <span className="block truncate text-sm font-medium text-foreground">{email}</span>
+            <span className="block truncate text-sm font-medium text-foreground">{displayName}</span>
+            <span className="block truncate text-xs text-muted-foreground">{ROLE_LABELS[role]}</span>
           </span>
         </button>
 
@@ -213,8 +221,10 @@ export default function AdminNav({ userId, email, role }: AdminNavProps) {
             <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
             <div className="absolute bottom-full left-0 z-50 mb-2 w-60 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
               <div className="border-b border-border px-4 py-3">
-                <p className="text-xs text-muted-foreground">Đăng nhập với</p>
-                <p className="truncate text-sm font-medium text-foreground">{email}</p>
+                <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {email} · {ROLE_LABELS[role]}
+                </p>
               </div>
               <form action={logout}>
                 <button

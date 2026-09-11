@@ -32,6 +32,7 @@ export default async function AdminAccountsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <th className="px-4 py-3">Họ và tên</th>
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Cách đăng nhập</th>
                 <th className="px-4 py-3">Vai trò</th>
@@ -42,7 +43,8 @@ export default async function AdminAccountsPage() {
             <tbody>
               {accounts.map((account) => (
                 <tr key={account.id} className="border-b border-border transition last:border-0 hover:bg-muted/40">
-                  <td className="px-4 py-3 font-medium text-foreground">{account.email}</td>
+                  <td className="px-4 py-3 font-medium text-foreground">{account.full_name ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{account.email}</td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {account.providers.map((p) => PROVIDER_LABELS[p] ?? p).join(", ") || "—"}
                   </td>
@@ -67,7 +69,7 @@ export default async function AdminAccountsPage() {
               ))}
               {accounts.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                     Chưa có tài khoản nào.
                   </td>
                 </tr>
