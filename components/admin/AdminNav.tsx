@@ -97,11 +97,24 @@ function ShieldIcon({ className }: { className?: string }) {
   );
 }
 
+function ClockIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.8} stroke="currentColor" className={className}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+      />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   { href: "/admin", label: "Phòng", icon: HomeIcon, adminOnly: false },
   { href: "/admin/projects", label: "Dự án", icon: BuildingIcon, adminOnly: false },
   { href: "/admin/leads", label: "Leads", icon: InboxIcon, adminOnly: false },
   { href: "/admin/blog", label: "Blog", icon: DocumentIcon, adminOnly: false },
+  { href: "/admin/activity", label: "Lịch sử", icon: ClockIcon, adminOnly: false },
   { href: "/admin/staff", label: "Nhân viên", icon: UsersIcon, adminOnly: true },
   { href: "/admin/accounts", label: "Tài khoản", icon: KeyIcon, adminOnly: true },
   { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon, adminOnly: false },

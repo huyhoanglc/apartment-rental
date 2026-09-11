@@ -340,3 +340,113 @@ create trigger staff_set_updated_at
   before update on staff
   for each row
   execute function set_updated_at();
+
+-- ==========================================================================
+-- Nhật ký chỉnh sửa (activity_log) — KHÔNG giới hạn quyền sửa theo người tạo:
+-- bất động sản có quá nhiều dự án để bắt "ai tạo người đó sửa" (đã trao đổi
+-- và đổi hướng sang ghi log để biết ai sửa gì/khi nào, còn quyền sửa vẫn dùng
+-- chung như trước cho listings/projects/blog_posts). Mỗi bảng vẫn có cột
+-- created_by/created_by_email để biết người khởi tạo, set tự động ở server
+-- (trigger), không tin dữ liệu client gửi lên.
+-- ==========================================================================
+create table if not exists activity_log (
+  id uuid primary key default gen_random_uuid(),
+  table_name text not null,
+  record_id text not null,
+  record_label text,
+  action text not null check (action in ('insert', 'update', 'delete')),
+  changed_by uuid references auth.users(id) on delete set null,
+  changed_by_email text,
+  created_at timestamptz not null default now()
+);
+
+alter table activity_log enable row level security;
+
+drop policy if exists "authenticated can select activity log" on activity_log;
+create policy "authenticated can select activity log"
+  on activity_log for select
+  to authenticated
+  using (true);
+
+-- Không có policy insert/update/delete cho authenticated: bảng này chỉ được
+-- ghi bởi trigger log_activity() (chạy với quyền chủ bảng, bỏ qua RLS), nên
+-- user thường không tự chèn/sửa log giả được.
+
+create or replace function log_activity()
+returns trigger as $$
+declare
+  v_row jsonb;
+begin
+  v_row := to_jsonb(coalesce(new, old));
+  insert into activity_log (table_name, record_id, record_label, action, changed_by, changed_by_email)
+  values (
+    TG_TABLE_NAME,
+    coalesce(v_row->>'id', v_row->>'code'),
+    coalesce(v_row->>'title', v_row->>'name', v_row->>'full_name', v_row->>'code'),
+    lower(TG_OP),
+    auth.uid(),
+    auth.jwt() ->> 'email'
+  );
+  return coalesce(new, old);
+end;
+$$ language plpgsql security definer;
+
+create or replace function set_created_by()
+returns trigger as $$
+begin
+  new.created_by := auth.uid();
+  new.created_by_email := auth.jwt() ->> 'email';
+  return new;
+end;
+$$ language plpgsql security definer;
+
+-- listings (Phòng)
+alter table listings add column if not exists created_by uuid references auth.users(id) on delete set null;
+alter table listings add column if not exists created_by_email text;
+
+drop trigger if exists listings_set_created_by on listings;
+create trigger listings_set_created_by
+  before insert on listings
+  for each row
+  execute function set_created_by();
+
+drop trigger if exists listings_log_activity on listings;
+create trigger listings_log_activity
+  after insert or update or delete on listings
+  for each row
+  execute function log_activity();
+
+-- projects (Dự án)
+alter table projects add column if not exists created_by uuid references auth.users(id) on delete set null;
+alter table projects add column if not exists created_by_email text;
+
+drop trigger if exists projects_set_created_by on projects;
+create trigger projects_set_created_by
+  before insert on projects
+  for each row
+  execute function set_created_by();
+
+drop trigger if exists projects_log_activity on projects;
+create trigger projects_log_activity
+  after insert or update or delete on projects
+  for each row
+  execute function log_activity();
+
+-- blog_posts
+alter table blog_posts add column if not exists created_by uuid references auth.users(id) on delete set null;
+alter table blog_posts add column if not exists created_by_email text;
+
+drop trigger if exists blog_posts_set_created_by on blog_posts;
+create trigger blog_posts_set_created_by
+  before insert on blog_posts
+  for each row
+  execute function set_created_by();
+
+drop trigger if exists blog_posts_log_activity on blog_posts;
+create trigger blog_posts_log_activity
+  after insert or update or delete on blog_posts
+  for each row
+  execute function log_activity();
+
+-- leads và staff KHÔNG ghi log: leads là dữ liệu khách gửi công khai (không có
+-- khái niệm "sửa nội dung"), staff là danh bạ đơn giản, ngoài phạm vi log này.

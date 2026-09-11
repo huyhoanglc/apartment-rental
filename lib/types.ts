@@ -18,14 +18,16 @@ export interface Project {
   cover_image_url: string | null;
   image_urls: string[];
   amenities: string[];
+  created_by: string | null;
+  created_by_email: string | null;
   created_at: string;
   updated_at: string;
 }
 
-/** Field admin nhập ở form thêm/sửa dự án. */
+/** Field admin nhập ở form thêm/sửa dự án (created_by* do trigger DB tự set, không nhận từ client). */
 export type ProjectInput = Omit<
   Project,
-  "id" | "created_at" | "updated_at" | "image_urls" | "cover_image_url"
+  "id" | "created_at" | "updated_at" | "image_urls" | "cover_image_url" | "created_by" | "created_by_email"
 > & { image_urls?: string[]; cover_image_url?: string };
 
 /**
@@ -47,6 +49,8 @@ export interface Listing {
   image_url: string;
   image_urls: string[];
   description: string | null;
+  created_by: string | null;
+  created_by_email: string | null;
   updated_at: string;
   created_at: string;
 }
@@ -56,8 +60,11 @@ export interface ListingWithProject extends Listing {
   project: Project;
 }
 
-/** Field admin nhập ở form thêm/sửa phòng (không gồm id/timestamps do DB tự sinh). */
-export type ListingInput = Omit<Listing, "id" | "created_at" | "updated_at" | "image_urls">;
+/** Field admin nhập ở form thêm/sửa phòng (created_by* do trigger DB tự set, không nhận từ client). */
+export type ListingInput = Omit<
+  Listing,
+  "id" | "created_at" | "updated_at" | "image_urls" | "created_by" | "created_by_email"
+>;
 
 export interface ListingFilters {
   district?: string;
@@ -125,15 +132,46 @@ export interface BlogPost {
   meta_description: string | null;
   published: boolean;
   published_at: string | null;
+  created_by: string | null;
+  created_by_email: string | null;
   created_at: string;
   updated_at: string;
 }
 
-/** Field admin nhập ở form thêm/sửa bài blog. */
+/** Field admin nhập ở form thêm/sửa bài blog (created_by* do trigger DB tự set, không nhận từ client). */
 export type BlogPostInput = Omit<
   BlogPost,
-  "id" | "created_at" | "updated_at" | "published_at" | "cover_image_url"
+  | "id"
+  | "created_at"
+  | "updated_at"
+  | "published_at"
+  | "cover_image_url"
+  | "created_by"
+  | "created_by_email"
 > & { cover_image_url?: string };
+
+export interface ActivityLogEntry {
+  id: string;
+  table_name: "listings" | "projects" | "blog_posts";
+  record_id: string;
+  record_label: string | null;
+  action: "insert" | "update" | "delete";
+  changed_by: string | null;
+  changed_by_email: string | null;
+  created_at: string;
+}
+
+export const ACTIVITY_TABLE_LABELS: Record<ActivityLogEntry["table_name"], string> = {
+  listings: "Phòng",
+  projects: "Dự án",
+  blog_posts: "Blog",
+};
+
+export const ACTIVITY_ACTION_LABELS: Record<ActivityLogEntry["action"], string> = {
+  insert: "Tạo mới",
+  update: "Chỉnh sửa",
+  delete: "Xoá",
+};
 
 export const DISTRICTS = [
   "Quận 1",

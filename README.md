@@ -92,6 +92,11 @@ tự đổi được vai trò của chính tài khoản đang đăng nhập).
 **Lưu ý phạm vi:** vai trò chỉ giới hạn **thấy được trang nào**, chưa lọc theo dữ liệu — trong 4
 trang dùng chung (Phòng/Dự án/Blog/Leads), Admin và Cá nhân thấy và sửa/xoá được **toàn bộ** dữ
 liệu như nhau (RLS vẫn `to authenticated using (true)` cho các bảng này, không phân biệt ai tạo).
+Cố ý không giới hạn "ai tạo người đó sửa" vì bất động sản có nhiều dự án, một người có thể cần sửa
+phòng do đồng nghiệp tạo. Thay vào đó, Phòng/Dự án/Blog tự ghi lại người tạo (`created_by`,
+`created_by_email`, set tự động bằng trigger DB, không tin client) và mọi lượt tạo/sửa/xoá được
+ghi vào bảng `activity_log` — xem ở trang **`/admin/Lịch sử`** (`/admin/activity`, thấy được bởi cả
+2 vai trò) để biết ai đã thao tác gì và khi nào.
 
 **Quan trọng:** RLS cho `listings`/`leads`/... cấp quyền ghi cho **bất kỳ** user `authenticated`
 nào ở tầng database (vai trò Admin/Cá nhân chỉ chặn ở tầng ứng dụng, không đổi RLS). Vì app không

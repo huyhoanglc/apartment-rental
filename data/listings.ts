@@ -24,6 +24,8 @@ export const demoListings: Listing[] = [
     ],
     description:
       "Phòng trọ mới xây, full nội thất cơ bản, an ninh 24/7, gần cầu Sài Gòn và Landmark 81, thuận tiện di chuyển vào trung tâm Quận 1.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-08-20T02:00:00.000Z",
     created_at: "2026-07-01T02:00:00.000Z",
   },
@@ -44,6 +46,8 @@ export const demoListings: Listing[] = [
     ],
     description:
       "Cùng chung cư Sài Gòn Riverside với BT-101, phòng tầng cao hơn, view thoáng, có ban công riêng.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-08-25T02:00:00.000Z",
     created_at: "2026-07-10T02:00:00.000Z",
   },
@@ -65,6 +69,8 @@ export const demoListings: Listing[] = [
     ],
     description:
       "Studio cao cấp trong khu Phú Mỹ Hưng, thiết kế hiện đại, view sông thoáng mát, gần trường quốc tế và trung tâm thương mại Crescent Mall.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-09-05T02:00:00.000Z",
     created_at: "2026-06-15T02:00:00.000Z",
   },
@@ -85,6 +91,8 @@ export const demoListings: Listing[] = [
     ],
     description:
       "Căn hộ dịch vụ ngay trung tâm Quận 1, đi bộ tới chợ Bến Thành và phố đi bộ Nguyễn Huệ, phù hợp người đi làm và chuyên gia nước ngoài.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-08-28T02:00:00.000Z",
     created_at: "2026-05-20T02:00:00.000Z",
   },
@@ -106,6 +114,8 @@ export const demoListings: Listing[] = [
     ],
     description:
       "Căn hộ mini mới bàn giao, nội thất tinh gọn, gần công viên Gia Định và sân bay Tân Sơn Nhất, khu dân cư yên tĩnh.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-09-01T02:00:00.000Z",
     created_at: "2026-07-18T02:00:00.000Z",
   },
@@ -126,6 +136,8 @@ export const demoListings: Listing[] = [
     ],
     description:
       "Phòng trọ sinh viên, giá tốt, gần Đại học Công nghiệp TP.HCM, khu vực nhiều quán ăn và siêu thị mini.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-09-08T02:00:00.000Z",
     created_at: "2026-08-01T02:00:00.000Z",
   },
@@ -146,6 +158,8 @@ export const demoListings: Listing[] = [
     ],
     description:
       "Căn hộ mini nội thất phong cách châu Âu, cách sân bay Tân Sơn Nhất 5 phút di chuyển, hiện đã hết phòng trống.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-08-15T02:00:00.000Z",
     created_at: "2026-04-10T02:00:00.000Z",
   },
@@ -167,6 +181,8 @@ export const demoListings: Listing[] = [
     ],
     description:
       "Nhà nguyên căn khu An Phú, gần trường quốc tế và Metro số 1, phù hợp gia đình hoặc nhóm bạn ở ghép.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-08-30T02:00:00.000Z",
     created_at: "2026-06-02T02:00:00.000Z",
   },
@@ -187,6 +203,8 @@ export const demoListings: Listing[] = [
     ],
     description:
       "Studio nằm trong hẻm yên tĩnh gần hồ Con Rùa, đi bộ tới nhiều quán cà phê và trường học quốc tế.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-08-22T02:00:00.000Z",
     created_at: "2026-05-05T02:00:00.000Z",
   },
@@ -206,6 +224,8 @@ export const demoListings: Listing[] = [
       "https://picsum.photos/seed/q10076b/1200/800",
     ],
     description: "Phòng trọ khu vực Kỳ Hòa, gần bệnh viện và chợ, an ninh tốt, chủ nhà thân thiện.",
+    created_by: null,
+    created_by_email: null,
     updated_at: "2026-08-10T02:00:00.000Z",
     created_at: "2026-03-12T02:00:00.000Z",
   },
