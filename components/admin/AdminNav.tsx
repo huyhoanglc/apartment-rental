@@ -104,7 +104,7 @@ const NAV_ITEMS = [
   { href: "/admin/blog", label: "Blog", icon: DocumentIcon, adminOnly: false },
   { href: "/admin/staff", label: "Nhân viên", icon: UsersIcon, adminOnly: true },
   { href: "/admin/accounts", label: "Tài khoản", icon: KeyIcon, adminOnly: true },
-  { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon, adminOnly: true },
+  { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon, adminOnly: false },
 ];
 
 function isActive(pathname: string, href: string): boolean {

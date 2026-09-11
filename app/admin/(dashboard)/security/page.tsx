@@ -2,15 +2,16 @@ import LinkGoogleButton from "@/components/admin/LinkGoogleButton";
 import SignOutOthersButton from "@/components/admin/SignOutOthersButton";
 import { createClient } from "@/lib/supabase/server";
 import { getLoginEvents, parseUserAgent } from "@/lib/admin/security";
-import { requireAdminPage } from "@/lib/admin/roles";
 
+// Không chặn theo role: trang này chỉ hiện thông tin của CHÍNH tài khoản
+// đang đăng nhập (lịch sử đăng nhập, phương thức liên kết) — không phải
+// quản trị người khác, nên cả Admin lẫn Cá nhân đều tự quản lý được.
 const PROVIDER_LABELS: Record<string, string> = {
   email: "Email/mật khẩu",
   google: "Google",
 };
 
 export default async function AdminSecurityPage() {
-  await requireAdminPage();
   const supabase = createClient();
   const [events, identitiesResult] = await Promise.all([
     getLoginEvents(),

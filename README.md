@@ -78,9 +78,11 @@ các yêu cầu gửi từ form trên trang chủ.
 Mỗi tài khoản có 1 trong 2 vai trò, lưu ở `app_metadata.role` của Supabase Auth user (chỉ set được
 qua Admin API — user không tự nâng quyền được):
 
-- **Admin**: thấy và dùng được tất cả, kể cả Nhân viên, Tài khoản, Bảo mật.
-- **Cá nhân**: chỉ thấy Phòng, Dự án, Blog, Leads trên nav — vào thẳng URL 3 trang còn lại cũng bị
-  chặn (404), không chỉ ẩn link.
+- **Admin**: thấy và dùng được tất cả, kể cả Nhân viên và Tài khoản (quản lý người khác).
+- **Cá nhân**: thấy Phòng, Dự án, Blog, Leads, và **Bảo mật** (tự quản lý đăng nhập của chính
+  mình — xem lịch sử, tự liên kết thêm Google). Không thấy Nhân viên/Tài khoản trên nav — vào
+  thẳng URL 2 trang đó cũng bị chặn (404), không chỉ ẩn link. `/admin/security` không chặn theo
+  role vì chỉ hiện dữ liệu của chính tài khoản đang đăng nhập, không phải quản trị người khác.
 
 Tài khoản tạo **trước khi có tính năng này** (kể cả tài khoản đầu tiên tạo qua Supabase Dashboard)
 không có `role` trong `app_metadata` — app coi thiếu role = **Admin** để không tự khoá bạn ra khỏi
