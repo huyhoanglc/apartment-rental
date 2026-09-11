@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import StaffForm from "@/components/admin/StaffForm";
 import { getStaffById } from "@/lib/admin/staff";
+import { requireAdminPage } from "@/lib/admin/roles";
 import { saveStaff } from "../../actions";
 
 export default async function EditStaffPage({ params }: { params: { id: string } }) {
+  await requireAdminPage();
   const person = await getStaffById(params.id);
   if (!person) notFound();
 

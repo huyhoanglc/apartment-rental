@@ -5,10 +5,12 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { logout } from "@/app/admin/(dashboard)/actions";
 import PresenceIndicator from "@/components/admin/PresenceIndicator";
+import type { AdminRole } from "@/lib/admin/roles";
 
 interface AdminNavProps {
   userId: string;
   email: string;
+  role: AdminRole;
 }
 
 function HomeIcon({ className }: { className?: string }) {
@@ -96,13 +98,13 @@ function ShieldIcon({ className }: { className?: string }) {
 }
 
 const NAV_ITEMS = [
-  { href: "/admin", label: "Phòng", icon: HomeIcon },
-  { href: "/admin/projects", label: "Dự án", icon: BuildingIcon },
-  { href: "/admin/leads", label: "Leads", icon: InboxIcon },
-  { href: "/admin/blog", label: "Blog", icon: DocumentIcon },
-  { href: "/admin/staff", label: "Nhân viên", icon: UsersIcon },
-  { href: "/admin/accounts", label: "Tài khoản", icon: KeyIcon },
-  { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon },
+  { href: "/admin", label: "Phòng", icon: HomeIcon, adminOnly: false },
+  { href: "/admin/projects", label: "Dự án", icon: BuildingIcon, adminOnly: false },
+  { href: "/admin/leads", label: "Leads", icon: InboxIcon, adminOnly: false },
+  { href: "/admin/blog", label: "Blog", icon: DocumentIcon, adminOnly: false },
+  { href: "/admin/staff", label: "Nhân viên", icon: UsersIcon, adminOnly: true },
+  { href: "/admin/accounts", label: "Tài khoản", icon: KeyIcon, adminOnly: true },
+  { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon, adminOnly: true },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -110,10 +112,11 @@ function isActive(pathname: string, href: string): boolean {
   return pathname.startsWith(href);
 }
 
-export default function AdminNav({ userId, email }: AdminNavProps) {
+export default function AdminNav({ userId, email, role }: AdminNavProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || role === "admin");
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/95 shadow-sm backdrop-blur">
@@ -126,7 +129,7 @@ export default function AdminNav({ userId, email }: AdminNavProps) {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
-          {NAV_ITEMS.map((item) => {
+          {visibleItems.map((item) => {
             const active = isActive(pathname, item.href);
             const Icon = item.icon;
             return (
@@ -194,7 +197,7 @@ export default function AdminNav({ userId, email }: AdminNavProps) {
       {mobileOpen && (
         <nav className="border-t border-border bg-card md:hidden">
           <div className="flex flex-col gap-1 px-4 py-3">
-            {NAV_ITEMS.map((item) => {
+            {visibleItems.map((item) => {
               const active = isActive(pathname, item.href);
               const Icon = item.icon;
               return (

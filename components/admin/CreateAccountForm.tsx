@@ -43,6 +43,13 @@ export default function CreateAccountForm() {
           <input type="password" name="password" required minLength={8} className={FIELD} />
           <p className="mt-1.5 text-xs text-muted-foreground">Ít nhất 8 ký tự.</p>
         </div>
+        <div>
+          <label className={LABEL}>Vai trò *</label>
+          <select name="role" required defaultValue="member" className={FIELD}>
+            <option value="member">Cá nhân — chỉ Phòng, Dự án, Blog, Leads</option>
+            <option value="admin">Admin — toàn quyền</option>
+          </select>
+        </div>
 
         {state.error && <p className="text-sm text-rose-600">{state.error}</p>}
         {state.success && (

@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { AdminRole } from "@/lib/admin/roles";
 
 export interface AdminAccount {
   id: string;
   email: string;
+  role: AdminRole;
   created_at: string;
   last_sign_in_at: string | null;
   providers: string[];
@@ -23,6 +25,10 @@ async function requireAuthenticated(): Promise<void> {
   if (!user) throw new Error("Chưa đăng nhập.");
 }
 
+function roleOf(appMetadata: Record<string, unknown> | undefined): AdminRole {
+  return appMetadata?.role === "member" ? "member" : "admin";
+}
+
 export async function getAdminAccounts(): Promise<AdminAccount[]> {
   await requireAuthenticated();
   const admin = createAdminClient();
@@ -34,6 +40,7 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
     .map((u) => ({
       id: u.id,
       email: u.email ?? "",
+      role: roleOf(u.app_metadata),
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at ?? null,
       providers: (u.identities ?? []).map((i) => i.provider),
@@ -41,7 +48,11 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
     .sort((a, b) => a.email.localeCompare(b.email));
 }
 
-export async function createAdminAccount(email: string, password: string): Promise<void> {
+export async function createAdminAccount(
+  email: string,
+  password: string,
+  role: AdminRole
+): Promise<void> {
   await requireAuthenticated();
   const admin = createAdminClient();
 
@@ -49,6 +60,7 @@ export async function createAdminAccount(email: string, password: string): Promi
     email,
     password,
     email_confirm: true,
+    app_metadata: { role },
   });
 
   if (error) throw error;
@@ -59,5 +71,16 @@ export async function deleteAdminAccount(id: string): Promise<void> {
   const admin = createAdminClient();
 
   const { error } = await admin.auth.admin.deleteUser(id);
+  if (error) throw error;
+}
+
+export async function updateAdminAccountRole(id: string, role: AdminRole): Promise<void> {
+  await requireAuthenticated();
+  const admin = createAdminClient();
+
+  const { error } = await admin.auth.admin.updateUserById(id, {
+    app_metadata: { role },
+  });
+
   if (error) throw error;
 }

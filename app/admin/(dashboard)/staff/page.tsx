@@ -2,8 +2,10 @@ import Link from "next/link";
 import DeleteStaffButton from "@/components/admin/DeleteStaffButton";
 import StaffActiveToggle from "@/components/admin/StaffActiveToggle";
 import { getAllStaff } from "@/lib/admin/staff";
+import { requireAdminPage } from "@/lib/admin/roles";
 
 export default async function AdminStaffPage() {
+  await requireAdminPage();
   const staff = await getAllStaff();
 
   return (

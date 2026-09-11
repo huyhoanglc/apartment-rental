@@ -67,18 +67,38 @@ không cần vào thẳng Supabase Dashboard nữa (dù vẫn dùng được n�
 
 **Tạo thêm tài khoản khác** — từ tài khoản đầu tiên trở đi có thể tạo ngay trong app, không cần
 vào Supabase Dashboard nữa: đăng nhập → **Tài khoản** (`/admin/accounts`) → điền email + mật khẩu
-→ Tạo tài khoản. Gửi email/mật khẩu đó cho người dùng để họ tự đăng nhập.
++ chọn **vai trò** → Tạo tài khoản. Gửi email/mật khẩu đó cho người dùng để họ tự đăng nhập.
 
 Sau khi đăng nhập, `/admin` hiển thị danh sách phòng (đổi trạng thái nhanh bằng dropdown, sửa/xoá
 từng phòng), `/admin/listings/new` để thêm phòng mới, `/admin/leads` để xem và đánh dấu đã liên hệ
 các yêu cầu gửi từ form trên trang chủ.
 
-**Quan trọng:** RLS cho `listings`/`leads` cấp quyền ghi cho **bất kỳ** user `authenticated` nào,
-không phân biệt role/admin riêng. Vì app không có trang tự đăng ký nên bình thường chỉ ai được bạn
-tạo tài khoản thủ công mới đăng nhập được — nhưng nếu Supabase project của bạn đang bật đăng ký
-công khai (mặc định), ai đó vẫn có thể tự tạo tài khoản thẳng qua Supabase Auth API (không qua UI
-của web) rồi có toàn quyền admin. Vào **Authentication → Providers → Email** và tắt "Allow new
-users to sign up" để chặn việc này.
+### Vai trò (Admin / Cá nhân)
+
+Mỗi tài khoản có 1 trong 2 vai trò, lưu ở `app_metadata.role` của Supabase Auth user (chỉ set được
+qua Admin API — user không tự nâng quyền được):
+
+- **Admin**: thấy và dùng được tất cả, kể cả Nhân viên, Tài khoản, Bảo mật.
+- **Cá nhân**: chỉ thấy Phòng, Dự án, Blog, Leads trên nav — vào thẳng URL 3 trang còn lại cũng bị
+  chặn (404), không chỉ ẩn link.
+
+Tài khoản tạo **trước khi có tính năng này** (kể cả tài khoản đầu tiên tạo qua Supabase Dashboard)
+không có `role` trong `app_metadata` — app coi thiếu role = **Admin** để không tự khoá bạn ra khỏi
+hệ thống. Muốn đổi vai trò 1 tài khoản, admin vào `/admin/accounts` đổi trực tiếp trên bảng (không
+tự đổi được vai trò của chính tài khoản đang đăng nhập).
+
+**Lưu ý phạm vi:** vai trò chỉ giới hạn **thấy được trang nào**, chưa lọc theo dữ liệu — trong 4
+trang dùng chung (Phòng/Dự án/Blog/Leads), Admin và Cá nhân thấy và sửa/xoá được **toàn bộ** dữ
+liệu như nhau (RLS vẫn `to authenticated using (true)` cho các bảng này, không phân biệt ai tạo).
+
+**Quan trọng:** RLS cho `listings`/`leads`/... cấp quyền ghi cho **bất kỳ** user `authenticated`
+nào ở tầng database (vai trò Admin/Cá nhân chỉ chặn ở tầng ứng dụng, không đổi RLS). Vì app không
+có trang tự đăng ký nên bình thường chỉ ai được bạn tạo tài khoản mới đăng nhập được — nhưng nếu
+Supabase project của bạn đang bật đăng ký công khai (mặc định), ai đó vẫn có thể tự tạo tài khoản
+thẳng qua Supabase Auth API (không qua UI của web) — tài khoản tự tạo kiểu này **không có role**,
+nên theo đúng quy tắc "thiếu role = Admin" ở trên, họ sẽ có **toàn quyền Admin**, không phải Cá
+nhân. Vào **Authentication → Providers → Email** và tắt "Allow new users to sign up" để chặn việc
+này — càng quan trọng hơn từ khi có vai trò, vì hậu quả của việc bỏ sót còn nặng hơn trước.
 
 ### Đăng nhập bằng Google (tuỳ chọn)
 

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createStaff, deleteStaff, updateStaff, updateStaffActive } from "@/lib/admin/staff";
+import { isCurrentUserAdmin } from "@/lib/admin/roles";
 import type { StaffInput } from "@/lib/types";
 
 export interface SaveStaffState {
@@ -14,6 +15,10 @@ export async function saveStaff(
   _prevState: SaveStaffState,
   formData: FormData
 ): Promise<SaveStaffState> {
+  if (!(await isCurrentUserAdmin())) {
+    return { error: "Bạn không có quyền thực hiện thao tác này." };
+  }
+
   const full_name = String(formData.get("full_name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
@@ -48,11 +53,13 @@ export async function saveStaff(
 }
 
 export async function deleteStaffAction(id: string): Promise<void> {
+  if (!(await isCurrentUserAdmin())) return;
   await deleteStaff(id);
   revalidatePath("/admin/staff");
 }
 
 export async function toggleStaffActiveAction(id: string, active: boolean): Promise<void> {
+  if (!(await isCurrentUserAdmin())) return;
   await updateStaffActive(id, active);
   revalidatePath("/admin/staff");
 }

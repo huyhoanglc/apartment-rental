@@ -1,7 +1,9 @@
 import StaffForm from "@/components/admin/StaffForm";
+import { requireAdminPage } from "@/lib/admin/roles";
 import { saveStaff } from "../actions";
 
-export default function NewStaffPage() {
+export default async function NewStaffPage() {
+  await requireAdminPage();
   const action = saveStaff.bind(null, null);
 
   return (
