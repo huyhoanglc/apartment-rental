@@ -50,13 +50,11 @@ export default function AccountLockToggle({
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:cursor-wait disabled:opacity-50 ${
-        locked
-          ? "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400"
-          : "bg-status-available/10 text-status-available"
+      className={`text-sm font-medium hover:underline disabled:cursor-wait disabled:opacity-50 ${
+        locked ? "text-primary-700 dark:text-primary-300" : "text-rose-600"
       }`}
     >
-      {locked ? "Đã khoá" : "Đang hoạt động"}
+      {locked ? "Mở khoá" : "Khoá tài khoản"}
     </button>
   );
 }

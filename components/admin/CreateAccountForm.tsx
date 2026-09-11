@@ -1,8 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { createAccountAction, type CreateAccountState } from "@/app/admin/(dashboard)/accounts/actions";
+
+interface CreateAccountFormProps {
+  onCancel: () => void;
+  onSuccess: () => void;
+}
 
 const LABEL = "block text-xs font-semibold uppercase tracking-wide text-muted-foreground";
 const FIELD =
@@ -21,19 +26,16 @@ function SubmitButton() {
   );
 }
 
-export default function CreateAccountForm() {
+export default function CreateAccountForm({ onCancel, onSuccess }: CreateAccountFormProps) {
   const [state, formAction] = useFormState<CreateAccountState, FormData>(createAccountAction, {});
-  const [formKey, setFormKey] = useState(0);
 
-  // Tạo xong thì reset input (remount form bằng key) thay vì để lại giá trị cũ.
   useEffect(() => {
-    if (state.success) setFormKey((k) => k + 1);
-  }, [state.success]);
+    if (state.success) onSuccess();
+  }, [state.success, onSuccess]);
 
   return (
-    <form key={formKey} action={formAction} className="max-w-md overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
+    <form action={formAction} className="mx-auto max-w-md overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
       <div className="space-y-4 p-6">
-        <h2 className="text-sm font-semibold text-foreground">Tạo tài khoản đăng nhập mới</h2>
         <div>
           <label className={LABEL}>Họ và tên *</label>
           <input type="text" name="full_name" required className={FIELD} />
@@ -61,14 +63,16 @@ export default function CreateAccountForm() {
         </div>
 
         {state.error && <p className="text-sm text-rose-600">{state.error}</p>}
-        {state.success && (
-          <p className="text-sm text-status-available">
-            Đã tạo tài khoản — gửi email/mật khẩu này cho người dùng để họ đăng nhập.
-          </p>
-        )}
       </div>
 
-      <div className="border-t border-border bg-muted/30 px-6 py-4">
+      <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/30 px-6 py-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          Huỷ
+        </button>
         <SubmitButton />
       </div>
     </form>
