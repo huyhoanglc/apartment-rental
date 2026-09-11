@@ -118,7 +118,7 @@ function ClockIcon({ className }: { className?: string }) {
   );
 }
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   { href: "/admin", label: "Phòng", icon: HomeIcon, adminOnly: false },
   { href: "/admin/projects", label: "Dự án", icon: BuildingIcon, adminOnly: false },
   { href: "/admin/leads", label: "Leads", icon: InboxIcon, adminOnly: false },
@@ -129,7 +129,7 @@ const NAV_ITEMS = [
   { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon, adminOnly: false },
 ];
 
-function isActive(pathname: string, href: string): boolean {
+export function isActive(pathname: string, href: string): boolean {
   if (href === "/admin") return pathname === "/admin";
   return pathname.startsWith(href);
 }
