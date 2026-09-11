@@ -14,6 +14,10 @@ import { createClient } from "@/lib/supabase/client";
  * dev do Fast Refresh chưa kịp đóng) — email mới là danh tính thật cần hiện,
  * nên luôn chỉ 1 avatar cho mỗi người dù họ mở bao nhiêu tab.
  *
+ * Chỉ hiện NGƯỜI KHÁC đang online (loại chính mình khỏi danh sách) — trạng
+ * thái online của chính mình đã gộp chung vào avatar tài khoản (chấm xanh
+ * trên nút dropdown), tránh 2 avatar trùng lặp cho cùng 1 người.
+ *
  * Giới hạn: chỉ phản ánh "đang mở tab ở khu vực admin", không biết đang thao
  * tác cụ thể gì (vd đang sửa tin nào) — muốn mức chi tiết đó (kiểu Google Docs
  * cùng sửa 1 tài liệu) cần thiết kế riêng, phức tạp hơn nhiều, ngoài phạm vi
@@ -59,14 +63,15 @@ export default function PresenceIndicator({ userId, email }: PresenceIndicatorPr
     };
   }, [userId, email]);
 
-  if (onlineEmails.length === 0) return null;
+  const otherEmails = onlineEmails.filter((e) => e !== email);
+  if (otherEmails.length === 0) return null;
 
   return (
     <div className="flex items-center -space-x-2">
-      {onlineEmails.map((adminEmail) => (
+      {otherEmails.map((adminEmail) => (
         <span
           key={adminEmail}
-          title={adminEmail === email ? `${adminEmail} (Bạn)` : adminEmail}
+          title={adminEmail}
           className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-xs font-semibold text-white ring-2 ring-card"
         >
           {adminEmail[0]?.toUpperCase()}

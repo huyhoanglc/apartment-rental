@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { logout } from "@/app/admin/(dashboard)/actions";
 import PresenceIndicator from "@/components/admin/PresenceIndicator";
 import type { AdminRole } from "@/lib/admin/roles";
@@ -13,7 +13,8 @@ interface AdminNavProps {
   role: AdminRole;
 }
 
-const COLLAPSE_STORAGE_KEY = "admin-sidebar-collapsed";
+/** Thời gian chờ trước khi thu gọn lại sau khi rê chuột ra khỏi sidebar. */
+const COLLAPSE_DELAY_MS = 2500;
 
 function HomeIcon({ className }: { className?: string }) {
   return (
@@ -111,14 +112,6 @@ function ClockIcon({ className }: { className?: string }) {
   );
 }
 
-function ChevronLeftIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-    </svg>
-  );
-}
-
 const NAV_ITEMS = [
   { href: "/admin", label: "Phòng", icon: HomeIcon, adminOnly: false },
   { href: "/admin/projects", label: "Dự án", icon: BuildingIcon, adminOnly: false },
@@ -139,21 +132,22 @@ export default function AdminNav({ userId, email, role }: AdminNavProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const collapseTimer = useRef<ReturnType<typeof setTimeout>>();
   const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || role === "admin");
+  const collapsed = !expanded;
 
-  useEffect(() => {
-    setCollapsed(localStorage.getItem(COLLAPSE_STORAGE_KEY) === "1");
-    setHydrated(true);
-  }, []);
+  function handleMouseEnter() {
+    clearTimeout(collapseTimer.current);
+    setExpanded(true);
+  }
 
-  function toggleCollapsed() {
-    setCollapsed((prev) => {
-      const next = !prev;
-      localStorage.setItem(COLLAPSE_STORAGE_KEY, next ? "1" : "0");
-      return next;
-    });
+  function handleMouseLeave() {
+    clearTimeout(collapseTimer.current);
+    collapseTimer.current = setTimeout(() => {
+      setExpanded(false);
+      setMenuOpen(false);
+    }, COLLAPSE_DELAY_MS);
   }
 
   const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
@@ -188,12 +182,12 @@ export default function AdminNav({ userId, email, role }: AdminNavProps) {
   );
 
   const UserFooter = () => (
-    <div className={`border-t border-border p-2.5 ${collapsed ? "md:flex md:flex-col md:items-center md:gap-2" : ""}`}>
-      <div className={`flex items-center px-0.5 pb-2 ${collapsed ? "md:justify-center" : "justify-start"}`}>
+    <div className={`flex items-center gap-2 border-t border-border p-2.5 ${collapsed ? "md:flex-col" : ""}`}>
+      <div className="shrink-0">
         <PresenceIndicator userId={userId} email={email} />
       </div>
 
-      <div className="relative">
+      <div className="relative min-w-0 flex-1">
         <button
           type="button"
           onClick={() => setMenuOpen((v) => !v)}
@@ -201,8 +195,9 @@ export default function AdminNav({ userId, email, role }: AdminNavProps) {
             collapsed ? "md:justify-center md:px-0" : ""
           }`}
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-semibold text-white shadow-sm">
+          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-semibold text-white shadow-sm">
             {(email[0] || "?").toUpperCase()}
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-status-available ring-2 ring-card" />
           </span>
           <span
             className={`min-w-0 overflow-hidden whitespace-nowrap transition-all duration-200 ${
@@ -272,10 +267,16 @@ export default function AdminNav({ userId, email, role }: AdminNavProps) {
         </div>
       )}
 
+      {/* Chừa chỗ cố định (68px) trong layout — sidebar thật nằm đè lên trên (fixed)
+          khi mở rộng ra khi rê chuột vào, không đẩy nội dung chính xô lệch. */}
+      <div className="hidden shrink-0 md:block md:w-[68px]" />
+
       <aside
-        className={`sticky top-0 z-30 hidden h-screen shrink-0 flex-col border-r border-border bg-card md:flex ${
-          hydrated ? "transition-[width] duration-200" : ""
-        } ${collapsed ? "md:w-[68px]" : "md:w-60"}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`fixed left-0 top-0 z-30 hidden h-screen flex-col border-r border-border bg-card transition-[width] duration-200 md:flex ${
+          expanded ? "md:w-60 shadow-xl" : "md:w-[68px]"
+        }`}
       >
         <div className={`flex h-14 items-center gap-2 border-b border-border px-4 ${collapsed ? "md:justify-center md:px-0" : ""}`}>
           <Link href="/admin" className="flex items-center gap-2 overflow-hidden text-primary-700 dark:text-primary-300">
@@ -294,15 +295,6 @@ export default function AdminNav({ userId, email, role }: AdminNavProps) {
 
         <NavLinks />
         <UserFooter />
-
-        <button
-          type="button"
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
-          className="absolute -right-3 top-16 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition hover:text-foreground"
-        >
-          <ChevronLeftIcon className={`h-3.5 w-3.5 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
-        </button>
       </aside>
     </>
   );
