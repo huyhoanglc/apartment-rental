@@ -43,6 +43,11 @@ export default function CreateAccountForm() {
           <input type="email" name="email" required className={FIELD} />
         </div>
         <div>
+          <label className={LABEL}>Số điện thoại *</label>
+          <input type="tel" name="phone" required className={FIELD} />
+          <p className="mt-1.5 text-xs text-muted-foreground">Dùng làm mật khẩu mặc định khi cần &quot;Reset mật khẩu&quot;.</p>
+        </div>
+        <div>
           <label className={LABEL}>Mật khẩu *</label>
           <input type="password" name="password" required minLength={8} className={FIELD} />
           <p className="mt-1.5 text-xs text-muted-foreground">Ít nhất 8 ký tự.</p>

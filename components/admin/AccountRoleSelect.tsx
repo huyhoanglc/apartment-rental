@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { updateAccountRoleAction } from "@/app/admin/(dashboard)/accounts/actions";
 import { useToast } from "@/components/admin/Toast";
+import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
 import type { AdminRole } from "@/lib/admin/roles";
 
 export default function AccountRoleSelect({
@@ -16,6 +17,7 @@ export default function AccountRoleSelect({
 }) {
   const [isPending, startTransition] = useTransition();
   const toast = useToast();
+  const loading = useGlobalLoading();
 
   if (isSelf) {
     return (
@@ -27,9 +29,16 @@ export default function AccountRoleSelect({
 
   function handleChange(newRole: AdminRole) {
     startTransition(async () => {
-      const result = await updateAccountRoleAction(id, newRole);
-      if (result.error) toast.error(result.error);
-      else toast.success("Đã đổi vai trò.");
+      loading.show("Đang đổi vai trò...");
+      try {
+        const result = await updateAccountRoleAction(id, newRole);
+        if (result.error) toast.error(result.error);
+        else toast.success("Đã đổi vai trò.");
+      } catch {
+        toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+      } finally {
+        loading.hide();
+      }
     });
   }
 

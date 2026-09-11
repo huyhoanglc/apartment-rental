@@ -6,7 +6,9 @@ export interface AdminAccount {
   id: string;
   email: string;
   full_name: string | null;
+  phone: string | null;
   role: AdminRole;
+  locked: boolean;
   created_at: string;
   last_sign_in_at: string | null;
   providers: string[];
@@ -30,6 +32,9 @@ function roleOf(appMetadata: Record<string, unknown> | undefined): AdminRole {
   return appMetadata?.role === "member" ? "member" : "admin";
 }
 
+/** Supabase không có "khoá vĩnh viễn" thật sự — dùng ban_duration rất dài để mô phỏng. */
+const LOCK_DURATION = "876000h";
+
 export async function getAdminAccounts(): Promise<AdminAccount[]> {
   await requireAuthenticated();
   const admin = createAdminClient();
@@ -42,7 +47,9 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
       id: u.id,
       email: u.email ?? "",
       full_name: typeof u.user_metadata?.full_name === "string" ? u.user_metadata.full_name : null,
+      phone: typeof u.user_metadata?.phone === "string" ? u.user_metadata.phone : null,
       role: roleOf(u.app_metadata),
+      locked: Boolean(u.banned_until) && new Date(u.banned_until as string) > new Date(),
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at ?? null,
       providers: (u.identities ?? []).map((i) => i.provider),
@@ -54,7 +61,8 @@ export async function createAdminAccount(
   email: string,
   password: string,
   role: AdminRole,
-  fullName: string
+  fullName: string,
+  phone: string
 ): Promise<void> {
   await requireAuthenticated();
   const admin = createAdminClient();
@@ -64,7 +72,7 @@ export async function createAdminAccount(
     password,
     email_confirm: true,
     app_metadata: { role },
-    user_metadata: { full_name: fullName },
+    user_metadata: { full_name: fullName, phone: phone || null },
   });
 
   if (error) throw error;
@@ -86,5 +94,25 @@ export async function updateAdminAccountRole(id: string, role: AdminRole): Promi
     app_metadata: { role },
   });
 
+  if (error) throw error;
+}
+
+export async function setAdminAccountLocked(id: string, locked: boolean): Promise<void> {
+  await requireAuthenticated();
+  const admin = createAdminClient();
+
+  const { error } = await admin.auth.admin.updateUserById(id, {
+    ban_duration: locked ? LOCK_DURATION : "none",
+  });
+
+  if (error) throw error;
+}
+
+/** Đặt lại mật khẩu về đúng số điện thoại đã nhập lúc tạo tài khoản. */
+export async function resetAdminAccountPassword(id: string, phone: string): Promise<void> {
+  await requireAuthenticated();
+  const admin = createAdminClient();
+
+  const { error } = await admin.auth.admin.updateUserById(id, { password: phone });
   if (error) throw error;
 }
