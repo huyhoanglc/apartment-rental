@@ -13,7 +13,10 @@ export default function LinkGoogleButton() {
     const supabase = createClient();
     const { error } = await supabase.auth.linkIdentity({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/admin/security` },
+      // KHÔNG gắn query string vào redirectTo — xem ghi chú trong
+      // GoogleLoginButton.tsx. Route callback tự biết đây là thao tác liên
+      // kết (có session sẵn) nên tự đưa về /admin/security, không cần ?next.
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
     if (error) {
       setError(error.message);

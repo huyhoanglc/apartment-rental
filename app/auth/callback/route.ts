@@ -30,12 +30,19 @@ function isEmailAllowed(email: string | null): boolean {
  * Callback cho OAuth (Google...) — Supabase redirect về đây kèm ?code=...
  * sau khi user đồng ý ở màn hình consent. Đường dẫn này nằm ngoài /admin và
  * ngoài matcher của middleware.ts nên không bị chặn đăng nhập/redirect ngôn
- * ngữ — tự xử lý xong rồi redirect thẳng vào /admin.
+ * ngữ — tự xử lý xong rồi redirect vào /admin (đăng nhập mới) hoặc
+ * /admin/security (liên kết Google cho tài khoản đang đăng nhập).
+ *
+ * Cố ý KHÔNG nhận đích đến qua query string (?next=...): redirectTo gửi cho
+ * Supabase phải khớp NGUYÊN VĂN 1 entry trong allowlist "Redirect URLs" của
+ * Supabase Dashboard — gắn thêm query string vào sẽ không khớp entry đã đăng
+ * ký (vd "https://.../auth/callback") nữa và bị Supabase âm thầm rớt về Site
+ * URL mặc định (từng gây lỗi đăng nhập Google trên domain thật bị đưa nhầm
+ * về localhost). Đích đến được suy ra từ isLinking bên dưới, không cần query.
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/admin";
 
   if (!code) {
     return NextResponse.redirect(`${origin}/admin/login?error=1`);
@@ -67,5 +74,6 @@ export async function GET(request: NextRequest) {
     await recordAdminLogin(data.user.id, data.user.email ?? null);
   }
 
+  const next = isLinking ? "/admin/security" : "/admin";
   return NextResponse.redirect(`${origin}${next}`);
 }

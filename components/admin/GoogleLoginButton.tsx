@@ -15,7 +15,12 @@ export default function GoogleLoginButton() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/admin` },
+      // KHÔNG gắn query string vào redirectTo — Supabase so khớp allowlist
+      // "Redirect URLs" theo đúng nguyên văn URL, có thêm ?... vào là không
+      // khớp entry đã đăng ký nữa và bị rớt về Site URL mặc định (từng gây
+      // lỗi đăng nhập Google trên Vercel bị đưa nhầm về localhost). Đích đến
+      // (isLinking hay không) đã tự xác định server-side ở route callback.
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
     // Trình duyệt sẽ tự chuyển sang màn hình Google — không cần setLoading(false)
     // ở nhánh thành công, chỉ nhỡ lỗi mạng thì mới quay lại đây với loading=true mãi,
