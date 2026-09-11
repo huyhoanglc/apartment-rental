@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createStaff, deleteStaff, updateStaff, updateStaffActive } from "@/lib/admin/staff";
 import { isCurrentUserAdmin } from "@/lib/admin/roles";
 import type { StaffInput } from "@/lib/types";
 
 export interface SaveStaffState {
   error?: string;
+  success?: boolean;
 }
 
 export async function saveStaff(
@@ -49,7 +49,7 @@ export async function saveStaff(
   }
 
   revalidatePath("/admin/staff");
-  redirect("/admin/staff");
+  return { success: true };
 }
 
 export async function deleteStaffAction(id: string): Promise<void> {

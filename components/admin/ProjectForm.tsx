@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
-import Link from "next/link";
 import { slugify } from "@/lib/slugify";
 import { DISTRICTS, type Project } from "@/lib/types";
 import type { SaveProjectState } from "@/app/admin/(dashboard)/projects/actions";
@@ -11,6 +10,8 @@ import type { SaveProjectState } from "@/app/admin/(dashboard)/projects/actions"
 interface ProjectFormProps {
   action: (state: SaveProjectState, formData: FormData) => Promise<SaveProjectState>;
   initialProject?: Project;
+  onCancel: () => void;
+  onSuccess: () => void;
 }
 
 const LABEL = "block text-xs font-semibold uppercase tracking-wide text-muted-foreground";
@@ -31,9 +32,13 @@ function SubmitButton() {
   );
 }
 
-export default function ProjectForm({ action, initialProject }: ProjectFormProps) {
+export default function ProjectForm({ action, initialProject, onCancel, onSuccess }: ProjectFormProps) {
   const [state, formAction] = useFormState<SaveProjectState, FormData>(action, {});
   const isEdit = Boolean(initialProject);
+
+  useEffect(() => {
+    if (state.success) onSuccess();
+  }, [state.success, onSuccess]);
 
   const [name, setName] = useState(initialProject?.name ?? "");
   const [slug, setSlug] = useState(initialProject?.slug ?? "");
@@ -224,9 +229,13 @@ export default function ProjectForm({ action, initialProject }: ProjectFormProps
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/30 px-6 py-4">
-        <Link href="/admin/projects" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
           Huỷ
-        </Link>
+        </button>
         <div className="flex items-center gap-3">
           {state.error && <p className="text-sm text-rose-600">{state.error}</p>}
           <SubmitButton />

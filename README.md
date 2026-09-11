@@ -75,8 +75,9 @@ tên hiển thị cho tới khi bạn cập nhật `user_metadata.full_name` th�
 Edit → User Metadata).
 
 Sau khi đăng nhập, `/admin` hiển thị danh sách phòng (đổi trạng thái nhanh bằng dropdown, sửa/xoá
-từng phòng), `/admin/listings/new` để thêm phòng mới, `/admin/leads` để xem và đánh dấu đã liên hệ
-các yêu cầu gửi từ form trên trang chủ.
+từng phòng qua popup ngay trên trang — không điều hướng sang trang khác), `/admin/leads` để xem và
+đánh dấu đã liên hệ các yêu cầu gửi từ form trên trang chủ. Dự án/Blog/Nhân viên cũng thêm/sửa qua
+popup tương tự trên trang danh sách của từng mục.
 
 ### Vai trò (Admin / Cá nhân)
 
@@ -236,9 +237,9 @@ không cần cập nhật tay. Nhớ set `NEXT_PUBLIC_SITE_URL` đúng domain th
 
 Mỗi phòng cho thuê giờ thuộc về 1 **Dự án** (tòa nhà/chung cư) — địa chỉ, quận/phường, tiện ích
 chung nằm ở dự án; phòng chỉ giữ thông tin riêng (giá, diện tích, loại hình, ảnh, tiện ích riêng).
-**Phải tạo Dự án trước khi thêm Phòng** — `/admin/listings/new` sẽ nhắc tạo dự án nếu chưa có cái
-nào. Quản lý ở `/admin/projects` (CRUD dự án, dùng chung `ProjectForm`) — xoá 1 dự án sẽ báo lỗi
-nếu dự án đó vẫn còn phòng (xoá hết phòng trước).
+**Phải tạo Dự án trước khi thêm Phòng** — bấm "Thêm phòng mới" ở `/admin` khi chưa có dự án nào sẽ
+báo lỗi nhắc tạo dự án trước, thay vì mở popup thêm phòng. Quản lý ở `/admin/projects` (CRUD dự án,
+dùng chung `ProjectForm`) — xoá 1 dự án sẽ báo lỗi nếu dự án đó vẫn còn phòng (xoá hết phòng trước).
 
 `/admin/staff` là **danh bạ nhân viên nội bộ** đơn giản (tên, SĐT, email, chức vụ, đang làm/nghỉ)
 — không liên quan tài khoản đăng nhập `/admin` (tài khoản đăng nhập vẫn tạo thủ công qua Supabase

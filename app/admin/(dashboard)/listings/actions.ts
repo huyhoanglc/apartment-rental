@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import {
   createListing,
   deleteListing,
@@ -14,6 +13,7 @@ import type { ListingInput, ListingStatus, ListingType } from "@/lib/types";
 
 export interface SaveListingState {
   error?: string;
+  success?: boolean;
 }
 
 const LISTING_TYPES: ListingType[] = [
@@ -115,7 +115,7 @@ export async function saveListing(
   }
 
   revalidatePath("/admin");
-  redirect("/admin");
+  return { success: true };
 }
 
 export async function deleteListingAction(code: string): Promise<void> {

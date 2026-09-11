@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
-import Link from "next/link";
 import { slugify } from "@/lib/slugify";
 import type { BlogPost } from "@/lib/types";
 import type { SaveBlogPostState } from "@/app/admin/(dashboard)/blog/actions";
@@ -11,6 +10,8 @@ import type { SaveBlogPostState } from "@/app/admin/(dashboard)/blog/actions";
 interface BlogPostFormProps {
   action: (state: SaveBlogPostState, formData: FormData) => Promise<SaveBlogPostState>;
   initialPost?: BlogPost;
+  onCancel: () => void;
+  onSuccess: () => void;
 }
 
 const META_TITLE_LIMIT = 60;
@@ -34,9 +35,13 @@ function SubmitButton() {
   );
 }
 
-export default function BlogPostForm({ action, initialPost }: BlogPostFormProps) {
+export default function BlogPostForm({ action, initialPost, onCancel, onSuccess }: BlogPostFormProps) {
   const [state, formAction] = useFormState<SaveBlogPostState, FormData>(action, {});
   const isEdit = Boolean(initialPost);
+
+  useEffect(() => {
+    if (state.success) onSuccess();
+  }, [state.success, onSuccess]);
 
   const [title, setTitle] = useState(initialPost?.title ?? "");
   const [slug, setSlug] = useState(initialPost?.slug ?? "");
@@ -194,9 +199,13 @@ export default function BlogPostForm({ action, initialPost }: BlogPostFormProps)
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/30 px-6 py-4">
-        <Link href="/admin/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
           Huỷ
-        </Link>
+        </button>
         <div className="flex items-center gap-3">
           {state.error && <p className="text-sm text-rose-600">{state.error}</p>}
           <SubmitButton />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +18,8 @@ interface ListingFormProps {
   action: (state: SaveListingState, formData: FormData) => Promise<SaveListingState>;
   projects: Project[];
   initialListing?: ListingWithProject;
+  onCancel: () => void;
+  onSuccess: () => void;
 }
 
 const TYPE_OPTIONS = Object.entries(LISTING_TYPE_LABELS) as [ListingType, string][];
@@ -41,13 +43,23 @@ function SubmitButton() {
   );
 }
 
-export default function ListingForm({ action, projects, initialListing }: ListingFormProps) {
+export default function ListingForm({
+  action,
+  projects,
+  initialListing,
+  onCancel,
+  onSuccess,
+}: ListingFormProps) {
   const [state, formAction] = useFormState<SaveListingState, FormData>(action, {});
   const [amenities, setAmenities] = useState<string[]>(initialListing?.amenities ?? []);
   const [amenityInput, setAmenityInput] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialListing?.image_url ?? null);
 
   const isEdit = Boolean(initialListing);
+
+  useEffect(() => {
+    if (state.success) onSuccess();
+  }, [state.success, onSuccess]);
 
   function addAmenity() {
     const value = amenityInput.trim();
@@ -122,10 +134,10 @@ export default function ListingForm({ action, projects, initialListing }: Listin
             </select>
             <p className="mt-1.5 text-xs text-muted-foreground">
               Chưa thấy dự án cần tìm? Vào{" "}
-              <Link href="/admin/projects/new" className="font-medium text-primary-700 hover:underline dark:text-primary-300">
-                Dự án → Thêm dự án mới
+              <Link href="/admin/projects" className="font-medium text-primary-700 hover:underline dark:text-primary-300">
+                trang Dự án
               </Link>{" "}
-              trước.
+              tạo dự án mới trước.
             </p>
           </div>
         </div>
@@ -270,9 +282,13 @@ export default function ListingForm({ action, projects, initialListing }: Listin
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/30 px-6 py-4">
-        <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
           Huỷ
-        </Link>
+        </button>
         <div className="flex items-center gap-3">
           {state.error && <p className="text-sm text-rose-600">{state.error}</p>}
           <SubmitButton />

@@ -1,13 +1,15 @@
 "use client";
 
+import { useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import Link from "next/link";
 import type { Staff } from "@/lib/types";
 import type { SaveStaffState } from "@/app/admin/(dashboard)/staff/actions";
 
 interface StaffFormProps {
   action: (state: SaveStaffState, formData: FormData) => Promise<SaveStaffState>;
   initialStaff?: Staff;
+  onCancel: () => void;
+  onSuccess: () => void;
 }
 
 const LABEL = "block text-xs font-semibold uppercase tracking-wide text-muted-foreground";
@@ -27,8 +29,12 @@ function SubmitButton() {
   );
 }
 
-export default function StaffForm({ action, initialStaff }: StaffFormProps) {
+export default function StaffForm({ action, initialStaff, onCancel, onSuccess }: StaffFormProps) {
   const [state, formAction] = useFormState<SaveStaffState, FormData>(action, {});
+
+  useEffect(() => {
+    if (state.success) onSuccess();
+  }, [state.success, onSuccess]);
 
   return (
     <form action={formAction} className="max-w-lg overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
@@ -71,9 +77,13 @@ export default function StaffForm({ action, initialStaff }: StaffFormProps) {
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/30 px-6 py-4">
-        <Link href="/admin/staff" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
           Huỷ
-        </Link>
+        </button>
         <div className="flex items-center gap-3">
           {state.error && <p className="text-sm text-rose-600">{state.error}</p>}
           <SubmitButton />

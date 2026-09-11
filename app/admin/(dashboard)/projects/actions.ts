@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createProject, deleteProject, updateProject } from "@/lib/admin/projects";
 import { uploadProjectImage } from "@/lib/admin/storage";
 import { getProjectBySlug } from "@/lib/projects";
@@ -10,6 +9,7 @@ import type { ProjectInput } from "@/lib/types";
 
 export interface SaveProjectState {
   error?: string;
+  success?: boolean;
 }
 
 export async function saveProject(
@@ -77,9 +77,9 @@ export async function saveProject(
   }
 
   revalidatePath("/admin/projects");
-  revalidatePath("/admin/listings");
+  revalidatePath("/admin");
   revalidatePath("/");
-  redirect("/admin/projects");
+  return { success: true };
 }
 
 export async function deleteProjectAction(slug: string): Promise<{ error?: string }> {

@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import {
   createBlogPost,
   deleteBlogPost,
@@ -15,6 +14,7 @@ import type { BlogPostInput } from "@/lib/types";
 
 export interface SaveBlogPostState {
   error?: string;
+  success?: boolean;
 }
 
 export async function saveBlogPost(
@@ -86,7 +86,7 @@ export async function saveBlogPost(
 
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
-  redirect("/admin/blog");
+  return { success: true };
 }
 
 export async function deleteBlogPostAction(slug: string): Promise<void> {
