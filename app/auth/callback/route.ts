@@ -10,6 +10,12 @@ import { recordAdminLogin } from "@/lib/admin/security";
  * nên nếu không chặn ở đây thì ai có Gmail cũng vào được /admin với toàn
  * quyền (RLS chỉ phân biệt authenticated/anon, không phân biệt ai). Không
  * cấu hình biến này = chặn tất cả (fail closed), an toàn hơn là mặc định mở.
+ *
+ * Chỉ áp dụng cho ĐĂNG NHẬP MỚI — không áp dụng khi 1 tài khoản đã đăng nhập
+ * (bằng email/password) tự liên kết thêm Google cho chính mình
+ * (supabase.auth.linkIdentity, xem components/admin/LinkGoogleButton.tsx):
+ * thao tác đó không cấp thêm quyền gì (tài khoản vốn đã hợp lệ), chỉ thêm 1
+ * cách đăng nhập, nên không cần nằm trong allowlist.
  */
 function isEmailAllowed(email: string | null): boolean {
   if (!email) return false;
@@ -31,20 +37,35 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/admin";
 
-  if (code) {
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (!error && data.user) {
-      if (!isEmailAllowed(data.user.email ?? null)) {
-        await supabase.auth.signOut();
-        return NextResponse.redirect(`${origin}/admin/login?error=not_allowed`);
-      }
-
-      await recordAdminLogin(data.user.id, data.user.email ?? null);
-      return NextResponse.redirect(`${origin}${next}`);
-    }
+  if (!code) {
+    return NextResponse.redirect(`${origin}/admin/login?error=1`);
   }
 
-  return NextResponse.redirect(`${origin}/admin/login?error=1`);
+  const supabase = createClient();
+
+  // Đã có session hợp lệ TRƯỚC khi exchange code => đây là thao tác liên kết
+  // identity cho tài khoản đang đăng nhập, không phải đăng nhập mới. Lấy tín
+  // hiệu từ cookie session có sẵn (server-side) — KHÔNG dùng query param do
+  // client tự gửi, vì query param có thể bị sửa tay để giả làm "linking" và
+  // né allowlist.
+  const {
+    data: { user: existingUser },
+  } = await supabase.auth.getUser();
+  const isLinking = Boolean(existingUser);
+
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error || !data.user) {
+    return NextResponse.redirect(`${origin}/admin/login?error=1`);
+  }
+
+  if (!isLinking) {
+    if (!isEmailAllowed(data.user.email ?? null)) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(`${origin}/admin/login?error=not_allowed`);
+    }
+    await recordAdminLogin(data.user.id, data.user.email ?? null);
+  }
+
+  return NextResponse.redirect(`${origin}${next}`);
 }

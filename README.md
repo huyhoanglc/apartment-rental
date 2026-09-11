@@ -38,8 +38,10 @@ Supabase thật vì cần đăng nhập (xem mục 4).
    NEXT_PUBLIC_ZALO_CONTACT=0901234567
    ```
 
-   `SUPABASE_SERVICE_ROLE_KEY` chỉ dùng cho script seed dữ liệu chạy local, **không** được dùng
-   trong code app và không commit lên git.
+   `SUPABASE_SERVICE_ROLE_KEY` dùng cho script seed **và** cho tính năng tạo/xoá tài khoản đăng
+   nhập ở `/admin/accounts` (`lib/supabase/admin.ts`) — key này bỏ qua mọi RLS nên **tuyệt đối
+   không commit lên git**, không lộ ra client (chỉ dùng trong Server Action đã tự kiểm tra người
+   gọi đang đăng nhập).
 
 5. Nạp dữ liệu mẫu vào Supabase (tuỳ chọn, để có sẵn vài dự án/phòng/bài blog demo):
 
@@ -55,16 +57,21 @@ Trang admin cho phép đăng nhập rồi tự quản lý dự án, phòng, blog
 không cần vào thẳng Supabase Dashboard nữa (dù vẫn dùng được nếu muốn). Chi tiết cấu trúc Dự
 án/Phòng/Nhân viên xem mục 9.
 
-**Tạo tài khoản admin** (chỉ làm 1 lần, không có trang tự đăng ký):
+**Tạo tài khoản admin đầu tiên** (bắt buộc qua Supabase Dashboard vì lúc này chưa có ai đăng nhập
+được để dùng tính năng trong app):
 
 1. Vào Supabase Dashboard → **Authentication → Users → Add user**.
 2. Nhập email + mật khẩu, bỏ chọn "Auto confirm user" nếu muốn xác thực email, hoặc để "Auto
    confirm" nếu muốn dùng được ngay.
 3. Vào `/admin/login` trên web, đăng nhập bằng email/mật khẩu vừa tạo.
 
-Sau khi đăng nhập, `/admin` hiển thị danh sách tin (đổi trạng thái nhanh bằng dropdown, sửa/xoá
-từng tin), `/admin/listings/new` để thêm tin mới, `/admin/leads` để xem và đánh dấu đã liên hệ các
-yêu cầu gửi từ form trên trang chủ. Muốn thêm admin khác thì lặp lại bước 1-2 với email khác.
+**Tạo thêm tài khoản khác** — từ tài khoản đầu tiên trở đi có thể tạo ngay trong app, không cần
+vào Supabase Dashboard nữa: đăng nhập → **Tài khoản** (`/admin/accounts`) → điền email + mật khẩu
+→ Tạo tài khoản. Gửi email/mật khẩu đó cho người dùng để họ tự đăng nhập.
+
+Sau khi đăng nhập, `/admin` hiển thị danh sách phòng (đổi trạng thái nhanh bằng dropdown, sửa/xoá
+từng phòng), `/admin/listings/new` để thêm phòng mới, `/admin/leads` để xem và đánh dấu đã liên hệ
+các yêu cầu gửi từ form trên trang chủ.
 
 **Quan trọng:** RLS cho `listings`/`leads` cấp quyền ghi cho **bất kỳ** user `authenticated` nào,
 không phân biệt role/admin riêng. Vì app không có trang tự đăng ký nên bình thường chỉ ai được bạn
@@ -93,6 +100,15 @@ Trang login hỗ trợ thêm nút "Đăng nhập với Google" cạnh form email
    định cho qua.
 5. Đăng nhập thử ở `/admin/login`. Nếu Google báo lỗi redirect URI mismatch, kiểm tra lại URL ở
    bước 2 khớp chính xác (kể cả https, không có dấu `/` thừa cuối).
+
+**Tự liên kết Google cho tài khoản email/password có sẵn:** một tài khoản tạo bằng email/password
+(qua Dashboard hoặc `/admin/accounts`) có thể tự thêm Google làm cách đăng nhập khác cho **chính
+tài khoản đó** (không tạo tài khoản mới) — vào `/admin/security`, bấm "Liên kết Google". Không cần
+admin duyệt riêng (`supabase.auth.linkIdentity`), và không cần nằm trong `ADMIN_ALLOWED_EMAILS`
+(không cấp thêm quyền gì, chỉ thêm cách đăng nhập cho tài khoản vốn đã hợp lệ). Cần bật **"Manual
+linking"** trong Supabase Dashboard → Authentication → (mục Settings/Advanced tuỳ phiên bản
+dashboard, tìm từ khoá "manual linking") — nếu không tìm thấy, xem
+[docs Supabase](https://supabase.com/docs/guides/auth/auth-identity-linking).
 
 Đăng nhập Zalo chưa làm (cần tự build OAuth flow riêng vì Supabase không hỗ trợ sẵn Zalo — sẽ làm
 sau khi có Zalo Developer App).
@@ -129,11 +145,16 @@ giữ nguyên cho cả 2 chế độ.
 2. Import project vào [Vercel](https://vercel.com) từ repo GitHub này. Đảm bảo Vercel dùng Node.js
    22.x runtime (Project Settings > General > Node.js Version).
 3. Trong **Project Settings > Environment Variables**, thêm:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (giống giá trị 2 dòng trên)
+   - `SUPABASE_SERVICE_ROLE_KEY` — **bắt buộc** trên Vercel từ khi có `/admin/accounts` (tạo/xoá
+     tài khoản đăng nhập cần Admin API, không seed dữ liệu mới cần nữa). Đánh dấu là *Sensitive*
+     trong Vercel nếu có tuỳ chọn đó. Key này bỏ qua mọi RLS — không dán vào đâu khác, không log ra
+     console ở bất kỳ đâu trong code.
    - `NEXT_PUBLIC_ZALO_CONTACT` (số điện thoại/Zalo OA thật để nhận tin nhắn khách thuê)
-
-   Không thêm `SUPABASE_SERVICE_ROLE_KEY` vào Vercel — key này chỉ cần chạy local để seed dữ liệu.
+   - `NEXT_PUBLIC_SITE_URL` (domain Vercel thật, cho sitemap)
+   - `ADMIN_ALLOWED_EMAILS` nếu dùng đăng nhập Google (xem mục 3)
+   - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` nếu dùng thông báo Telegram (xem mục 7)
 4. Deploy. Vercel cấp domain tạm dạng `*.vercel.app`; gắn domain riêng sau trong
    **Project Settings > Domains** khi đã mua domain.
 
@@ -220,9 +241,10 @@ phòng. Chưa có trang công khai duyệt riêng theo Dự án (`/du-an`) — c
   `listings.ts`/`projects.ts`/`leads.ts`/`blog.ts` (truy vấn công khai, fallback dữ liệu mẫu khi
   chưa cấu hình Supabase), `telegram.ts`, `slugify.ts`
 - `lib/supabase/` — `server.ts`/`middleware.ts`/`client.ts`: client Supabase gắn session admin
-  (đăng nhập) + client browser cho Realtime Presence
+  (đăng nhập) + client browser cho Realtime Presence; `admin.ts`: client service role key (bỏ qua
+  RLS) — chỉ dùng trong `lib/admin/accounts.ts`, không dùng ở đâu khác
 - `lib/admin/` — thao tác ghi dữ liệu (phòng, dự án, blog, nhân viên, leads, upload ảnh, lịch sử
-  đăng nhập) dùng client admin
+  đăng nhập, tài khoản đăng nhập) dùng client admin
 - `data/listings.ts`, `data/projects.ts`, `data/blogPosts.ts` — dữ liệu mẫu/seed, dùng làm fallback
   dev và nguồn cho `npm run seed`
 - `supabase/schema.sql` — script khởi tạo bảng, RLS, bucket Storage, policy cho admin
