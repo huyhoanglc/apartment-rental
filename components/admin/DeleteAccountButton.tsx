@@ -1,32 +1,48 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { deleteAccountAction } from "@/app/admin/(dashboard)/accounts/actions";
+import { useConfirm } from "@/components/admin/ConfirmDialog";
+import { useToast } from "@/components/admin/Toast";
+import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
 
 export default function DeleteAccountButton({ id, email }: { id: string; email: string }) {
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
+  const confirm = useConfirm();
+  const toast = useToast();
+  const loading = useGlobalLoading();
 
-  function handleClick() {
-    if (!window.confirm(`Xoá tài khoản "${email}"? Hành động này không thể hoàn tác.`)) return;
-    setError(null);
+  async function handleClick() {
+    const ok = await confirm({
+      title: `Xoá tài khoản "${email}"?`,
+      description: "Hành động này không thể hoàn tác.",
+      confirmLabel: "Xoá",
+      danger: true,
+    });
+    if (!ok) return;
+
     startTransition(async () => {
-      const result = await deleteAccountAction(id);
-      if (result.error) setError(result.error);
+      loading.show("Đang xoá tài khoản...");
+      try {
+        const result = await deleteAccountAction(id);
+        if (result.error) toast.error(result.error);
+        else toast.success("Đã xoá tài khoản.");
+      } catch {
+        toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+      } finally {
+        loading.hide();
+      }
     });
   }
 
   return (
-    <div className="inline-block">
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={isPending}
-        className="text-sm font-medium text-rose-600 hover:underline disabled:opacity-50"
-      >
-        Xoá
-      </button>
-      {error && <p className="mt-1 max-w-xs text-xs text-rose-600">{error}</p>}
-    </div>
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={isPending}
+      className="text-sm font-medium text-rose-600 hover:underline disabled:opacity-50"
+    >
+      Xoá
+    </button>
   );
 }

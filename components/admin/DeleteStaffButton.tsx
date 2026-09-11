@@ -2,14 +2,35 @@
 
 import { useTransition } from "react";
 import { deleteStaffAction } from "@/app/admin/(dashboard)/staff/actions";
+import { useConfirm } from "@/components/admin/ConfirmDialog";
+import { useToast } from "@/components/admin/Toast";
+import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
 
 export default function DeleteStaffButton({ id, name }: { id: string; name: string }) {
   const [isPending, startTransition] = useTransition();
+  const confirm = useConfirm();
+  const toast = useToast();
+  const loading = useGlobalLoading();
 
-  function handleClick() {
-    if (!window.confirm(`Xoá nhân viên "${name}"? Hành động này không thể hoàn tác.`)) return;
-    startTransition(() => {
-      deleteStaffAction(id);
+  async function handleClick() {
+    const ok = await confirm({
+      title: `Xoá nhân viên "${name}"?`,
+      description: "Hành động này không thể hoàn tác.",
+      confirmLabel: "Xoá",
+      danger: true,
+    });
+    if (!ok) return;
+
+    startTransition(async () => {
+      loading.show("Đang xoá nhân viên...");
+      try {
+        await deleteStaffAction(id);
+        toast.success("Đã xoá nhân viên.");
+      } catch {
+        toast.error("Xoá thất bại, vui lòng thử lại.");
+      } finally {
+        loading.hide();
+      }
     });
   }
 
