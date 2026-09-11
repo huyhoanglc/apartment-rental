@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Avatar from "@/components/admin/Avatar";
 import { createClient } from "@/lib/supabase/client";
 
 /**
@@ -27,15 +28,22 @@ import { createClient } from "@/lib/supabase/client";
 interface PresenceIndicatorProps {
   userId: string;
   email: string;
+  avatarUrl: string | null;
 }
 
 interface PresenceMeta {
   email: string;
+  avatar_url: string | null;
   online_at: string;
 }
 
-export default function PresenceIndicator({ userId, email }: PresenceIndicatorProps) {
-  const [onlineEmails, setOnlineEmails] = useState<string[]>([]);
+interface OnlineAdmin {
+  email: string;
+  avatarUrl: string | null;
+}
+
+export default function PresenceIndicator({ userId, email, avatarUrl }: PresenceIndicatorProps) {
+  const [onlineAdmins, setOnlineAdmins] = useState<OnlineAdmin[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -46,37 +54,32 @@ export default function PresenceIndicator({ userId, email }: PresenceIndicatorPr
     channel
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState<PresenceMeta>();
-        const emails = new Set<string>();
+        const byEmail = new Map<string, string | null>();
         for (const metas of Object.values(state)) {
-          if (metas[0]?.email) emails.add(metas[0].email);
+          if (metas[0]?.email) byEmail.set(metas[0].email, metas[0].avatar_url ?? null);
         }
-        setOnlineEmails(Array.from(emails));
+        setOnlineAdmins(Array.from(byEmail, ([adminEmail, adminAvatarUrl]) => ({ email: adminEmail, avatarUrl: adminAvatarUrl })));
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
-          await channel.track({ email, online_at: new Date().toISOString() });
+          await channel.track({ email, avatar_url: avatarUrl, online_at: new Date().toISOString() });
         }
       });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, email]);
+  }, [userId, email, avatarUrl]);
 
-  const otherEmails = onlineEmails.filter((e) => e !== email);
-  if (otherEmails.length === 0) return null;
+  const others = onlineAdmins.filter((admin) => admin.email !== email);
+  if (others.length === 0) return null;
 
   return (
     <div className="flex items-center -space-x-2">
-      {otherEmails.map((adminEmail) => (
-        <span
-          key={adminEmail}
-          title={adminEmail}
-          className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-xs font-semibold text-white ring-2 ring-card"
-        >
-          {adminEmail[0]?.toUpperCase()}
-          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-status-available ring-2 ring-card" />
-        </span>
+      {others.map((admin) => (
+        <div key={admin.email} title={admin.email}>
+          <Avatar name={admin.email} avatarUrl={admin.avatarUrl} className="h-8 w-8 text-xs" online />
+        </div>
       ))}
     </div>
   );

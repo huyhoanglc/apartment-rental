@@ -18,6 +18,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "picsum.photos",
       },
+      {
+        // Avatar Google trả về khi đăng nhập OAuth (user_metadata.avatar_url).
+        protocol: "https",
+        hostname: "*.googleusercontent.com",
+      },
     ],
   },
 };

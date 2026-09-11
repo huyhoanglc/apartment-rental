@@ -4,13 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 import { logout } from "@/app/admin/(dashboard)/actions";
+import Avatar from "@/components/admin/Avatar";
 import PresenceIndicator from "@/components/admin/PresenceIndicator";
+import { useConfirm } from "@/components/admin/ConfirmDialog";
 import type { AdminRole } from "@/lib/admin/roles";
 
 interface AdminNavProps {
   userId: string;
   email: string;
   fullName: string | null;
+  avatarUrl: string | null;
   role: AdminRole;
 }
 
@@ -134,7 +137,7 @@ export function isActive(pathname: string, href: string): boolean {
   return pathname.startsWith(href);
 }
 
-export default function AdminNav({ userId, email, fullName, role }: AdminNavProps) {
+export default function AdminNav({ userId, email, fullName, avatarUrl, role }: AdminNavProps) {
   const pathname = usePathname();
   const displayName = fullName || email;
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -143,6 +146,17 @@ export default function AdminNav({ userId, email, fullName, role }: AdminNavProp
   const collapseTimer = useRef<ReturnType<typeof setTimeout>>();
   const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || role === "admin");
   const collapsed = !expanded;
+  const confirm = useConfirm();
+
+  async function handleLogout() {
+    const ok = await confirm({
+      title: "Đăng xuất?",
+      description: "Bạn sẽ cần đăng nhập lại để vào trang quản trị.",
+      confirmLabel: "Đăng xuất",
+      danger: true,
+    });
+    if (ok) await logout();
+  }
 
   function handleMouseEnter() {
     clearTimeout(collapseTimer.current);
@@ -191,7 +205,7 @@ export default function AdminNav({ userId, email, fullName, role }: AdminNavProp
   const UserFooter = () => (
     <div className={`flex items-center gap-2 border-t border-border p-2.5 ${collapsed ? "md:flex-col" : ""}`}>
       <div className="shrink-0">
-        <PresenceIndicator userId={userId} email={email} />
+        <PresenceIndicator userId={userId} email={email} avatarUrl={avatarUrl} />
       </div>
 
       <div className="relative min-w-0 flex-1">
@@ -202,10 +216,7 @@ export default function AdminNav({ userId, email, fullName, role }: AdminNavProp
             collapsed ? "md:justify-center md:px-0" : ""
           }`}
         >
-          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-semibold text-white shadow-sm">
-            {(displayName[0] || "?").toUpperCase()}
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-status-available ring-2 ring-card" />
-          </span>
+          <Avatar name={displayName} avatarUrl={avatarUrl} className="h-8 w-8 text-sm" online />
           <span
             className={`min-w-0 overflow-hidden whitespace-nowrap transition-all duration-200 ${
               collapsed ? "md:w-0 md:opacity-0" : "w-auto opacity-100"
@@ -226,14 +237,13 @@ export default function AdminNav({ userId, email, fullName, role }: AdminNavProp
                   {email} · {ROLE_LABELS[role]}
                 </p>
               </div>
-              <form action={logout}>
-                <button
-                  type="submit"
-                  className="w-full px-4 py-2.5 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                >
-                  Đăng xuất
-                </button>
-              </form>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full px-4 py-2.5 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/40"
+              >
+                Đăng xuất
+              </button>
             </div>
           </>
         )}
