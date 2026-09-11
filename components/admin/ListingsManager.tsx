@@ -7,6 +7,7 @@ import DeleteListingButton from "@/components/admin/DeleteListingButton";
 import StatusSelect from "@/components/admin/StatusSelect";
 import FormModal from "@/components/admin/FormModal";
 import ListingForm from "@/components/admin/ListingForm";
+import { useConfirm } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { saveListing } from "@/app/admin/(dashboard)/listings/actions";
 import { LISTING_TYPE_LABELS, type ListingWithProject, type Project } from "@/lib/types";
@@ -22,6 +23,7 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
   const [modal, setModal] = useState<ModalState>(null);
   const router = useRouter();
   const toast = useToast();
+  const confirm = useConfirm();
 
   function closeModal() {
     setModal(null);
@@ -33,9 +35,15 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
     router.refresh();
   }
 
-  function handleAddClick() {
+  async function handleAddClick() {
     if (projects.length === 0) {
-      toast.error("Chưa có dự án nào — vào trang Dự án tạo dự án trước khi thêm phòng.");
+      const ok = await confirm({
+        title: "Chưa có dự án nào",
+        description: "Cần tạo ít nhất 1 dự án (tòa nhà/chung cư) trước khi thêm phòng. Bạn có muốn tạo dự án mới không?",
+        confirmLabel: "Tạo dự án",
+        cancelLabel: "Để sau",
+      });
+      if (ok) router.push("/admin/projects?new=1");
       return;
     }
     setModal({ mode: "create" });

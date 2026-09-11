@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import DeleteProjectButton from "@/components/admin/DeleteProjectButton";
 import FormModal from "@/components/admin/FormModal";
@@ -20,6 +20,17 @@ export default function ProjectsManager({ projects }: ProjectsManagerProps) {
   const [modal, setModal] = useState<ModalState>(null);
   const router = useRouter();
   const toast = useToast();
+  const searchParams = useSearchParams();
+
+  // Đến từ trang Phòng khi chưa có dự án nào (?new=1) — mở sẵn popup tạo dự
+  // án luôn, đỡ phải bấm thêm 1 lần "Thêm dự án" nữa.
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setModal({ mode: "create" });
+      router.replace("/admin/projects");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function closeModal() {
     setModal(null);
