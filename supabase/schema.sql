@@ -260,6 +260,14 @@ create table if not exists projects (
   updated_at timestamptz not null default now()
 );
 
+-- Thông tin chủ nhà/quản lý + tiện ích cấu trúc toà nhà (khác amenities vì đây
+-- là dữ liệu có cấu trúc cần lọc/hiển thị riêng, không phải tag tự do).
+alter table projects add column if not exists owner_name text;
+alter table projects add column if not exists owner_phone text;
+alter table projects add column if not exists elevator boolean not null default false;
+alter table projects add column if not exists has_security boolean not null default false;
+alter table projects add column if not exists has_basement boolean not null default false;
+
 alter table projects enable row level security;
 
 drop policy if exists "projects are publicly readable" on projects;

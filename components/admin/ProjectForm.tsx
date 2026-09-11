@@ -133,6 +133,53 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
         </div>
 
         <div className={SECTION}>
+          <h2 className="text-sm font-semibold text-foreground">Chủ nhà / Quản lý</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={LABEL}>Tên chủ nhà / quản lý</label>
+              <input name="owner_name" defaultValue={initialProject?.owner_name ?? ""} className={FIELD} />
+            </div>
+            <div>
+              <label className={LABEL}>Số điện thoại</label>
+              <input name="owner_phone" defaultValue={initialProject?.owner_phone ?? ""} className={FIELD} />
+            </div>
+          </div>
+
+          <div>
+            <label className={LABEL}>Tiện ích toà nhà</label>
+            <div className="mt-1.5 flex flex-wrap gap-x-6 gap-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <input
+                  type="checkbox"
+                  name="elevator"
+                  defaultChecked={initialProject?.elevator ?? false}
+                  className="h-4 w-4 accent-primary-600"
+                />
+                Thang máy (bỏ chọn = thang bộ)
+              </label>
+              <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <input
+                  type="checkbox"
+                  name="has_security"
+                  defaultChecked={initialProject?.has_security ?? false}
+                  className="h-4 w-4 accent-primary-600"
+                />
+                Có bảo vệ
+              </label>
+              <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <input
+                  type="checkbox"
+                  name="has_basement"
+                  defaultChecked={initialProject?.has_basement ?? false}
+                  className="h-4 w-4 accent-primary-600"
+                />
+                Có hầm xe
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className={SECTION}>
           <h2 className="text-sm font-semibold text-foreground">Mô tả &amp; tiện ích chung</h2>
           <div>
             <label className={LABEL}>Mô tả</label>

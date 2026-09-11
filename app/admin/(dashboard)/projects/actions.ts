@@ -24,6 +24,11 @@ export async function saveProject(
   const address = String(formData.get("address") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const amenities = formData.getAll("amenities").map(String).filter(Boolean);
+  const ownerName = String(formData.get("owner_name") ?? "").trim();
+  const ownerPhone = String(formData.get("owner_phone") ?? "").trim();
+  const elevator = formData.get("elevator") === "on";
+  const hasSecurity = formData.get("has_security") === "on";
+  const hasBasement = formData.get("has_basement") === "on";
   const coverFile = formData.get("cover_image");
 
   if (!name || !district) {
@@ -61,6 +66,11 @@ export async function saveProject(
     address: address || null,
     description: description || null,
     amenities,
+    owner_name: ownerName || null,
+    owner_phone: ownerPhone || null,
+    elevator,
+    has_security: hasSecurity,
+    has_basement: hasBasement,
   };
 
   try {

@@ -18,6 +18,11 @@ export interface Project {
   cover_image_url: string | null;
   image_urls: string[];
   amenities: string[];
+  owner_name: string | null;
+  owner_phone: string | null;
+  elevator: boolean;
+  has_security: boolean;
+  has_basement: boolean;
   created_by: string | null;
   created_by_email: string | null;
   created_at: string;

@@ -237,10 +237,12 @@ không cần cập nhật tay. Nhớ set `NEXT_PUBLIC_SITE_URL` đúng domain th
 ## 9. Dự án → Phòng, Nhân viên
 
 Mỗi phòng cho thuê giờ thuộc về 1 **Dự án** (tòa nhà/chung cư) — địa chỉ, quận/phường, tiện ích
-chung nằm ở dự án; phòng chỉ giữ thông tin riêng (giá, diện tích, loại hình, ảnh, tiện ích riêng).
-**Phải tạo Dự án trước khi thêm Phòng** — bấm "Thêm phòng mới" ở `/admin` khi chưa có dự án nào sẽ
-báo lỗi nhắc tạo dự án trước, thay vì mở popup thêm phòng. Quản lý ở `/admin/projects` (CRUD dự án,
-dùng chung `ProjectForm`) — xoá 1 dự án sẽ báo lỗi nếu dự án đó vẫn còn phòng (xoá hết phòng trước).
+chung, thông tin chủ nhà/quản lý (tên + SĐT, nội bộ — không hiện công khai) và tiện ích toà nhà
+(thang máy/thang bộ, có bảo vệ, có hầm xe) nằm ở dự án; phòng chỉ giữ thông tin riêng (giá, diện
+tích, loại hình, ảnh, tiện ích riêng). **Phải tạo Dự án trước khi thêm Phòng** — bấm "Thêm phòng
+mới" ở `/admin` khi chưa có dự án nào sẽ báo lỗi nhắc tạo dự án trước, thay vì mở popup thêm phòng.
+Quản lý ở `/admin/projects` (CRUD dự án, dùng chung `ProjectForm`) — xoá 1 dự án sẽ báo lỗi nếu dự
+án đó vẫn còn phòng (xoá hết phòng trước).
 
 `/admin/staff` là **danh bạ nhân viên nội bộ** đơn giản (tên, SĐT, email, chức vụ, đang làm/nghỉ)
 — không liên quan tài khoản đăng nhập `/admin` (tài khoản đăng nhập vẫn tạo thủ công qua Supabase
