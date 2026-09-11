@@ -14,9 +14,11 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   const role = await getCurrentRole();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background">
       <AdminNav userId={user.id} email={user.email ?? ""} role={role} />
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main className="min-w-0 flex-1 px-4 py-8 md:px-8">
+        <div className="mx-auto max-w-6xl">{children}</div>
+      </main>
     </div>
   );
 }

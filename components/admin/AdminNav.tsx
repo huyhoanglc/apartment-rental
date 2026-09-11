@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { logout } from "@/app/admin/(dashboard)/actions";
 import PresenceIndicator from "@/components/admin/PresenceIndicator";
 import type { AdminRole } from "@/lib/admin/roles";
@@ -12,6 +12,8 @@ interface AdminNavProps {
   email: string;
   role: AdminRole;
 }
+
+const COLLAPSE_STORAGE_KEY = "admin-sidebar-collapsed";
 
 function HomeIcon({ className }: { className?: string }) {
   return (
@@ -109,6 +111,14 @@ function ClockIcon({ className }: { className?: string }) {
   );
 }
 
+function ChevronLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   { href: "/admin", label: "Phòng", icon: HomeIcon, adminOnly: false },
   { href: "/admin/projects", label: "Dự án", icon: BuildingIcon, adminOnly: false },
@@ -129,109 +139,171 @@ export default function AdminNav({ userId, email, role }: AdminNavProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || role === "admin");
 
-  return (
-    <header className="sticky top-0 z-40 border-b border-border bg-card/95 shadow-sm backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/admin" className="flex items-center gap-2 text-lg font-bold text-primary-700 dark:text-primary-300">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-primary-800 text-white shadow-sm">
-            TT
-          </span>
-          <span className="hidden sm:inline">Quản trị Tổ Thuê TP.HCM</span>
-        </Link>
+  useEffect(() => {
+    setCollapsed(localStorage.getItem(COLLAPSE_STORAGE_KEY) === "1");
+    setHydrated(true);
+  }, []);
 
-        <nav className="hidden items-center gap-1 md:flex">
-          {visibleItems.map((item) => {
-            const active = isActive(pathname, item.href);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition ${
-                  active
-                    ? "bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(COLLAPSE_STORAGE_KEY, next ? "1" : "0");
+      return next;
+    });
+  }
 
-        <div className="flex items-center gap-3">
-          <PresenceIndicator userId={userId} email={email} />
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setMenuOpen((v) => !v)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-semibold text-white shadow-sm transition hover:brightness-110"
-              aria-label="Tài khoản"
-            >
-              {(email[0] || "?").toUpperCase()}
-            </button>
-
-            {menuOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
-                  <div className="border-b border-border px-4 py-3">
-                    <p className="text-xs text-muted-foreground">Đăng nhập với</p>
-                    <p className="truncate text-sm font-medium text-foreground">{email}</p>
-                  </div>
-                  <form action={logout}>
-                    <button
-                      type="submit"
-                      className="w-full px-4 py-2.5 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                    >
-                      Đăng xuất
-                    </button>
-                  </form>
-                </div>
-              </>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setMobileOpen((v) => !v)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground md:hidden"
-            aria-label="Mở menu"
+  const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
+    <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-2.5 py-3">
+      {visibleItems.map((item) => {
+        const active = isActive(pathname, item.href);
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              active
+                ? "bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            } ${collapsed ? "md:justify-center md:px-0" : ""}`}
           >
-            <span className="text-lg">{mobileOpen ? "✕" : "☰"}</span>
-          </button>
-        </div>
+            <Icon className="h-[18px] w-[18px] shrink-0" />
+            <span
+              className={`overflow-hidden whitespace-nowrap transition-all duration-200 ${
+                collapsed ? "md:w-0 md:opacity-0" : "w-auto opacity-100"
+              }`}
+            >
+              {item.label}
+            </span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+
+  const UserFooter = () => (
+    <div className={`border-t border-border p-2.5 ${collapsed ? "md:flex md:flex-col md:items-center md:gap-2" : ""}`}>
+      <div className={`flex items-center px-0.5 pb-2 ${collapsed ? "md:justify-center" : "justify-start"}`}>
+        <PresenceIndicator userId={userId} email={email} />
       </div>
 
-      {mobileOpen && (
-        <nav className="border-t border-border bg-card md:hidden">
-          <div className="flex flex-col gap-1 px-4 py-3">
-            {visibleItems.map((item) => {
-              const active = isActive(pathname, item.href);
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
-                    active
-                      ? "bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"
-                      : "text-foreground hover:bg-muted"
-                  }`}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition hover:bg-muted ${
+            collapsed ? "md:justify-center md:px-0" : ""
+          }`}
+        >
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-semibold text-white shadow-sm">
+            {(email[0] || "?").toUpperCase()}
+          </span>
+          <span
+            className={`min-w-0 overflow-hidden whitespace-nowrap transition-all duration-200 ${
+              collapsed ? "md:w-0 md:opacity-0" : "w-auto opacity-100"
+            }`}
+          >
+            <span className="block truncate text-sm font-medium text-foreground">{email}</span>
+          </span>
+        </button>
+
+        {menuOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+            <div className="absolute bottom-full left-0 z-50 mb-2 w-60 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+              <div className="border-b border-border px-4 py-3">
+                <p className="text-xs text-muted-foreground">Đăng nhập với</p>
+                <p className="truncate text-sm font-medium text-foreground">{email}</p>
+              </div>
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="w-full px-4 py-2.5 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/40"
                 >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
+                  Đăng xuất
+                </button>
+              </form>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Thanh trên cùng chỉ hiện ở mobile — sidebar thật nằm bên trái ở md+. */}
+      <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-card/95 px-4 shadow-sm backdrop-blur md:hidden">
+        <Link href="/admin" className="flex items-center gap-2 text-base font-bold text-primary-700 dark:text-primary-300">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-primary-800 text-xs text-white shadow-sm">
+            TT
+          </span>
+          Quản trị
+        </Link>
+        <button
+          type="button"
+          onClick={() => setMobileOpen((v) => !v)}
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground"
+          aria-label="Mở menu"
+        >
+          <span className="text-lg">{mobileOpen ? "✕" : "☰"}</span>
+        </button>
+      </header>
+
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col bg-card shadow-xl">
+            <div className="flex h-14 items-center gap-2 border-b border-border px-4 text-base font-bold text-primary-700 dark:text-primary-300">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-primary-800 text-xs text-white shadow-sm">
+                TT
+              </span>
+              Quản trị
+            </div>
+            <NavLinks onNavigate={() => setMobileOpen(false)} />
+            <UserFooter />
+          </aside>
+        </div>
       )}
-    </header>
+
+      <aside
+        className={`sticky top-0 z-30 hidden h-screen shrink-0 flex-col border-r border-border bg-card md:flex ${
+          hydrated ? "transition-[width] duration-200" : ""
+        } ${collapsed ? "md:w-[68px]" : "md:w-60"}`}
+      >
+        <div className={`flex h-14 items-center gap-2 border-b border-border px-4 ${collapsed ? "md:justify-center md:px-0" : ""}`}>
+          <Link href="/admin" className="flex items-center gap-2 overflow-hidden text-primary-700 dark:text-primary-300">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-primary-800 text-xs font-bold text-white shadow-sm">
+              TT
+            </span>
+            <span
+              className={`overflow-hidden whitespace-nowrap text-sm font-bold transition-all duration-200 ${
+                collapsed ? "md:w-0 md:opacity-0" : "w-auto opacity-100"
+              }`}
+            >
+              Tổ Thuê TP.HCM
+            </span>
+          </Link>
+        </div>
+
+        <NavLinks />
+        <UserFooter />
+
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
+          className="absolute -right-3 top-16 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition hover:text-foreground"
+        >
+          <ChevronLeftIcon className={`h-3.5 w-3.5 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
+        </button>
+      </aside>
+    </>
   );
 }
