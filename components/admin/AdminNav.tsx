@@ -7,6 +7,7 @@ import { logout } from "@/app/admin/(dashboard)/actions";
 import Avatar from "@/components/admin/Avatar";
 import PresenceIndicator from "@/components/admin/PresenceIndicator";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
+import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
 import type { AdminRole } from "@/lib/admin/roles";
 
 interface AdminNavProps {
@@ -172,6 +173,7 @@ export default function AdminNav({ userId, email, fullName, avatarUrl, role }: A
   const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || role === "admin");
   const collapsed = !expanded;
   const confirm = useConfirm();
+  const loading = useGlobalLoading();
 
   async function handleLogout() {
     const ok = await confirm({
@@ -180,7 +182,15 @@ export default function AdminNav({ userId, email, fullName, avatarUrl, role }: A
       confirmLabel: "Đăng xuất",
       danger: true,
     });
-    if (ok) await logout();
+    if (!ok) return;
+
+    setMenuOpen(false);
+    loading.show("Đang đăng xuất...");
+    try {
+      await logout();
+    } finally {
+      loading.hide();
+    }
   }
 
   function handleMouseEnter() {
