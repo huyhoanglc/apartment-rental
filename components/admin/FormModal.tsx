@@ -24,9 +24,14 @@ export default function FormModal({ title, onClose, children }: FormModalProps) 
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto p-4 py-8 sm:items-center">
+    // Cố ý căn TRÊN + padding (không dùng flex items-center) — centering bằng
+    // flex trên 1 container overflow-y-auto sẽ cắt mất phần đầu của nội dung
+    // cao hơn viewport vì trình duyệt không cuộn tới được vùng tràn phía trên
+    // khi item được canh giữa (scroll offset âm không hợp lệ). Top-align +
+    // margin ngang tự động vẫn nhìn cân đối với modal ngắn mà không bị lỗi đó.
+    <div className="fixed inset-0 z-[70] overflow-y-auto p-4 py-8">
       <div className="fixed inset-0 bg-black/40" onClick={onClose} />
-      <div className="animate-dialog-in relative w-full max-w-2xl">
+      <div className="animate-dialog-in relative mx-auto w-full max-w-2xl">
         <div className="mb-3 flex items-center justify-between px-1">
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
           <button

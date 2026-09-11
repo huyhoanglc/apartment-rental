@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import DeleteListingButton from "@/components/admin/DeleteListingButton";
 import StatusSelect from "@/components/admin/StatusSelect";
 import FormModal from "@/components/admin/FormModal";
 import ListingForm from "@/components/admin/ListingForm";
+import ProjectForm from "@/components/admin/ProjectForm";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { saveListing } from "@/app/admin/(dashboard)/listings/actions";
+import { saveProject } from "@/app/admin/(dashboard)/projects/actions";
 import { LISTING_TYPE_LABELS, type ListingWithProject, type Project } from "@/lib/types";
 
 interface ListingsManagerProps {
@@ -17,7 +19,11 @@ interface ListingsManagerProps {
   projects: Project[];
 }
 
-type ModalState = { mode: "create" } | { mode: "edit"; listing: ListingWithProject } | null;
+type ModalState =
+  | { mode: "create" }
+  | { mode: "edit"; listing: ListingWithProject }
+  | { mode: "create-project" }
+  | null;
 
 export default function ListingsManager({ listings, projects }: ListingsManagerProps) {
   const [modal, setModal] = useState<ModalState>(null);
@@ -25,8 +31,24 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
   const toast = useToast();
   const confirm = useConfirm();
 
+  // Sau khi tạo dự án ngay trong popup (từ chỗ "chưa có dự án"), tự mở tiếp
+  // popup thêm phòng luôn — đỡ phải bấm "Thêm phòng mới" lại lần 2.
+  const continueToAddListing = useRef(false);
+
+  useEffect(() => {
+    if (continueToAddListing.current && projects.length > 0) {
+      continueToAddListing.current = false;
+      setModal({ mode: "create" });
+    }
+  }, [projects]);
+
   function closeModal() {
     setModal(null);
+  }
+
+  function handleCancelCreateProject() {
+    continueToAddListing.current = false;
+    closeModal();
   }
 
   function handleSuccess(message: string) {
@@ -43,7 +65,10 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
         confirmLabel: "Tạo dự án",
         cancelLabel: "Để sau",
       });
-      if (ok) router.push("/admin/projects?new=1");
+      if (ok) {
+        continueToAddListing.current = true;
+        setModal({ mode: "create-project" });
+      }
       return;
     }
     setModal({ mode: "create" });
@@ -142,7 +167,7 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
         )}
       </div>
 
-      {modal && (
+      {modal && modal.mode !== "create-project" && (
         <FormModal
           title={modal.mode === "create" ? "Thêm phòng mới" : `Sửa phòng — ${modal.listing.code}`}
           onClose={closeModal}
@@ -156,6 +181,16 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
             onSuccess={() =>
               handleSuccess(modal.mode === "edit" ? "Đã cập nhật phòng." : "Đã thêm phòng mới.")
             }
+          />
+        </FormModal>
+      )}
+
+      {modal?.mode === "create-project" && (
+        <FormModal title="Thêm dự án mới" onClose={handleCancelCreateProject}>
+          <ProjectForm
+            action={saveProject.bind(null, null)}
+            onCancel={handleCancelCreateProject}
+            onSuccess={() => handleSuccess("Đã thêm dự án mới — tiếp tục thêm phòng.")}
           />
         </FormModal>
       )}
