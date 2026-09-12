@@ -9,6 +9,8 @@ export interface ImportProjectsResult {
 
 interface ParsedRow {
   code: string | null;
+  houseNumber: string;
+  street: string;
   address: string;
   ward: string | null;
   district: string;
@@ -28,6 +30,43 @@ const HEADER_ALIASES = {
   ownerName: ["tên chủ", "ten chu"],
   ownerPhone: ["số điện thoại chủ", "so dien thoai chu", "sđt chủ", "sdt chu"],
 };
+
+// Viết tắt quận theo quy ước riêng (không phải cứ lấy chữ cái đầu — vd Bình
+// Thạnh dùng "BTH" chứ không phải "BT" để khỏi trùng Bình Tân). Quận đánh số
+// (Quận 1, Quận 3...) tự suy ra "Q" + số, không cần liệt kê từng quận.
+const NAMED_DISTRICT_CODES: Record<string, string> = {
+  "bình thạnh": "BTH",
+  "tân bình": "TB",
+  "tân phú": "TP",
+  "bình tân": "BT",
+  "gò vấp": "GV",
+  "thủ đức": "TĐ",
+  "phú nhuận": "PN",
+};
+
+/** Chữ cái đầu mỗi từ, in hoa, nối liền — vd "Nguyễn Hữu Cảnh" -> "NHC". */
+function initials(text: string): string {
+  return text
+    .trim()
+    .split(/\s+/)
+    .map((word) => word[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+/** "Quận 1" -> "Q1", "Bình Thạnh"/"Quận Bình Thạnh" -> "QBTH". */
+function districtCode(district: string): string {
+  const key = district.trim().toLowerCase().replace(/^quận\s*/, "");
+  const numbered = key.match(/^(\d+)$/);
+  if (numbered) return `Q${numbered[1]}`;
+  return `Q${NAMED_DISTRICT_CODES[key] ?? initials(district)}`;
+}
+
+/** Mã nhà tự sinh khi để trống: "Số nhà.Viết tắt tên đường.Viết tắt quận" — vd "22.NHC.QBTH". */
+function deriveProjectCode(houseNumber: string, street: string, district: string): string | null {
+  if (!houseNumber && !street) return null;
+  const parts = [houseNumber, initials(street), districtCode(district)].filter(Boolean);
+  return parts.length > 0 ? parts.join(".") : null;
+}
 
 /** grid[0] là dòng tiêu đề, các dòng sau là dữ liệu. */
 function gridToRows(grid: string[][]): { rows: ParsedRow[]; skipped: number } {
@@ -62,6 +101,8 @@ function gridToRows(grid: string[][]): { rows: ParsedRow[]; skipped: number } {
 
     rows.push({
       code: codeIdx !== -1 ? (cells[codeIdx] ?? "").trim() || null : null,
+      houseNumber,
+      street,
       address,
       ward: wardIdx !== -1 ? (cells[wardIdx] ?? "").trim() || null : null,
       district,
@@ -76,9 +117,11 @@ function gridToRows(grid: string[][]): { rows: ParsedRow[]; skipped: number } {
 /**
  * Import hàng loạt Dự án từ file Excel (.xlsx/.xls) hoặc CSV/TSV với cấu
  * trúc cột: Mã nhà, Số nhà, Tên đường, Phường, Quận, Tên chủ, Số điện thoại
- * chủ. "Mã nhà" (tuỳ chọn) để Phòng import hàng loạt tham chiếu đúng dự án —
- * dòng nào có Mã nhà trùng dự án đã có/dòng khác trong cùng file sẽ bị bỏ
- * qua (không tự đổi mã, tránh phá tham chiếu bên file Phòng).
+ * chủ. "Mã nhà" để trống thì tự sinh theo công thức "Số nhà.Viết tắt tên
+ * đường.Viết tắt quận" (xem deriveProjectCode) để Phòng import hàng loạt
+ * tham chiếu đúng dự án — dòng nào có Mã nhà (nhập tay hoặc tự sinh) trùng
+ * dự án đã có/dòng khác trong cùng file sẽ bị bỏ qua (không tự đổi mã, tránh
+ * phá tham chiếu bên file Phòng).
  *
  * Tên dự án = Số nhà + Tên đường (file không có cột tên riêng) — sửa lại
  * sau nếu muốn.
@@ -112,15 +155,17 @@ export async function importProjectsFromFile(file: UploadedFile): Promise<Import
   const toInsert: Record<string, unknown>[] = [];
 
   for (const row of rows) {
-    if (row.code && usedCodes.has(row.code)) {
+    const code = row.code || deriveProjectCode(row.houseNumber, row.street, row.district);
+
+    if (code && usedCodes.has(code)) {
       skippedDuplicateCode++;
       continue;
     }
-    if (row.code) usedCodes.add(row.code);
+    if (code) usedCodes.add(code);
 
     toInsert.push({
       slug: uniqueSlug(slugify(row.address) || "du-an"),
-      code: row.code,
+      code,
       name: row.address,
       district: row.district,
       ward: row.ward,

@@ -264,6 +264,15 @@ trực tiếp file `.xlsx`/`.xls` (đọc bằng `exceljs`) hoặc CSV/TSV. Kh�
   nếu muốn; slug tự sinh từ địa chỉ, tự thêm hậu tố `-2`, `-3`... nếu trùng. Dòng thiếu Số nhà/Tên
   đường hoặc Quận bị bỏ qua; Mã nhà trùng dự án đã có cũng bị bỏ qua (không tự đổi mã, tránh phá
   tham chiếu bên file Phòng).
+
+  **`Mã nhà` để trống thì tự sinh** theo công thức `Số nhà.Viết tắt tên đường.Viết tắt quận` (hàm
+  `deriveProjectCode` trong `lib/admin/importProjects.ts`) — vd "22 Nguyễn Hữu Cảnh, Bình Thạnh" →
+  `22.NHC.QBTH`. Viết tắt tên đường = chữ cái đầu mỗi từ, in hoa, giữ nguyên dấu (vd "Thủ Đức" giữ
+  "Đ", không đổi thành "D"). Viết tắt quận: quận đánh số → `Q` + số (vd `Q1`, `Q7`); quận tên riêng
+  dùng bảng quy ước cố định để tránh trùng (`Bình Thạnh`→`BTH` chứ không phải `BT` để khỏi đụng
+  `Bình Tân`→`BT`; còn có `Tân Bình`→`TB`, `Tân Phú`→`TP`, `Gò Vấp`→`GV`, `Thủ Đức`→`TĐ`, `Phú
+  Nhuận`→`PN`), rồi thêm `Q` phía trước (vd `QBTH`); quận tên riêng chưa có trong bảng thì tự lấy
+  chữ cái đầu mỗi từ.
 - **Phòng** — cột: `Mã nhà` (khớp đúng cột `Mã nhà` đã đặt cho 1 Dự án — **phải tạo/đặt Mã nhà cho
   dự án trước** thì mới import Phòng vào đúng chỗ được), `Mã phòng` (→ `listings.code`, duy nhất),
   `Tiêu đề`, `Giá (triệu)`, `Diện tích (m²)`, `Loại hình` (gõ đúng nhãn hiển thị: "Phòng trọ",
