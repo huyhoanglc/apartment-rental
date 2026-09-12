@@ -34,12 +34,12 @@ export default function ProjectsManager({ projects }: ProjectsManagerProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">Dự án</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{projects.length} dự án đang quản lý</p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
           <ImportProjectsButton />
           <button
             type="button"
@@ -54,7 +54,7 @@ export default function ProjectsManager({ projects }: ProjectsManagerProps) {
         </div>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
+      <div className="mt-4 overflow-x-auto rounded-xl2 border border-border bg-card shadow-card">
         {projects.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
             <p className="font-medium text-foreground">Chưa có dự án nào</p>

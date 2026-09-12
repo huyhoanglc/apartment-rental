@@ -77,12 +77,12 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">Phòng</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{listings.length} phòng đang quản lý</p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
           <ImportListingsButton />
           <button
             type="button"
@@ -97,7 +97,7 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
         </div>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
+      <div className="mt-4 overflow-x-auto rounded-xl2 border border-border bg-card shadow-card">
         {listings.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">

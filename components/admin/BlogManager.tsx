@@ -33,7 +33,7 @@ export default function BlogManager({ posts }: BlogManagerProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-bold text-foreground">Blog ({posts.length})</h1>
         <button
           type="button"

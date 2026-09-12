@@ -111,7 +111,7 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
 
         <div className={SECTION}>
           <h2 className="text-sm font-semibold text-foreground">Vị trí</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={LABEL}>Quận *</label>
               <select name="district" required defaultValue={initialProject?.district ?? ""} className={FIELD}>
@@ -144,7 +144,7 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
 
         <div className={SECTION}>
           <h2 className="text-sm font-semibold text-foreground">Chủ nhà / Quản lý</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={LABEL}>Tên chủ nhà / quản lý</label>
               <input name="owner_name" defaultValue={initialProject?.owner_name ?? ""} className={FIELD} />

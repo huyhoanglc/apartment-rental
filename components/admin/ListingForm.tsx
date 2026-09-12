@@ -82,7 +82,7 @@ export default function ListingForm({
       <div className="divide-y divide-border">
         <div className={SECTION}>
           <h2 className="text-sm font-semibold text-foreground">Thông tin cơ bản</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={LABEL}>Mã căn *</label>
               <input
@@ -144,7 +144,7 @@ export default function ListingForm({
 
         <div className={SECTION}>
           <h2 className="text-sm font-semibold text-foreground">Giá &amp; diện tích</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <label className={LABEL}>Giá (triệu) *</label>
               <input

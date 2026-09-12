@@ -33,7 +33,7 @@ export default function StaffManager({ staff }: StaffManagerProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">Nhân viên</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{staff.length} nhân viên trong danh bạ</p>
@@ -50,7 +50,7 @@ export default function StaffManager({ staff }: StaffManagerProps) {
         </button>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
+      <div className="mt-4 overflow-x-auto rounded-xl2 border border-border bg-card shadow-card">
         {staff.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
             <p className="font-medium text-foreground">Chưa có nhân viên nào</p>

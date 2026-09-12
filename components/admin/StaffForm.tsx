@@ -44,7 +44,7 @@ export default function StaffForm({ action, initialStaff, onCancel, onSuccess }:
           <input name="full_name" required defaultValue={initialStaff?.full_name} className={FIELD} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={LABEL}>Số điện thoại</label>
             <input name="phone" defaultValue={initialStaff?.phone ?? ""} className={FIELD} />
