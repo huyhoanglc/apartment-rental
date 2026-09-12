@@ -51,7 +51,7 @@ export async function recordAdminLogin(
   const device = parseUserAgent(headerList.get("user-agent"));
 
   await sendTelegramMessage(
-    "🔐 <b>Thông Báo Đăng Nhập Admin Dashboard</b>\n" +
+    "🔔 <b>Thông Báo Đăng Nhập Admin Dashboard</b>\n" +
       "━━━━━━━━━━━━━━━━━\n" +
       `👤 <b>Tài khoản:</b> ${email ?? "?"}\n` +
       (phone ? `📱 <b>Số điện thoại:</b> ${phone}\n` : "") +
