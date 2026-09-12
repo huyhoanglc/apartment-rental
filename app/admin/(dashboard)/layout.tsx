@@ -26,7 +26,13 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
 
   return (
     <AdminUIProvider>
-      <div className="flex min-h-screen bg-background">
+      {/* flex-col ở mobile: AdminNav trả về cả thanh header mobile (full-width,
+          nằm TRÊN nội dung) lẫn sidebar desktop (nằm CẠNH nội dung) như 2 phần
+          tử anh em cùng cấp — nếu container này luôn là flex-row thì thanh
+          header mobile bị coi là 1 flex item hẹp theo nội dung, nằm cạnh
+          <main> thay vì full-width phía trên nó (đúng bug đã gặp trên Safari
+          iPhone). md:flex-row mới bật lại hàng ngang cho sidebar desktop. */}
+      <div className="flex min-h-screen flex-col bg-background md:flex-row">
         <AdminNav
           userId={user.id}
           email={user.email ?? ""}
