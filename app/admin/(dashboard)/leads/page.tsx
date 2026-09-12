@@ -7,7 +7,7 @@ export default async function AdminLeadsPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-foreground">Leads ({leads.length})</h1>
+      <h1 className="text-xl font-bold text-foreground">Yêu cầu khách hàng ({leads.length})</h1>
 
       <div className="mt-4 overflow-x-auto rounded-xl2 bg-card shadow-card">
         <table className="w-full text-sm">

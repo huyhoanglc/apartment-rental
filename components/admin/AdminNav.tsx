@@ -151,7 +151,7 @@ function ClockIcon({ className }: { className?: string }) {
 export const NAV_ITEMS = [
   { href: "/admin", label: "Phòng", icon: HomeIcon, adminOnly: false },
   { href: "/admin/projects", label: "Dự án", icon: BuildingIcon, adminOnly: false },
-  { href: "/admin/leads", label: "Leads", icon: InboxIcon, adminOnly: false },
+  { href: "/admin/leads", label: "Yêu cầu khách hàng", icon: InboxIcon, adminOnly: false },
   { href: "/admin/blog", label: "Blog", icon: DocumentIcon, adminOnly: false },
   { href: "/admin/activity", label: "Lịch sử", icon: ClockIcon, adminOnly: false },
   { href: "/admin/staff", label: "Nhân viên", icon: UsersIcon, adminOnly: true },
