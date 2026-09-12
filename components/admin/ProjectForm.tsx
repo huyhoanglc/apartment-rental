@@ -69,7 +69,7 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
   }
 
   return (
-    <form action={formAction} className="max-w-2xl overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
+    <form action={formAction}>
       <div className="divide-y divide-border">
         <div className={SECTION}>
           <h2 className="text-sm font-semibold text-foreground">Thông tin dự án</h2>

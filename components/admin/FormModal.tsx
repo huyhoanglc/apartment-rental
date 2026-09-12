@@ -9,10 +9,11 @@ interface FormModalProps {
 }
 
 /**
- * Modal bọc các form Thêm/Sửa (Phòng, Dự án, Blog, Nhân viên) ngay trên
- * trang danh sách — thay cho việc điều hướng sang /new hoặc /[id]/edit rồi
- * lại quay về. Form bên trong tự lo phần thân card (đã có border/shadow),
- * modal chỉ thêm tiêu đề + nút đóng + nền mờ + cuộn khi form dài.
+ * Modal bọc các form Thêm/Sửa (Phòng, Dự án, Blog, Nhân viên, Tài khoản)
+ * ngay trên trang danh sách — thay cho việc điều hướng sang /new hoặc
+ * /[id]/edit rồi lại quay về. Modal tự vẽ khung card + tiêu đề + nút đóng
+ * thành 1 khối liền — các form bên trong chỉ còn nội dung (không tự vẽ
+ * border/rounded/shadow riêng nữa để khỏi bị "khung trong khung").
  */
 export default function FormModal({ title, onClose, children }: FormModalProps) {
   useEffect(() => {
@@ -31,8 +32,8 @@ export default function FormModal({ title, onClose, children }: FormModalProps) 
     // margin ngang tự động vẫn nhìn cân đối với modal ngắn mà không bị lỗi đó.
     <div className="fixed inset-0 z-[70] overflow-y-auto p-4 py-8">
       <div className="fixed inset-0 bg-black/40" onClick={onClose} />
-      <div className="animate-dialog-in relative mx-auto w-full max-w-2xl">
-        <div className="mb-3 flex items-center justify-between px-1">
+      <div className="animate-dialog-in relative mx-auto w-full max-w-2xl overflow-hidden rounded-xl2 border border-border bg-card shadow-xl">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
           <button
             type="button"

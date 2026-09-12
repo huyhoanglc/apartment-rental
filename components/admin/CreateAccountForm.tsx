@@ -34,7 +34,7 @@ export default function CreateAccountForm({ onCancel, onSuccess }: CreateAccount
   }, [state.success, onSuccess]);
 
   return (
-    <form action={formAction} className="mx-auto max-w-md overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
+    <form action={formAction}>
       <div className="space-y-4 p-6">
         <div>
           <label className={LABEL}>Họ và tên *</label>
