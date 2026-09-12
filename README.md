@@ -254,14 +254,26 @@ mới" ở `/admin` khi chưa có dự án nào sẽ báo lỗi nhắc tạo d�
 Quản lý ở `/admin/projects` (CRUD dự án, dùng chung `ProjectForm`) — xoá 1 dự án sẽ báo lỗi nếu dự
 án đó vẫn còn phòng (xoá hết phòng trước).
 
-**Import Excel hàng loạt** — nút "Import Excel" ở `/admin/projects` nhận trực tiếp file `.xlsx`/
-`.xls` (đọc bằng `exceljs`) hoặc CSV/TSV xuất từ Excel/Google Sheets. Chỉ đọc 3 cột theo tên ở dòng
-tiêu đề (không phân biệt hoa/thường, khoảng trắng thừa): **Địa chỉ**, **Quận**, **Số chủ** — các cột
-khác trong file (Người Cập Nhật, Hệ Thống, Tên Chủ Nhà, Link tổng...) bị bỏ qua. Vì file không có
-cột tên riêng, **tên dự án = chính địa chỉ** (sửa lại sau nếu muốn); slug tự sinh từ địa chỉ, tự
-thêm hậu tố `-2`, `-3`... nếu trùng dự án đã có. Cột "Số chủ" thường lẫn cả tên lẫn SĐT chủ nhà
-trong 1 ô (vd "c Hồng 0704525007") nên được lưu **nguyên văn** vào `owner_phone` —
-tách tay tên/SĐT riêng sau qua form sửa dự án. Dòng thiếu Địa chỉ hoặc Quận bị bỏ qua, không tạo.
+**Import Excel hàng loạt** — nút "Import Excel" ở cả `/admin/projects` và `/admin` (Phòng) nhận
+trực tiếp file `.xlsx`/`.xls` (đọc bằng `exceljs`) hoặc CSV/TSV. Khớp cột theo **tên** ở dòng tiêu
+đề (không phân biệt hoa/thường, khoảng trắng thừa), thứ tự cột không quan trọng.
+
+- **Dự án** — cột: `Mã nhà` (tuỳ chọn — dùng để Phòng import tham chiếu đúng dự án, xem bên dưới),
+  `Số nhà`, `Tên đường` (2 cột này nối lại thành `address`), `Phường`, `Quận` (bắt buộc), `Tên chủ`,
+  `Số điện thoại chủ`. Tên dự án = Số nhà + Tên đường (file không có cột tên riêng) — sửa lại sau
+  nếu muốn; slug tự sinh từ địa chỉ, tự thêm hậu tố `-2`, `-3`... nếu trùng. Dòng thiếu Số nhà/Tên
+  đường hoặc Quận bị bỏ qua; Mã nhà trùng dự án đã có cũng bị bỏ qua (không tự đổi mã, tránh phá
+  tham chiếu bên file Phòng).
+- **Phòng** — cột: `Mã nhà` (khớp đúng cột `Mã nhà` đã đặt cho 1 Dự án — **phải tạo/đặt Mã nhà cho
+  dự án trước** thì mới import Phòng vào đúng chỗ được), `Mã phòng` (→ `listings.code`, duy nhất),
+  `Tiêu đề`, `Giá (triệu)`, `Diện tích (m²)`, `Loại hình` (gõ đúng nhãn hiển thị: "Phòng trọ",
+  "Studio", "Căn hộ mini", "Căn hộ dịch vụ", "Nhà nguyên căn"), `Trạng thái` (để trống = "Còn
+  phòng"), `Link ảnh` (bắt buộc — Excel không gắn được file ảnh thật vào từng dòng nên phải dán sẵn
+  1 link ảnh có sẵn), `Mô tả` (tuỳ chọn). Dòng thiếu Mã nhà/Mã phòng/Tiêu đề/Link ảnh, giá/diện tích
+  không phải số dương, Loại hình gõ sai nhãn, hoặc Mã nhà không khớp dự án nào đều bị bỏ qua.
+
+Cả 2 đều chỉ báo tổng số dòng tạo thành công + số dòng bị bỏ qua qua toast, không có màn xem trước
+từng dòng — kiểm tra lại kết quả trực tiếp trên trang danh sách sau khi import.
 
 `/admin/staff` là **danh bạ nhân viên nội bộ** đơn giản (tên, SĐT, email, chức vụ, đang làm/nghỉ)
 — không liên quan tài khoản đăng nhập `/admin` (tài khoản đăng nhập vẫn tạo thủ công qua Supabase

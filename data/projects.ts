@@ -5,6 +5,7 @@ export const demoProjects: Project[] = [
   {
     id: "demo-project-1",
     slug: "chung-cu-sai-gon-riverside",
+    code: "NH-01",
     name: "Chung cư Sài Gòn Riverside",
     district: "Bình Thạnh",
     ward: "Phường 22",
@@ -26,6 +27,7 @@ export const demoProjects: Project[] = [
   {
     id: "demo-project-2",
     slug: "the-panorama-phu-my-hung",
+    code: "NH-02",
     name: "The Panorama Phú Mỹ Hưng",
     district: "Quận 7",
     ward: "Tân Phong",
@@ -47,6 +49,7 @@ export const demoProjects: Project[] = [
   {
     id: "demo-project-3",
     slug: "ben-thanh-serviced-residence",
+    code: "NH-03",
     name: "Bến Thành Serviced Residence",
     district: "Quận 1",
     ward: "Bến Thành",
@@ -68,6 +71,7 @@ export const demoProjects: Project[] = [
   {
     id: "demo-project-4",
     slug: "gia-dinh-home",
+    code: "NH-04",
     name: "Gia Định Home",
     district: "Phú Nhuận",
     ward: "Phường 3",
@@ -89,6 +93,7 @@ export const demoProjects: Project[] = [
   {
     id: "demo-project-5",
     slug: "khu-tro-cong-nghiep-go-vap",
+    code: "NH-05",
     name: "Khu trọ Công Nghiệp Gò Vấp",
     district: "Gò Vấp",
     ward: "Phường 6",
@@ -110,6 +115,7 @@ export const demoProjects: Project[] = [
   {
     id: "demo-project-6",
     slug: "tan-binh-airport-residence",
+    code: "NH-06",
     name: "Tân Bình Airport Residence",
     district: "Tân Bình",
     ward: "Phường 4",
@@ -131,6 +137,7 @@ export const demoProjects: Project[] = [
   {
     id: "demo-project-7",
     slug: "nha-pho-an-phu",
+    code: "NH-07",
     name: "Nhà phố An Phú",
     district: "Thủ Đức",
     ward: "An Phú",
@@ -152,6 +159,7 @@ export const demoProjects: Project[] = [
   {
     id: "demo-project-8",
     slug: "ho-con-rua-homes",
+    code: "NH-08",
     name: "Hồ Con Rùa Homes",
     district: "Quận 3",
     ward: "Phường 6",
@@ -173,6 +181,7 @@ export const demoProjects: Project[] = [
   {
     id: "demo-project-9",
     slug: "nha-tro-ky-hoa",
+    code: "NH-09",
     name: "Nhà trọ Kỳ Hòa",
     district: "Quận 10",
     ward: "Phường 12",

@@ -268,6 +268,11 @@ alter table projects add column if not exists elevator boolean not null default 
 alter table projects add column if not exists has_security boolean not null default false;
 alter table projects add column if not exists has_basement boolean not null default false;
 
+-- Mã nhà tuỳ chọn, đặt tay hoặc lúc import Excel — dùng để Phòng tham chiếu
+-- đúng dự án khi import hàng loạt (cột "Mã nhà" trong file Excel Phòng),
+-- không phải khoá chính nội bộ (id/slug vẫn dùng như cũ).
+alter table projects add column if not exists code text unique;
+
 alter table projects enable row level security;
 
 drop policy if exists "projects are publicly readable" on projects;

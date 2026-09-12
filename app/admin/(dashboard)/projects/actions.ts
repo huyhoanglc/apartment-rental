@@ -20,6 +20,7 @@ export async function saveProject(
 ): Promise<SaveProjectState> {
   const name = String(formData.get("name") ?? "").trim();
   const slugRaw = String(formData.get("slug") ?? "").trim();
+  const code = String(formData.get("code") ?? "").trim();
   const district = String(formData.get("district") ?? "").trim();
   const ward = String(formData.get("ward") ?? "").trim();
   const address = String(formData.get("address") ?? "").trim();
@@ -61,6 +62,7 @@ export async function saveProject(
 
   const baseFields: Omit<ProjectInput, "cover_image_url"> = {
     slug,
+    code: code || null,
     name,
     district,
     ward: ward || null,
@@ -84,7 +86,10 @@ export async function saveProject(
     }
   } catch (err) {
     console.error("[saveProject]", err);
-    return { error: "Lưu dự án thất bại, vui lòng thử lại." };
+    const code23505 = typeof err === "object" && err && "code" in err && err.code === "23505";
+    return {
+      error: code23505 ? `Mã nhà "${code}" đã được dùng, vui lòng chọn mã khác.` : "Lưu dự án thất bại, vui lòng thử lại.",
+    };
   }
 
   revalidatePath("/admin/projects");

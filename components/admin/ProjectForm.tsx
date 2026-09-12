@@ -97,6 +97,16 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
               className={FIELD}
             />
           </div>
+
+          <div>
+            <label className={LABEL}>Mã nhà (tuỳ chọn)</label>
+            <input
+              name="code"
+              defaultValue={initialProject?.code ?? ""}
+              placeholder="Vd: NH001 — để Phòng import Excel tham chiếu tới dự án này"
+              className={FIELD}
+            />
+          </div>
         </div>
 
         <div className={SECTION}>

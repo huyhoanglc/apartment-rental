@@ -7,6 +7,7 @@ import {
   updateListing,
   updateListingStatus,
 } from "@/lib/admin/listings";
+import { importListingsFromFile, type ImportListingsResult } from "@/lib/admin/importListings";
 import { uploadListingImage } from "@/lib/admin/storage";
 import { getListingByCode } from "@/lib/listings";
 import type { ListingInput, ListingStatus, ListingType } from "@/lib/types";
@@ -116,6 +117,28 @@ export async function saveListing(
 
   revalidatePath("/admin");
   return { success: true };
+}
+
+export async function importListingsAction(
+  formData: FormData
+): Promise<ImportListingsResult & { error?: string }> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { imported: 0, skipped: 0, error: "Vui lòng chọn file." };
+  }
+
+  try {
+    const result = await importListingsFromFile(file);
+    revalidatePath("/admin");
+    return result;
+  } catch (err) {
+    console.error("[importListingsAction]", err);
+    return {
+      imported: 0,
+      skipped: 0,
+      error: err instanceof Error ? err.message : "Import thất bại, vui lòng thử lại.",
+    };
+  }
 }
 
 export async function deleteListingAction(code: string): Promise<void> {

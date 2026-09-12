@@ -10,6 +10,8 @@ export type ListingType =
 export interface Project {
   id: string;
   slug: string;
+  /** Mã nhà tuỳ chọn (đặt tay hoặc lúc import Excel) — Phòng import hàng loạt dùng cột "Mã nhà" tham chiếu tới đây. */
+  code: string | null;
   name: string;
   district: string;
   ward: string | null;

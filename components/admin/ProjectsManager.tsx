@@ -67,6 +67,7 @@ export default function ProjectsManager({ projects }: ProjectsManagerProps) {
             <thead>
               <tr className="border-b border-border bg-muted/50 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <th className="px-4 py-3">Ảnh</th>
+                <th className="px-4 py-3">Mã nhà</th>
                 <th className="px-4 py-3">Tên dự án</th>
                 <th className="px-4 py-3">Quận</th>
                 <th className="px-4 py-3">Địa chỉ</th>
@@ -88,6 +89,7 @@ export default function ProjectsManager({ projects }: ProjectsManagerProps) {
                       <div className="h-12 w-16 rounded-md bg-muted" />
                     )}
                   </td>
+                  <td className="px-4 py-3 text-muted-foreground">{project.code ?? "—"}</td>
                   <td className="px-4 py-3 font-medium text-foreground">{project.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{project.district}</td>
                   <td className="max-w-xs truncate px-4 py-3 text-muted-foreground">
