@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       await supabase.auth.signOut();
       return NextResponse.redirect(`${origin}/admin/login?error=not_allowed`);
     }
-    await recordAdminLogin(data.user.id, data.user.email ?? null);
+    await recordAdminLogin(data.user.id, data.user.email ?? null, "google");
   }
 
   const next = isLinking ? "/admin/security" : "/admin";

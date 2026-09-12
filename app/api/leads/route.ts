@@ -25,11 +25,12 @@ export async function POST(request: NextRequest) {
 
     // Tuỳ chọn: báo Telegram khi có lead mới, không chặn response nếu lỗi.
     void sendTelegramMessage(
-      `📩 <b>Lead mới</b>\n` +
-        `SĐT/Zalo: ${lead.phone}\n` +
-        (lead.district ? `Khu vực: ${lead.district}\n` : "") +
-        (lead.budget_million != null ? `Ngân sách: ${lead.budget_million} triệu\n` : "") +
-        (lead.note ? `Ghi chú: ${lead.note}` : "")
+      "📩 <b>Có yêu cầu thuê mới</b>\n" +
+        "━━━━━━━━━━━━━━━━━\n" +
+        `📞 <b>SĐT/Zalo:</b> <code>${lead.phone}</code>\n` +
+        (lead.district ? `📍 <b>Khu vực:</b> ${lead.district}\n` : "") +
+        (lead.budget_million != null ? `💰 <b>Ngân sách:</b> ${lead.budget_million} triệu\n` : "") +
+        (lead.note ? `📝 <b>Ghi chú:</b> ${lead.note}` : "")
     );
 
     return NextResponse.json({ ok: true });

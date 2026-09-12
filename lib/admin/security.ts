@@ -28,12 +28,21 @@ export async function logLoginEvent(userId: string): Promise<void> {
   if (error) console.error("[logLoginEvent]", error);
 }
 
+const PROVIDER_LABELS = {
+  email: "Email/mật khẩu",
+  google: "Google",
+} as const;
+
 /**
  * Ghi log + báo Telegram cho 1 lần đăng nhập thành công — dùng chung cho cả
  * luồng email/password (app/admin/login/actions.ts) và OAuth
  * (app/auth/callback/route.ts) để 2 cách đăng nhập được audit như nhau.
  */
-export async function recordAdminLogin(userId: string, email: string | null): Promise<void> {
+export async function recordAdminLogin(
+  userId: string,
+  email: string | null,
+  provider: keyof typeof PROVIDER_LABELS
+): Promise<void> {
   await logLoginEvent(userId);
 
   const headerList = headers();
@@ -41,11 +50,13 @@ export async function recordAdminLogin(userId: string, email: string | null): Pr
   const device = parseUserAgent(headerList.get("user-agent"));
 
   await sendTelegramMessage(
-    `🔐 <b>Đăng nhập admin</b>\n` +
-      `Email: ${email ?? "?"}\n` +
-      `Thời gian: ${new Date().toLocaleString("vi-VN")}\n` +
-      `IP: ${ip}\n` +
-      `Thiết bị: ${device}`
+    "🔐 <b>Đăng nhập quản trị thành công</b>\n" +
+      "━━━━━━━━━━━━━━━━━\n" +
+      `👤 <b>Tài khoản:</b> ${email ?? "?"}\n` +
+      `🔑 <b>Phương thức:</b> ${PROVIDER_LABELS[provider]}\n` +
+      `🕒 <b>Thời gian:</b> ${new Date().toLocaleString("vi-VN")}\n` +
+      `🌐 <b>IP:</b> <code>${ip}</code>\n` +
+      `💻 <b>Thiết bị:</b> ${device}`
   );
 }
 
