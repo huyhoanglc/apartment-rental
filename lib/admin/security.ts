@@ -44,20 +44,19 @@ export async function recordAdminLogin(
   const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "không rõ";
   const device = parseUserAgent(headerList.get("user-agent"));
 
-  // Emoji đặt NGAY ĐẦU tin nhắn, trước 1 thẻ <b>, từng khiến Telegram hiện ra
-  // chữ escape thô "\uD83D\uDDxx" thay vì icon thật (bug tính offset UTF-16
-  // của Telegram khi ký tự đầu tiên là surrogate pair) — các dòng sau vẫn có
-  // icon + <b> y hệt nhưng không đứng ở vị trí đầu tin nên không bị. Đưa
-  // emoji vào TRONG thẻ <b> để nó không còn là điểm chuyển ranh giới ở vị
-  // trí 0 nữa.
+  // Format nhiều thẻ <b> + dòng kẻ + <code> (thử trước đó) vẫn bị Telegram
+  // hiện escape thô "\uD83D\uDDxx" ở icon đầu tin dù đổi icon hay đổi cách
+  // đặt icon trong/ngoài thẻ <b> — không chắc nguyên nhân chính xác (khả
+  // năng liên quan số lượng entity HTML trong 1 tin). Quay về đúng cấu trúc
+  // đơn giản đã dùng ổn định trước đây: chỉ 1 thẻ <b> duy nhất quanh tiêu đề,
+  // các dòng còn lại là text thường.
   await sendTelegramMessage(
-    "<b>🔔 Thông Báo Đăng Nhập Admin Dashboard</b>\n" +
-      "━━━━━━━━━━━━━━━━━\n" +
-      `👤 <b>Tài khoản:</b> ${email ?? "?"}\n` +
-      (phone ? `📱 <b>Số điện thoại:</b> ${phone}\n` : "") +
-      `🕒 <b>Thời gian:</b> ${new Date().toLocaleString("vi-VN")}\n` +
-      `🌐 <b>IP:</b> <code>${ip}</code>\n` +
-      `💻 <b>Thiết bị:</b> ${device}`
+    `🔔 <b>Thông Báo Đăng Nhập Admin Dashboard</b>\n` +
+      `Tài khoản: ${email ?? "?"}\n` +
+      (phone ? `Số điện thoại: ${phone}\n` : "") +
+      `Thời gian: ${new Date().toLocaleString("vi-VN")}\n` +
+      `IP: ${ip}\n` +
+      `Thiết bị: ${device}`
   );
 }
 

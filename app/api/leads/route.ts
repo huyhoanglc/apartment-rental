@@ -24,13 +24,15 @@ export async function POST(request: NextRequest) {
     await createLead(lead);
 
     // Tuỳ chọn: báo Telegram khi có lead mới, không chặn response nếu lỗi.
+    // Chỉ 1 thẻ <b> duy nhất quanh tiêu đề — nhiều thẻ <b>/dòng kẻ/<code>
+    // từng khiến Telegram hiện lỗi escape thô ở icon đầu tin (xem
+    // lib/admin/security.ts).
     void sendTelegramMessage(
-      "📩 <b>Có yêu cầu thuê mới</b>\n" +
-        "━━━━━━━━━━━━━━━━━\n" +
-        `📞 <b>SĐT/Zalo:</b> <code>${lead.phone}</code>\n` +
-        (lead.district ? `📍 <b>Khu vực:</b> ${lead.district}\n` : "") +
-        (lead.budget_million != null ? `💰 <b>Ngân sách:</b> ${lead.budget_million} triệu\n` : "") +
-        (lead.note ? `📝 <b>Ghi chú:</b> ${lead.note}` : "")
+      `📩 <b>Có yêu cầu thuê mới</b>\n` +
+        `SĐT/Zalo: ${lead.phone}\n` +
+        (lead.district ? `Khu vực: ${lead.district}\n` : "") +
+        (lead.budget_million != null ? `Ngân sách: ${lead.budget_million} triệu\n` : "") +
+        (lead.note ? `Ghi chú: ${lead.note}` : "")
     );
 
     return NextResponse.json({ ok: true });
