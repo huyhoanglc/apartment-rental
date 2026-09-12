@@ -208,6 +208,16 @@ giữ nguyên cho cả 2 chế độ.
 `admin_login_events`, IP lấy từ header `x-forwarded-for`, Vercel tự set khi deploy), và nút "Đăng
 xuất khỏi tất cả thiết bị khác" (`supabase.auth.signOut({ scope: 'others' })`).
 
+**`/admin/sessions`** (chỉ Admin): ép đăng xuất phiên đang hoạt động của **tài khoản khác**. Supabase
+Admin API không có hàm "sign out theo user id" — `auth.admin.signOut(jwt, scope)` cần chính JWT của
+phiên đó, admin không cầm sẵn JWT của người khác nên không gọi được. Cách thật sự hoạt động: xoá
+thẳng dòng session trong `auth.sessions` (và `auth.refresh_tokens` liên quan) qua hàm SQL
+`public.admin_force_logout(target_user_id)` (SECURITY DEFINER, đã có trong `schema.sql` — bắt buộc
+chạy lại file này trên Supabase thật thì nút này mới hoạt động). Sau khi ép đăng xuất, access token
+họ đang cầm về mặt chữ ký vẫn còn hạn, nhưng `getUser()` ở lần tải trang/thao tác kế tiếp sẽ thất
+bại vì session đã bị xoá — hiệu lực gần như ngay lập tức, không phải khoá tài khoản (họ đăng nhập
+lại bình thường được).
+
 **Thông báo Telegram khi có admin đăng nhập / lead mới** (tuỳ chọn, bỏ trống 2 biến env thì tự
 tắt, không lỗi):
 

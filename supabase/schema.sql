@@ -182,6 +182,32 @@ create policy "authenticated can insert own login events"
   with check (auth.uid() = user_id);
 
 -- ==========================================================================
+-- Ép đăng xuất user khác (trang /admin/sessions)
+-- ==========================================================================
+-- PostgREST không lộ schema `auth` ra ngoài (kể cả cho service role), nên
+-- không thể DELETE thẳng vào auth.sessions từ client. Hàm SECURITY DEFINER
+-- này chạy với quyền của người tạo hàm (có quyền truy cập auth), cho phép
+-- gọi qua supabase.rpc(...) bằng service role. Xoá session khiến access
+-- token hiện có của người đó bị getUser() từ chối ở lần tải trang/thao tác
+-- kế tiếp — gần như ngay lập tức dù token gốc (JWT) về mặt kỹ thuật chưa hết
+-- hạn (không có cách nào thu hồi JWT đã phát trước khi hết hạn tự nhiên).
+create or replace function public.admin_force_logout(target_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from auth.refresh_tokens
+    where session_id in (select id from auth.sessions where user_id = target_user_id);
+  delete from auth.sessions where user_id = target_user_id;
+end;
+$$;
+
+revoke all on function public.admin_force_logout(uuid) from public;
+grant execute on function public.admin_force_logout(uuid) to service_role;
+
+-- ==========================================================================
 -- Blog (SEO)
 -- ==========================================================================
 create table if not exists blog_posts (

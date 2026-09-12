@@ -116,3 +116,20 @@ export async function resetAdminAccountPassword(id: string, phone: string): Prom
   const { error } = await admin.auth.admin.updateUserById(id, { password: phone });
   if (error) throw error;
 }
+
+/**
+ * Ép đăng xuất phiên đang hoạt động của user khác. Supabase Admin API không
+ * có hàm "sign out theo user id" (auth.admin.signOut cần chính jwt của phiên
+ * đó, không phải id — không dùng được ở đây), nên xoá thẳng session trong DB
+ * qua RPC (hàm public.admin_force_logout, SECURITY DEFINER — xem
+ * supabase/schema.sql). Access token họ đang cầm vẫn hợp lệ về mặt chữ ký
+ * tới khi hết hạn tự nhiên, nhưng getUser() ở lần tải trang/thao tác kế tiếp
+ * sẽ thất bại vì session đã bị xoá.
+ */
+export async function forceLogoutAccount(id: string): Promise<void> {
+  await requireAuthenticated();
+  const admin = createAdminClient();
+
+  const { error } = await admin.rpc("admin_force_logout", { target_user_id: id });
+  if (error) throw error;
+}
