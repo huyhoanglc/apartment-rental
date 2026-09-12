@@ -9,6 +9,7 @@ export interface AdminAccount {
   phone: string | null;
   role: AdminRole;
   locked: boolean;
+  has_mfa: boolean;
   created_at: string;
   last_sign_in_at: string | null;
   providers: string[];
@@ -50,6 +51,7 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
       phone: typeof u.user_metadata?.phone === "string" ? u.user_metadata.phone : null,
       role: roleOf(u.app_metadata),
       locked: Boolean(u.banned_until) && new Date(u.banned_until as string) > new Date(),
+      has_mfa: (u.factors ?? []).some((f) => f.status === "verified"),
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at ?? null,
       providers: (u.identities ?? []).map((i) => i.provider),
@@ -132,4 +134,26 @@ export async function forceLogoutAccount(id: string): Promise<void> {
 
   const { error } = await admin.rpc("admin_force_logout", { target_user_id: id });
   if (error) throw error;
+}
+
+/**
+ * Gỡ MFA của 1 tài khoản khác — dùng khi họ mất thiết bị authenticator và
+ * không tự đăng nhập được nữa (role admin bắt buộc có MFA nên không có cách
+ * tự khôi phục nào khác). Sau khi gỡ, họ đăng nhập lại bình thường rồi bị bắt
+ * enroll lại từ đầu ở /admin/mfa-setup.
+ */
+export async function resetAdminAccountMfa(id: string): Promise<void> {
+  await requireAuthenticated();
+  const admin = createAdminClient();
+
+  const { data, error } = await admin.auth.admin.mfa.listFactors({ userId: id });
+  if (error) throw error;
+
+  for (const factor of data.factors) {
+    const { error: deleteError } = await admin.auth.admin.mfa.deleteFactor({
+      id: factor.id,
+      userId: id,
+    });
+    if (deleteError) throw deleteError;
+  }
 }

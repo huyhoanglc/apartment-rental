@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { recordAdminLogin } from "@/lib/admin/security";
+import { logLoginAttempt, logSecurityEvent, recordAdminLogin } from "@/lib/admin/security";
 
 /**
  * Danh sách email được phép đăng nhập qua OAuth (Google...), phân tách bằng
@@ -68,6 +68,12 @@ export async function GET(request: NextRequest) {
 
   if (!isLinking) {
     if (!isEmailAllowed(data.user.email ?? null)) {
+      await logLoginAttempt(data.user.email ?? "", false, data.user.id);
+      await logSecurityEvent("login_blocked_not_allowed", {
+        actorUserId: data.user.id,
+        actorEmail: data.user.email,
+        telegramNote: "Đăng nhập Google bị chặn — email không nằm trong ADMIN_ALLOWED_EMAILS.",
+      });
       await supabase.auth.signOut();
       return NextResponse.redirect(`${origin}/admin/login?error=not_allowed`);
     }

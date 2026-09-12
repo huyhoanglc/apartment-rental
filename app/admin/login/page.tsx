@@ -56,6 +56,12 @@ export default function AdminLoginPage({
                 danh sách cho phép.
               </p>
             )}
+            {searchParams.error === "locked" && (
+              <p className="text-sm text-rose-600">
+                Đã sai mật khẩu quá 5 lần liên tiếp — tài khoản tạm khoá đăng nhập 15 phút, vui
+                lòng thử lại sau.
+              </p>
+            )}
 
             <button
               type="submit"

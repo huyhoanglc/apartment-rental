@@ -9,8 +9,10 @@ export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/admin")) {
-    const { response, user } = await updateSession(request);
+    const { response, user, hasVerifiedMfaFactor, needsMfaChallenge } = await updateSession(request);
     const isLoginPage = pathname === "/admin/login";
+    const isMfaSetupPage = pathname === "/admin/mfa-setup";
+    const isMfaChallengePage = pathname === "/admin/mfa-challenge";
 
     if (!user && !isLoginPage) {
       const url = request.nextUrl.clone();
@@ -22,6 +24,26 @@ export default async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/admin";
       return NextResponse.redirect(url);
+    }
+
+    if (user && !isMfaSetupPage && !isMfaChallengePage) {
+      const role = user.app_metadata?.role === "member" ? "member" : "admin";
+
+      // Đã có factor verified nhưng session hiện tại mới ở aal1 (vừa đăng nhập
+      // lại) — bắt xác thực lại mã TOTP trước khi vào bất kỳ trang admin nào.
+      if (needsMfaChallenge) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin/mfa-challenge";
+        return NextResponse.redirect(url);
+      }
+
+      // Role admin bắt buộc có MFA — chưa enroll thì chặn hết, chỉ cho vào
+      // trang bật MFA.
+      if (role === "admin" && !hasVerifiedMfaFactor) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin/mfa-setup";
+        return NextResponse.redirect(url);
+      }
     }
 
     return response;

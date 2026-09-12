@@ -2,30 +2,29 @@
 
 import { useTransition } from "react";
 import { forceLogoutAction } from "@/app/admin/(dashboard)/sessions/actions";
-import { useConfirm } from "@/components/admin/ConfirmDialog";
+import { useReauth } from "@/components/admin/ReauthDialog";
 import { useToast } from "@/components/admin/Toast";
 import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
 
 export default function ForceLogoutButton({ id, email }: { id: string; email: string }) {
   const [isPending, startTransition] = useTransition();
-  const confirm = useConfirm();
+  const reauth = useReauth();
   const toast = useToast();
   const loading = useGlobalLoading();
 
   async function handleClick() {
-    const ok = await confirm({
+    const ok = await reauth({
       title: `Ép đăng xuất "${email}"?`,
       description:
-        "Phiên đăng nhập hiện tại của người này sẽ bị vô hiệu ngay — họ cần đăng nhập lại ở lần thao tác/tải trang tiếp theo. Tài khoản không bị khoá, vẫn đăng nhập lại được bình thường.",
+        "Phiên đăng nhập hiện tại của người này sẽ bị vô hiệu ngay — họ cần đăng nhập lại ở lần thao tác/tải trang tiếp theo. Tài khoản không bị khoá, vẫn đăng nhập lại được bình thường. Nhập mã TOTP để xác nhận.",
       confirmLabel: "Ép đăng xuất",
-      danger: true,
     });
     if (!ok) return;
 
     startTransition(async () => {
       loading.show("Đang ép đăng xuất...");
       try {
-        const result = await forceLogoutAction(id);
+        const result = await forceLogoutAction(id, email);
         if (result.error) toast.error(result.error);
         else toast.success("Đã ép đăng xuất — phiên hiện tại của họ đã bị vô hiệu.");
       } catch {

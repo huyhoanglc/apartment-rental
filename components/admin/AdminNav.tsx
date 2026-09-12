@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 import { logout } from "@/app/admin/(dashboard)/actions";
-import ThemeToggle from "@/components/ThemeToggle";
+import ThemeToggle from "@/components/layout/ThemeToggle";
 import Avatar from "@/components/admin/Avatar";
 import PresenceIndicator from "@/components/admin/PresenceIndicator";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
@@ -169,6 +169,7 @@ export const NAV_ITEMS = [
   { href: "/admin/staff", label: "Nhân viên", icon: UsersIcon, adminOnly: true },
   { href: "/admin/accounts", label: "Tài khoản", icon: KeyIcon, adminOnly: true },
   { href: "/admin/sessions", label: "Phiên đăng nhập", icon: MonitorIcon, adminOnly: true },
+  { href: "/admin/audit-log", label: "Nhật ký bảo mật", icon: ShieldIcon, adminOnly: true },
   { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon, adminOnly: false },
 ];
 

@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatVNDateTime } from "@/lib/formatDate";
 import { sendTelegramMessage } from "@/lib/telegram";
 
@@ -10,23 +11,179 @@ export interface LoginEvent {
   created_at: string;
 }
 
-/**
- * Ghi 1 dòng lịch sử đăng nhập. Lỗi ở đây chỉ log ra console, không throw —
- * một bản ghi audit log thất bại không được làm hỏng luồng đăng nhập chính.
- */
-export async function logLoginEvent(userId: string): Promise<void> {
-  const headerList = headers();
-  const ipAddress = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-  const userAgent = headerList.get("user-agent");
+/** Số lần sai liên tiếp trong 1 cửa sổ thời gian trước khi tạm khoá đăng nhập theo email. */
+const RATE_LIMIT_MAX_ATTEMPTS = 5;
+const RATE_LIMIT_WINDOW_MINUTES = 15;
 
-  const supabase = createClient();
-  const { error } = await supabase.from("admin_login_events").insert({
-    user_id: userId,
-    ip_address: ipAddress,
+/**
+ * Event có tín hiệu cao mới báo Telegram — login thành công thường/logout chỉ
+ * ghi DB (xem logLoginAttempt/logSecurityEvent), tránh spam kênh Telegram
+ * đang dùng chung với thông báo lead mới.
+ */
+const TELEGRAM_ALERT_EVENTS = new Set([
+  "login_blocked_rate_limit",
+  "login_blocked_not_allowed",
+  "account_locked_auto",
+  "new_device",
+  "role_changed",
+  "session_revoked",
+  "account_deleted",
+  "mfa_enrolled",
+  "mfa_removed",
+  "mfa_reset_by_admin",
+  "reauth_failed",
+]);
+
+function getRequestMeta(): { ip: string | null; userAgent: string | null } {
+  const headerList = headers();
+  return {
+    ip: headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+    userAgent: headerList.get("user-agent"),
+  };
+}
+
+/**
+ * Ghi 1 lần thử đăng nhập (thành công hoặc thất bại) vào admin_login_events.
+ * Luôn dùng service-role client vì lúc đăng nhập thất bại (hoặc email không
+ * khớp tài khoản nào) chưa có session hợp lệ để qua được RLS.
+ */
+export async function logLoginAttempt(
+  email: string,
+  success: boolean,
+  userId?: string
+): Promise<void> {
+  const { ip, userAgent } = getRequestMeta();
+  const admin = createAdminClient();
+  const { error } = await admin.from("admin_login_events").insert({
+    user_id: userId ?? null,
+    email,
+    success,
+    ip_address: ip,
     user_agent: userAgent,
   });
 
-  if (error) console.error("[logLoginEvent]", error);
+  if (error) console.error("[logLoginAttempt]", error);
+}
+
+/**
+ * Chặn đăng nhập khi 1 email vừa sai quá RATE_LIMIT_MAX_ATTEMPTS lần trong
+ * RATE_LIMIT_WINDOW_MINUTES gần nhất. Tự hết hạn theo cửa sổ thời gian (không
+ * cần bảng lock riêng), khác với khoá tay vĩnh viễn ở lib/admin/accounts.ts.
+ */
+export async function checkLoginRateLimit(
+  email: string
+): Promise<{ blocked: boolean; retryAfterSeconds: number }> {
+  const admin = createAdminClient();
+  const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60_000).toISOString();
+
+  const { count, error } = await admin
+    .from("admin_login_events")
+    .select("id", { count: "exact", head: true })
+    .eq("email", email)
+    .eq("success", false)
+    .gte("created_at", since);
+
+  if (error) {
+    console.error("[checkLoginRateLimit]", error);
+    return { blocked: false, retryAfterSeconds: 0 };
+  }
+
+  const blocked = (count ?? 0) >= RATE_LIMIT_MAX_ATTEMPTS;
+  return { blocked, retryAfterSeconds: blocked ? RATE_LIMIT_WINDOW_MINUTES * 60 : 0 };
+}
+
+/** So (ip, user_agent) hiện tại với các lần đăng nhập thành công trước đó của user này. */
+export async function detectNewDevice(
+  userId: string,
+  ip: string | null,
+  userAgent: string | null
+): Promise<boolean> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("admin_login_events")
+    .select("ip_address, user_agent")
+    .eq("user_id", userId)
+    .eq("success", true)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.error("[detectNewDevice]", error);
+    return false;
+  }
+  if (!data || data.length === 0) return false; // lần đăng nhập thành công đầu tiên, không tính là "thiết bị mới"
+
+  return !data.some((row) => row.ip_address === ip && row.user_agent === userAgent);
+}
+
+export interface SecurityEventDetails {
+  actorUserId?: string | null;
+  actorEmail?: string | null;
+  targetUserId?: string | null;
+  targetEmail?: string | null;
+  metadata?: Record<string, unknown>;
+  /** Dòng mô tả ngắn gọn hiển thị trong tin Telegram, nếu event nằm trong TELEGRAM_ALERT_EVENTS. */
+  telegramNote?: string;
+}
+
+/**
+ * Ghi 1 sự kiện bảo mật vào security_audit_log (service role) + báo Telegram
+ * nếu event nằm trong nhóm tín hiệu cao. Lỗi ở đây chỉ log console, không
+ * throw — audit log thất bại không được làm hỏng luồng chính.
+ */
+export async function logSecurityEvent(
+  eventType: string,
+  details: SecurityEventDetails = {}
+): Promise<void> {
+  const { ip, userAgent } = getRequestMeta();
+  const admin = createAdminClient();
+
+  const { error } = await admin.from("security_audit_log").insert({
+    event_type: eventType,
+    actor_user_id: details.actorUserId ?? null,
+    actor_email: details.actorEmail ?? null,
+    target_user_id: details.targetUserId ?? null,
+    target_email: details.targetEmail ?? null,
+    ip_address: ip,
+    user_agent: userAgent,
+    metadata: details.metadata ?? null,
+  });
+
+  if (error) console.error("[logSecurityEvent]", eventType, error);
+
+  if (TELEGRAM_ALERT_EVENTS.has(eventType)) {
+    void sendTelegramMessage(
+      `🛡️ <b>Cảnh báo bảo mật: ${eventType}</b>\n` +
+        (details.actorEmail ? `Người thực hiện: ${details.actorEmail}\n` : "") +
+        (details.targetEmail ? `Tài khoản liên quan: ${details.targetEmail}\n` : "") +
+        (details.telegramNote ? `${details.telegramNote}\n` : "") +
+        `Thời gian: ${formatVNDateTime(new Date())}\n` +
+        `IP: ${ip ?? "không rõ"}`
+    );
+  }
+}
+
+export interface SecurityAuditLogEntry {
+  id: string;
+  event_type: string;
+  actor_email: string | null;
+  target_email: string | null;
+  ip_address: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+/** 50 sự kiện bảo mật gần nhất — trang /admin/security-log (chỉ admin, theo RLS trên security_audit_log). */
+export async function getSecurityAuditLog(): Promise<SecurityAuditLogEntry[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("security_audit_log")
+    .select("id, event_type, actor_email, target_email, ip_address, metadata, created_at")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) throw error;
+  return data ?? [];
 }
 
 /**
@@ -39,11 +196,19 @@ export async function recordAdminLogin(
   email: string | null,
   phone: string | null
 ): Promise<void> {
-  await logLoginEvent(userId);
+  const { ip, userAgent } = getRequestMeta();
+  await logLoginAttempt(email ?? "", true, userId);
 
-  const headerList = headers();
-  const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "không rõ";
-  const device = parseUserAgent(headerList.get("user-agent"));
+  const isNewDevice = await detectNewDevice(userId, ip, userAgent);
+  if (isNewDevice) {
+    await logSecurityEvent("new_device", {
+      actorUserId: userId,
+      actorEmail: email,
+      telegramNote: `Thiết bị: ${parseUserAgent(userAgent)}`,
+    });
+  }
+
+  const device = parseUserAgent(userAgent);
 
   // Format nhiều thẻ <b> + dòng kẻ + <code> (thử trước đó) vẫn bị Telegram
   // hiện escape thô "\uD83D\uDDxx" ở icon đầu tin dù đổi icon hay đổi cách
@@ -56,7 +221,7 @@ export async function recordAdminLogin(
       `Tài khoản: ${email ?? "?"}\n` +
       (phone ? `Số điện thoại: ${phone}\n` : "") +
       `Thời gian: ${formatVNDateTime(new Date())}\n` +
-      `IP: ${ip}\n` +
+      `IP: ${ip ?? "không rõ"}\n` +
       `Thiết bị: ${device}`
   );
 }
@@ -66,6 +231,7 @@ export async function getLoginEvents(): Promise<LoginEvent[]> {
   const { data, error } = await supabase
     .from("admin_login_events")
     .select("id, ip_address, user_agent, created_at")
+    .eq("success", true)
     .order("created_at", { ascending: false })
     .limit(20);
 

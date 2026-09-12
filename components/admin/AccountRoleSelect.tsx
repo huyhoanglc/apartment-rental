@@ -2,20 +2,24 @@
 
 import { useTransition } from "react";
 import { updateAccountRoleAction } from "@/app/admin/(dashboard)/accounts/actions";
+import { useReauth } from "@/components/admin/ReauthDialog";
 import { useToast } from "@/components/admin/Toast";
 import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
 import type { AdminRole } from "@/lib/admin/roles";
 
 export default function AccountRoleSelect({
   id,
+  email,
   role,
   isSelf,
 }: {
   id: string;
+  email: string;
   role: AdminRole;
   isSelf: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
+  const reauth = useReauth();
   const toast = useToast();
   const loading = useGlobalLoading();
 
@@ -27,11 +31,18 @@ export default function AccountRoleSelect({
     );
   }
 
-  function handleChange(newRole: AdminRole) {
+  async function handleChange(newRole: AdminRole) {
+    const ok = await reauth({
+      title: `Đổi vai trò "${email}" thành ${newRole === "admin" ? "Admin" : "Cá nhân"}?`,
+      description: "Nhập mã TOTP để xác nhận thay đổi quyền hạn.",
+      confirmLabel: "Đổi vai trò",
+    });
+    if (!ok) return;
+
     startTransition(async () => {
       loading.show("Đang đổi vai trò...");
       try {
-        const result = await updateAccountRoleAction(id, newRole);
+        const result = await updateAccountRoleAction(id, newRole, email);
         if (result.error) toast.error(result.error);
         else toast.success("Đã đổi vai trò.");
       } catch {

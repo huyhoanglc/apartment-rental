@@ -161,11 +161,18 @@ create policy "authenticated can update listing images"
 -- ==========================================================================
 create table if not exists admin_login_events (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
   ip_address text,
   user_agent text,
   created_at timestamptz not null default now()
 );
+
+-- success=false (đăng nhập sai) + email dùng để đếm rate-limit/lockout theo email — kể cả khi
+-- email không khớp user nào (user_id null) vẫn phải ghi được để đếm đúng. Cho project đã tạo bảng
+-- này từ trước khi có 2 cột này/khi user_id còn not null:
+alter table admin_login_events add column if not exists success boolean not null default true;
+alter table admin_login_events add column if not exists email text;
+alter table admin_login_events alter column user_id drop not null;
 
 alter table admin_login_events enable row level security;
 
@@ -175,11 +182,40 @@ create policy "authenticated can select own login events"
   to authenticated
   using (auth.uid() = user_id);
 
+-- Không còn policy insert cho authenticated: ghi log đăng nhập (thành công lẫn thất bại, kể cả
+-- trước khi có session hợp lệ) giờ luôn qua service-role client (lib/admin/security.ts), bỏ qua
+-- RLS — nhất quán với cách lib/admin/accounts.ts thao tác dữ liệu nhạy cảm khác.
 drop policy if exists "authenticated can insert own login events" on admin_login_events;
-create policy "authenticated can insert own login events"
-  on admin_login_events for insert
+
+-- ==========================================================================
+-- Nhật ký sự kiện bảo mật (đăng nhập chặn rate-limit, khoá tự động, thiết bị
+-- mới, đổi vai trò, ép đăng xuất, xoá tài khoản, MFA...) — khác admin_login_events
+-- (chỉ lưu mỗi lần thử đăng nhập) và activity_log (chỉ lưu sửa dữ liệu
+-- listings/projects/blog_posts). Trang /admin/security (chỉ admin xem được).
+-- ==========================================================================
+create table if not exists security_audit_log (
+  id uuid primary key default gen_random_uuid(),
+  event_type text not null,
+  actor_user_id uuid references auth.users(id) on delete set null,
+  actor_email text,
+  target_user_id uuid references auth.users(id) on delete set null,
+  target_email text,
+  ip_address text,
+  user_agent text,
+  metadata jsonb,
+  created_at timestamptz not null default now()
+);
+
+alter table security_audit_log enable row level security;
+
+drop policy if exists "admin can select security audit log" on security_audit_log;
+create policy "admin can select security audit log"
+  on security_audit_log for select
   to authenticated
-  with check (auth.uid() = user_id);
+  using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
+
+-- Không có policy insert/update/delete cho authenticated: chỉ ghi qua service-role
+-- (lib/admin/security.ts logSecurityEvent), giống pattern activity_log.
 
 -- ==========================================================================
 -- Ép đăng xuất user khác (trang /admin/sessions)

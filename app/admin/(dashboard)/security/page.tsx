@@ -1,7 +1,10 @@
 import LinkGoogleButton from "@/components/admin/LinkGoogleButton";
+import MfaManager from "@/components/admin/MfaManager";
 import ProfileForm from "@/components/admin/ProfileForm";
 import SignOutOthersButton from "@/components/admin/SignOutOthersButton";
 import { createClient } from "@/lib/supabase/server";
+import { getVerifiedTotpFactor } from "@/lib/admin/mfa";
+import { isCurrentUserAdmin } from "@/lib/admin/roles";
 import { getLoginEvents, parseUserAgent } from "@/lib/admin/security";
 import { countListingsCreatedBy } from "@/lib/admin/listings";
 import { formatVNDateTime } from "@/lib/formatDate";
@@ -56,10 +59,12 @@ export default async function AdminSecurityPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [events, identitiesResult, listingsCount] = await Promise.all([
+  const [events, identitiesResult, listingsCount, mfaFactor, isAdmin] = await Promise.all([
     getLoginEvents(),
     supabase.auth.getUserIdentities(),
     user ? countListingsCreatedBy(user.id) : Promise.resolve(0),
+    getVerifiedTotpFactor(),
+    isCurrentUserAdmin(),
   ]);
 
   const email = user?.email ?? "";
@@ -124,6 +129,17 @@ export default async function AdminSecurityPage() {
             </div>
             <span className="text-xs text-muted-foreground">Tính năng đang cập nhật</span>
           </div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-xl2 border border-border bg-card p-6 shadow-card">
+        <h2 className="text-sm font-semibold text-foreground">Xác thực 2 lớp (MFA)</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Yêu cầu thêm mã từ app authenticator (Google Authenticator, Authy...) mỗi khi đăng nhập
+          lại.
+        </p>
+        <div className="mt-3">
+          <MfaManager hasFactor={Boolean(mfaFactor)} factorId={mfaFactor?.id ?? null} isAdmin={isAdmin} />
         </div>
       </div>
 

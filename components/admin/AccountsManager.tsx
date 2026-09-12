@@ -7,6 +7,7 @@ import AccountRoleSelect from "@/components/admin/AccountRoleSelect";
 import CreateAccountForm from "@/components/admin/CreateAccountForm";
 import DeleteAccountButton from "@/components/admin/DeleteAccountButton";
 import FormModal from "@/components/admin/FormModal";
+import ResetMfaButton from "@/components/admin/ResetMfaButton";
 import ResetPasswordButton from "@/components/admin/ResetPasswordButton";
 import { useToast } from "@/components/admin/Toast";
 import { formatVNDateTime } from "@/lib/formatDate";
@@ -59,6 +60,7 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
               <th className="px-4 py-3">SĐT</th>
               <th className="px-4 py-3">Vai trò</th>
               <th className="px-4 py-3">Trạng thái</th>
+              <th className="px-4 py-3">MFA</th>
               <th className="px-4 py-3">Đăng nhập gần nhất</th>
               <th className="px-4 py-3"></th>
             </tr>
@@ -72,7 +74,7 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
                   <td className="px-4 py-3 text-muted-foreground">{account.email}</td>
                   <td className="px-4 py-3 text-muted-foreground">{account.phone ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <AccountRoleSelect id={account.id} role={account.role} isSelf={isSelf} />
+                    <AccountRoleSelect id={account.id} email={account.email} role={account.role} isSelf={isSelf} />
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -85,6 +87,17 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
                       {account.locked ? "Đã khoá" : "Đang hoạt động"}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        account.has_mfa
+                          ? "bg-status-available/10 text-status-available"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {account.has_mfa ? "Đã bật" : "Chưa bật"}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {account.last_sign_in_at
                       ? formatVNDateTime(account.last_sign_in_at)
@@ -95,6 +108,7 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
                       <div className="flex items-center gap-3">
                         <AccountLockToggle id={account.id} email={account.email} locked={account.locked} />
                         <ResetPasswordButton id={account.id} phone={account.phone} />
+                        {account.has_mfa && <ResetMfaButton id={account.id} email={account.email} />}
                         <DeleteAccountButton id={account.id} email={account.email} />
                       </div>
                     )}
@@ -104,7 +118,7 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
             })}
             {accounts.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                   Chưa có tài khoản nào.
                 </td>
               </tr>
