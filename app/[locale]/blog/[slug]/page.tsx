@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getBlogPostBySlug } from "@/lib/blog";
+import { formatVNDate } from "@/lib/formatDate";
 
 interface PageProps {
   params: { locale: string; slug: string };
@@ -80,7 +81,7 @@ export default async function BlogPostPage({ params: { locale, slug } }: PagePro
         <h1 className="mt-6 text-3xl font-bold text-foreground">{post.title}</h1>
         {post.published_at && (
           <p className="mt-2 text-sm text-muted-foreground">
-            {new Date(post.published_at).toLocaleDateString("vi-VN")}
+            {formatVNDate(post.published_at)}
           </p>
         )}
 

@@ -9,6 +9,7 @@ import DeleteAccountButton from "@/components/admin/DeleteAccountButton";
 import FormModal from "@/components/admin/FormModal";
 import ResetPasswordButton from "@/components/admin/ResetPasswordButton";
 import { useToast } from "@/components/admin/Toast";
+import { formatVNDateTime } from "@/lib/formatDate";
 import type { AdminAccount } from "@/lib/admin/accounts";
 
 interface AccountsManagerProps {
@@ -86,7 +87,7 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {account.last_sign_in_at
-                      ? new Date(account.last_sign_in_at).toLocaleString("vi-VN")
+                      ? formatVNDateTime(account.last_sign_in_at)
                       : "Chưa đăng nhập"}
                   </td>
                   <td className="px-4 py-3">

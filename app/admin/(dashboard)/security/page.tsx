@@ -4,6 +4,7 @@ import SignOutOthersButton from "@/components/admin/SignOutOthersButton";
 import { createClient } from "@/lib/supabase/server";
 import { getLoginEvents, parseUserAgent } from "@/lib/admin/security";
 import { countListingsCreatedBy } from "@/lib/admin/listings";
+import { formatVNDateTime } from "@/lib/formatDate";
 
 // Không chặn theo role: trang này chỉ hiện thông tin của CHÍNH tài khoản
 // đang đăng nhập (hồ sơ, lịch sử đăng nhập, phương thức liên kết) — không
@@ -144,7 +145,7 @@ export default async function AdminSecurityPage() {
             {events.map((event) => (
               <tr key={event.id} className="border-b border-border last:border-0">
                 <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
-                  {new Date(event.created_at).toLocaleString("vi-VN")}
+                  {formatVNDateTime(event.created_at)}
                 </td>
                 <td className="px-4 py-3 text-foreground">{parseUserAgent(event.user_agent)}</td>
                 <td className="px-4 py-3 text-muted-foreground">{event.ip_address ?? "—"}</td>

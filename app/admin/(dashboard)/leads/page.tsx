@@ -1,5 +1,6 @@
 import ContactedToggle from "@/components/admin/ContactedToggle";
 import { getLeads } from "@/lib/admin/leads";
+import { formatVNDateTime } from "@/lib/formatDate";
 
 export default async function AdminLeadsPage() {
   const leads = await getLeads();
@@ -24,7 +25,7 @@ export default async function AdminLeadsPage() {
             {leads.map((lead) => (
               <tr key={lead.id} className="border-b border-border last:border-0">
                 <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
-                  {new Date(lead.created_at).toLocaleString("vi-VN")}
+                  {formatVNDateTime(lead.created_at)}
                 </td>
                 <td className="px-4 py-3 font-medium text-foreground">{lead.phone}</td>
                 <td className="px-4 py-3 text-muted-foreground">{lead.district ?? "—"}</td>

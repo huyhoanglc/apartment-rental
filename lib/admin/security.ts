@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { formatVNDateTime } from "@/lib/formatDate";
 import { sendTelegramMessage } from "@/lib/telegram";
 
 export interface LoginEvent {
@@ -54,7 +55,7 @@ export async function recordAdminLogin(
     `🔔 <b>Thông Báo Đăng Nhập Admin Dashboard</b>\n` +
       `Tài khoản: ${email ?? "?"}\n` +
       (phone ? `Số điện thoại: ${phone}\n` : "") +
-      `Thời gian: ${new Date().toLocaleString("vi-VN")}\n` +
+      `Thời gian: ${formatVNDateTime(new Date())}\n` +
       `IP: ${ip}\n` +
       `Thiết bị: ${device}`
   );

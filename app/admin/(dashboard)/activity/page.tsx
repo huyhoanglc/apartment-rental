@@ -1,4 +1,5 @@
 import { getRecentActivity } from "@/lib/admin/activity";
+import { formatVNDateTime } from "@/lib/formatDate";
 import { ACTIVITY_ACTION_LABELS, ACTIVITY_TABLE_LABELS } from "@/lib/types";
 
 const ACTION_BADGE: Record<string, string> = {
@@ -33,7 +34,7 @@ export default async function ActivityLogPage() {
             {entries.map((entry) => (
               <tr key={entry.id} className="border-b border-border last:border-0">
                 <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
-                  {new Date(entry.created_at).toLocaleString("vi-VN")}
+                  {formatVNDateTime(entry.created_at)}
                 </td>
                 <td className="px-4 py-3 text-foreground">{entry.changed_by_email ?? "—"}</td>
                 <td className="px-4 py-3">
