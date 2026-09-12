@@ -41,6 +41,7 @@ const PROVIDER_LABELS = {
 export async function recordAdminLogin(
   userId: string,
   email: string | null,
+  phone: string | null,
   provider: keyof typeof PROVIDER_LABELS
 ): Promise<void> {
   await logLoginEvent(userId);
@@ -50,9 +51,10 @@ export async function recordAdminLogin(
   const device = parseUserAgent(headerList.get("user-agent"));
 
   await sendTelegramMessage(
-    "🔐 <b>Đăng nhập quản trị thành công</b>\n" +
+    "🔐 <b>Thông Báo Đăng Nhập Admin Dashboard</b>\n" +
       "━━━━━━━━━━━━━━━━━\n" +
       `👤 <b>Tài khoản:</b> ${email ?? "?"}\n` +
+      (phone ? `📱 <b>Số điện thoại:</b> ${phone}\n` : "") +
       `🔑 <b>Phương thức:</b> ${PROVIDER_LABELS[provider]}\n` +
       `🕒 <b>Thời gian:</b> ${new Date().toLocaleString("vi-VN")}\n` +
       `🌐 <b>IP:</b> <code>${ip}</code>\n` +
