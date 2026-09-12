@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
 interface LoadingOverlayContextValue {
   show: (message?: string) => void;
@@ -19,9 +19,13 @@ export function LoadingOverlayProvider({ children }: { children: ReactNode }) {
 
   const show = useCallback((msg?: string) => setMessage(msg ?? "Đang xử lý..."), []);
   const hide = useCallback(() => setMessage(null), []);
+  // Nhớ object context (xem giải thích tương tự trong Toast.tsx) để tránh đổi
+  // identity mỗi lần message thay đổi, gây lặp vô hạn nếu ai đó phụ thuộc
+  // useGlobalLoading() trong useEffect.
+  const value = useMemo<LoadingOverlayContextValue>(() => ({ show, hide }), [show, hide]);
 
   return (
-    <LoadingOverlayContext.Provider value={{ show, hide }}>
+    <LoadingOverlayContext.Provider value={value}>
       {children}
       {message && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 p-4">

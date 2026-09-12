@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 
 type ToastType = "success" | "error" | "info";
 
@@ -76,11 +76,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [dismiss]
   );
 
-  const value: ToastContextValue = {
-    success: useCallback((message: string) => push("success", message), [push]),
-    error: useCallback((message: string) => push("error", message), [push]),
-    info: useCallback((message: string) => push("info", message), [push]),
-  };
+  const success = useCallback((message: string) => push("success", message), [push]);
+  const error = useCallback((message: string) => push("error", message), [push]);
+  const info = useCallback((message: string) => push("info", message), [push]);
+
+  // QUAN TRỌNG: phải nhớ (useMemo) object context này — nếu tạo object literal
+  // mới mỗi lần render, mọi component gọi useEffect phụ thuộc vào useToast()
+  // sẽ bị re-run ngay khi có toast mới xuất hiện (vì push toast => re-render
+  // ToastProvider => value đổi identity => effect chạy lại => push toast lần
+  // nữa => lặp vô hạn). Đây chính là nguyên nhân bug "spam toast" đã gặp.
+  const value = useMemo<ToastContextValue>(() => ({ success, error, info }), [success, error, info]);
 
   return (
     <ToastContext.Provider value={value}>
