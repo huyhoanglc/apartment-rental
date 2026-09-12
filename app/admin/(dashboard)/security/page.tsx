@@ -32,12 +32,19 @@ function GoogleIcon({ className }: { className?: string }) {
 
 function ZaloIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className}>
-      <rect width="24" height="24" rx="6" fill="#0068FF" />
-      <path
+    <svg viewBox="0 0 48 48" className={className}>
+      <rect width="48" height="48" rx="12" fill="#0068FF" />
+      <text
+        x="24"
+        y="31"
+        textAnchor="middle"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontWeight="700"
+        fontSize="15"
         fill="#fff"
-        d="M6 8.25h5.4v1.2H7.9l3.6 4.05v1.2H6v-1.2h3.7L6 9.45V8.25Zm7.2 0h1.35v6.45H13.2V8.25Zm2.85 1.8c1.25 0 2.2.98 2.2 2.32 0 1.35-.95 2.33-2.2 2.33S16 13.72 16 12.37c0-1.34.95-2.32 2.05-2.32Zm0 1.13c-.6 0-1.02.5-1.02 1.19 0 .7.42 1.2 1.02 1.2s1.02-.5 1.02-1.2c0-.69-.42-1.19-1.02-1.19Z"
-      />
+      >
+        Zalo
+      </text>
     </svg>
   );
 }
