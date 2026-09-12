@@ -39,7 +39,7 @@ export default function SignOutOthersButton() {
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+      className="w-full rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50 sm:w-auto"
     >
       {isPending ? "Đang xử lý..." : "Đăng xuất khỏi tất cả thiết bị khác"}
     </button>
