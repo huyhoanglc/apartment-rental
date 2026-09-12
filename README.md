@@ -95,8 +95,9 @@ qua Admin API — user không tự nâng quyền được):
 
 - **Admin**: thấy và dùng được tất cả, kể cả Nhân viên và Tài khoản (quản lý người khác).
 - **Cá nhân**: thấy Phòng, Dự án, Blog, Leads, và **Tài khoản của tôi** (`/admin/security` — tự sửa
-  họ tên hiển thị, xem lịch sử đăng nhập, tự liên kết thêm Google; menu "Hồ sơ"/"Cài đặt" ở dropdown
-  avatar đều dẫn tới đây). Không thấy Nhân viên/Tài khoản trên nav — vào
+  hồ sơ cá nhân: họ tên, ngày sinh, chức vụ, hình thức làm việc, ngày vào làm — kèm số phòng tự
+  đăng (đếm từ `listings.created_by`); xem lịch sử đăng nhập; tự liên kết thêm Google. Menu "Hồ
+  sơ"/"Cài đặt" ở dropdown avatar đều dẫn tới đây). Không thấy Nhân viên/Tài khoản trên nav — vào
   thẳng URL 2 trang đó cũng bị chặn (404), không chỉ ẩn link. `/admin/security` không chặn theo
   role vì chỉ hiện dữ liệu của chính tài khoản đang đăng nhập, không phải quản trị người khác.
 

@@ -24,3 +24,14 @@ export async function updateListingStatus(code: string, status: ListingStatus): 
   const { error } = await supabase.from("listings").update({ status }).eq("code", code);
   if (error) throw error;
 }
+
+/** Số phòng do 1 tài khoản tự tạo — hiện ở "Hồ sơ" (/admin/security) như 1 thành tích nhỏ. */
+export async function countListingsCreatedBy(userId: string): Promise<number> {
+  const supabase = createClient();
+  const { count, error } = await supabase
+    .from("listings")
+    .select("*", { count: "exact", head: true })
+    .eq("created_by", userId);
+  if (error) throw error;
+  return count ?? 0;
+}
