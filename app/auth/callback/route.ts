@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/admin/login?error=not_allowed`);
     }
     const phone = typeof data.user.user_metadata?.phone === "string" ? data.user.user_metadata.phone : null;
-    await recordAdminLogin(data.user.id, data.user.email ?? null, phone, "google");
+    await recordAdminLogin(data.user.id, data.user.email ?? null, phone);
   }
 
   const next = isLinking ? "/admin/security" : "/admin";

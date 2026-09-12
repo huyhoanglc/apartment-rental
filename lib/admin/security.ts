@@ -28,11 +28,6 @@ export async function logLoginEvent(userId: string): Promise<void> {
   if (error) console.error("[logLoginEvent]", error);
 }
 
-const PROVIDER_LABELS = {
-  email: "Email/mật khẩu",
-  google: "Google",
-} as const;
-
 /**
  * Ghi log + báo Telegram cho 1 lần đăng nhập thành công — dùng chung cho cả
  * luồng email/password (app/admin/login/actions.ts) và OAuth
@@ -41,8 +36,7 @@ const PROVIDER_LABELS = {
 export async function recordAdminLogin(
   userId: string,
   email: string | null,
-  phone: string | null,
-  provider: keyof typeof PROVIDER_LABELS
+  phone: string | null
 ): Promise<void> {
   await logLoginEvent(userId);
 
@@ -50,12 +44,17 @@ export async function recordAdminLogin(
   const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "không rõ";
   const device = parseUserAgent(headerList.get("user-agent"));
 
+  // Emoji đặt NGAY ĐẦU tin nhắn, trước 1 thẻ <b>, từng khiến Telegram hiện ra
+  // chữ escape thô "\uD83D\uDDxx" thay vì icon thật (bug tính offset UTF-16
+  // của Telegram khi ký tự đầu tiên là surrogate pair) — các dòng sau vẫn có
+  // icon + <b> y hệt nhưng không đứng ở vị trí đầu tin nên không bị. Đưa
+  // emoji vào TRONG thẻ <b> để nó không còn là điểm chuyển ranh giới ở vị
+  // trí 0 nữa.
   await sendTelegramMessage(
-    "🔔 <b>Thông Báo Đăng Nhập Admin Dashboard</b>\n" +
+    "<b>🔔 Thông Báo Đăng Nhập Admin Dashboard</b>\n" +
       "━━━━━━━━━━━━━━━━━\n" +
       `👤 <b>Tài khoản:</b> ${email ?? "?"}\n` +
       (phone ? `📱 <b>Số điện thoại:</b> ${phone}\n` : "") +
-      `🔑 <b>Phương thức:</b> ${PROVIDER_LABELS[provider]}\n` +
       `🕒 <b>Thời gian:</b> ${new Date().toLocaleString("vi-VN")}\n` +
       `🌐 <b>IP:</b> <code>${ip}</code>\n` +
       `💻 <b>Thiết bị:</b> ${device}`

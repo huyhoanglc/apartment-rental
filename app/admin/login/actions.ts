@@ -21,7 +21,7 @@ export async function login(formData: FormData) {
   }
 
   const phone = typeof data.user.user_metadata?.phone === "string" ? data.user.user_metadata.phone : null;
-  await recordAdminLogin(data.user.id, data.user.email ?? null, phone, "email");
+  await recordAdminLogin(data.user.id, data.user.email ?? null, phone);
 
   redirect("/admin");
 }
