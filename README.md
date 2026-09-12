@@ -254,6 +254,16 @@ mới" ở `/admin` khi chưa có dự án nào sẽ báo lỗi nhắc tạo d�
 Quản lý ở `/admin/projects` (CRUD dự án, dùng chung `ProjectForm`) — xoá 1 dự án sẽ báo lỗi nếu dự
 án đó vẫn còn phòng (xoá hết phòng trước).
 
+**Import Excel hàng loạt** — nút "Import Excel" ở `/admin/projects` nhận file CSV/TSV (trong Excel:
+File → Save As → chọn "CSV UTF-8" hoặc "Text (Tab delimited)", **không nhận file `.xlsx` gốc**, cố
+ý tránh thêm thư viện đọc Excel để không kéo theo lỗ hổng bảo mật từ dependency của nó). Chỉ đọc 3
+cột theo tên ở dòng tiêu đề (không phân biệt hoa/thường, khoảng trắng thừa): **Địa chỉ**, **Quận**,
+**Số chủ** — các cột khác trong file (Người Cập Nhật, Hệ Thống, Tên Chủ Nhà, Link tổng...) bị bỏ
+qua. Vì file không có cột tên riêng, **tên dự án = chính địa chỉ** (sửa lại sau nếu muốn); slug tự
+sinh từ địa chỉ, tự thêm hậu tố `-2`, `-3`... nếu trùng dự án đã có. Cột "Số chủ" thường lẫn cả tên
+lẫn SĐT chủ nhà trong 1 ô (vd "c Hồng 0704525007") nên được lưu **nguyên văn** vào `owner_phone` —
+tách tay tên/SĐT riêng sau qua form sửa dự án. Dòng thiếu Địa chỉ hoặc Quận bị bỏ qua, không tạo.
+
 `/admin/staff` là **danh bạ nhân viên nội bộ** đơn giản (tên, SĐT, email, chức vụ, đang làm/nghỉ)
 — không liên quan tài khoản đăng nhập `/admin` (tài khoản đăng nhập vẫn tạo thủ công qua Supabase
 Dashboard như mục 3).

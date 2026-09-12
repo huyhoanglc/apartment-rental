@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createProject, deleteProject, updateProject } from "@/lib/admin/projects";
+import { importProjectsFromText, type ImportProjectsResult } from "@/lib/admin/importProjects";
 import { uploadProjectImage } from "@/lib/admin/storage";
 import { getProjectBySlug } from "@/lib/projects";
 import { slugify } from "@/lib/slugify";
@@ -90,6 +91,24 @@ export async function saveProject(
   revalidatePath("/admin");
   revalidatePath("/");
   return { success: true };
+}
+
+export async function importProjectsAction(
+  text: string
+): Promise<ImportProjectsResult & { error?: string }> {
+  try {
+    const result = await importProjectsFromText(text);
+    revalidatePath("/admin/projects");
+    revalidatePath("/admin");
+    return result;
+  } catch (err) {
+    console.error("[importProjectsAction]", err);
+    return {
+      imported: 0,
+      skipped: 0,
+      error: err instanceof Error ? err.message : "Import thất bại, vui lòng thử lại.",
+    };
+  }
 }
 
 export async function deleteProjectAction(slug: string): Promise<{ error?: string }> {

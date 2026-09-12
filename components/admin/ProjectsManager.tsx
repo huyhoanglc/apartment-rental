@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import DeleteProjectButton from "@/components/admin/DeleteProjectButton";
 import FormModal from "@/components/admin/FormModal";
+import ImportProjectsButton from "@/components/admin/ImportProjectsButton";
 import ProjectForm from "@/components/admin/ProjectForm";
 import { useToast } from "@/components/admin/Toast";
 import { saveProject } from "@/app/admin/(dashboard)/projects/actions";
@@ -38,16 +39,19 @@ export default function ProjectsManager({ projects }: ProjectsManagerProps) {
           <h1 className="text-xl font-bold text-foreground">Dự án</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{projects.length} dự án đang quản lý</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setModal({ mode: "create" })}
-          className="flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700"
-        >
-          <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-4 w-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Thêm dự án
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <ImportProjectsButton />
+          <button
+            type="button"
+            onClick={() => setModal({ mode: "create" })}
+            className="flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700"
+          >
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-4 w-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Thêm dự án
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
