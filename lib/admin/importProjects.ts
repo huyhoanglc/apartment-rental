@@ -1,3 +1,4 @@
+import ExcelJS from "exceljs";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slugify";
 
@@ -30,7 +31,7 @@ function detectDelimiter(headerLine: string): "\t" | "," {
   return headerLine.includes("\t") ? "\t" : ",";
 }
 
-/** Tách 1 dòng theo delimiter — với dấu phẩy thì xử lý luôn field có ngoặc kép (CSV chuẩn, để không vỡ khi địa chỉ chứa dấu phẩy). */
+/** Tách 1 dòng CSV/TSV — với dấu phẩy thì xử lý luôn field có ngoặc kép (CSV chuẩn, để không vỡ khi địa chỉ chứa dấu phẩy). */
 function splitLine(line: string, delimiter: "\t" | ","): string[] {
   if (delimiter === "\t") return line.split("\t");
 
@@ -63,17 +64,50 @@ function splitLine(line: string, delimiter: "\t" | ","): string[] {
   return fields;
 }
 
-function parseRows(text: string): { rows: ParsedRow[]; skipped: number } {
+function parseDelimitedText(text: string): string[][] {
   const lines = text
     .replace(/\r\n/g, "\n")
     .split("\n")
     .filter((line) => line.trim().length > 0);
-
-  if (lines.length < 2) return { rows: [], skipped: 0 };
+  if (lines.length === 0) return [];
 
   const delimiter = detectDelimiter(lines[0]);
-  const headers = splitLine(lines[0], delimiter).map(normalizeHeader);
+  return lines.map((line) => splitLine(line, delimiter));
+}
 
+function cellValueToString(value: ExcelJS.CellValue): string {
+  if (value == null) return "";
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "object") {
+    if ("text" in value && typeof value.text === "string") return value.text; // hyperlink
+    if ("richText" in value) return value.richText.map((t) => t.text).join(""); // rich text
+    if ("result" in value) return value.result == null ? "" : String(value.result); // formula
+    return "";
+  }
+  return String(value);
+}
+
+async function parseXlsxBuffer(buffer: Buffer): Promise<string[][]> {
+  const workbook = new ExcelJS.Workbook();
+  // Type defs của exceljs khai Buffer theo shape cũ, không khớp Buffer<ArrayBufferLike>
+  // của @types/node hiện tại — ép kiểu vì runtime vẫn là Buffer thật, chỉ lệch khai báo type.
+  await workbook.xlsx.load(buffer as unknown as Parameters<typeof workbook.xlsx.load>[0]);
+  const sheet = workbook.worksheets[0];
+  if (!sheet) return [];
+
+  const grid: string[][] = [];
+  sheet.eachRow((row) => {
+    const values = row.values as ExcelJS.CellValue[]; // index 0 luôn rỗng (exceljs đánh số cột từ 1)
+    grid.push(values.slice(1).map(cellValueToString));
+  });
+  return grid;
+}
+
+/** grid[0] là dòng tiêu đề, các dòng sau là dữ liệu. */
+function gridToRows(grid: string[][]): { rows: ParsedRow[]; skipped: number } {
+  if (grid.length < 2) return { rows: [], skipped: 0 };
+
+  const headers = grid[0].map(normalizeHeader);
   const addressIdx = headers.findIndex((h) => HEADER_ALIASES.address.includes(h));
   const districtIdx = headers.findIndex((h) => HEADER_ALIASES.district.includes(h));
   const ownerPhoneIdx = headers.findIndex((h) => HEADER_ALIASES.ownerPhone.includes(h));
@@ -85,8 +119,7 @@ function parseRows(text: string): { rows: ParsedRow[]; skipped: number } {
   const rows: ParsedRow[] = [];
   let skipped = 0;
 
-  for (const line of lines.slice(1)) {
-    const cells = splitLine(line, delimiter);
+  for (const cells of grid.slice(1)) {
     const address = (cells[addressIdx] ?? "").trim();
     const district = (cells[districtIdx] ?? "").trim();
 
@@ -102,17 +135,26 @@ function parseRows(text: string): { rows: ParsedRow[]; skipped: number } {
   return { rows, skipped };
 }
 
+interface UploadedFile {
+  name: string;
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
+
 /**
- * Import hàng loạt Dự án từ file CSV/TSV xuất ra từ Excel. Chỉ đọc 3 cột
- * (Địa chỉ, Quận, Số chủ) — các cột khác trong file (Người Cập Nhật, Hệ
- * Thống, Tên Chủ Nhà, Link tổng...) bị bỏ qua theo đúng yêu cầu.
+ * Import hàng loạt Dự án từ file Excel (.xlsx/.xls) hoặc CSV/TSV. Chỉ đọc 3
+ * cột (Địa chỉ, Quận, Số chủ) theo tên ở dòng tiêu đề — các cột khác trong
+ * file (Người Cập Nhật, Hệ Thống, Tên Chủ Nhà, Link tổng...) bị bỏ qua.
  *
  * Tên dự án = chính địa chỉ (file không có cột tên riêng) — sửa lại tên sau
  * nếu muốn. "Số chủ" hiện đang lẫn cả tên lẫn SĐT chủ nhà trong 1 ô nên lưu
  * nguyên văn vào owner_phone, tách tay sau qua form sửa dự án.
  */
-export async function importProjectsFromText(text: string): Promise<ImportProjectsResult> {
-  const { rows, skipped } = parseRows(text);
+export async function importProjectsFromFile(file: UploadedFile): Promise<ImportProjectsResult> {
+  const isExcel = /\.(xlsx|xls)$/i.test(file.name);
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const grid = isExcel ? await parseXlsxBuffer(buffer) : parseDelimitedText(buffer.toString("utf-8"));
+  const { rows, skipped } = gridToRows(grid);
   if (rows.length === 0) return { imported: 0, skipped };
 
   const supabase = createClient();

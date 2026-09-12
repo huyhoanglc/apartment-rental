@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createProject, deleteProject, updateProject } from "@/lib/admin/projects";
-import { importProjectsFromText, type ImportProjectsResult } from "@/lib/admin/importProjects";
+import { importProjectsFromFile, type ImportProjectsResult } from "@/lib/admin/importProjects";
 import { uploadProjectImage } from "@/lib/admin/storage";
 import { getProjectBySlug } from "@/lib/projects";
 import { slugify } from "@/lib/slugify";
@@ -94,10 +94,15 @@ export async function saveProject(
 }
 
 export async function importProjectsAction(
-  text: string
+  formData: FormData
 ): Promise<ImportProjectsResult & { error?: string }> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { imported: 0, skipped: 0, error: "Vui lòng chọn file." };
+  }
+
   try {
-    const result = await importProjectsFromText(text);
+    const result = await importProjectsFromFile(file);
     revalidatePath("/admin/projects");
     revalidatePath("/admin");
     return result;

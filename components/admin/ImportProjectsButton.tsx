@@ -8,10 +8,9 @@ import { useToast } from "@/components/admin/Toast";
 import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
 
 /**
- * Import hàng loạt Dự án từ file CSV/TSV (xuất từ Excel: File → Save As →
- * "CSV UTF-8" hoặc "Text (Tab delimited)"). Chỉ đọc cột Địa chỉ/Quận/Số chủ,
- * các cột khác trong file bị bỏ qua. Tên dự án tự lấy theo địa chỉ vì file
- * không có cột tên riêng — sửa lại sau nếu cần.
+ * Import hàng loạt Dự án từ file Excel (.xlsx/.xls) hoặc CSV/TSV. Chỉ đọc
+ * cột Địa chỉ/Quận/Số chủ, các cột khác trong file bị bỏ qua. Tên dự án tự
+ * lấy theo địa chỉ vì file không có cột tên riêng — sửa lại sau nếu cần.
  */
 export default function ImportProjectsButton() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,12 +34,13 @@ export default function ImportProjectsButton() {
     });
     if (!ok) return;
 
-    const text = await file.text();
+    const formData = new FormData();
+    formData.set("file", file);
 
     startTransition(async () => {
       loading.show("Đang import...");
       try {
-        const result = await importProjectsAction(text);
+        const result = await importProjectsAction(formData);
         if (result.error) {
           toast.error(result.error);
         } else if (result.imported === 0) {
@@ -65,7 +65,7 @@ export default function ImportProjectsButton() {
       <input
         ref={inputRef}
         type="file"
-        accept=".csv,.tsv,.txt"
+        accept=".xlsx,.xls,.csv,.tsv,.txt"
         onChange={handleFileChange}
         className="hidden"
       />
