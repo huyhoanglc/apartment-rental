@@ -338,15 +338,14 @@ export default function AdminNav({ userId, email, fullName, avatarUrl, role }: A
         </div>
       )}
 
-      {/* Chừa chỗ cố định (68px) trong layout — sidebar thật nằm đè lên trên (fixed)
-          khi mở rộng ra khi rê chuột vào, không đẩy nội dung chính xô lệch. */}
-      <div className="hidden shrink-0 md:block md:w-[68px]" />
-
+      {/* Nằm trong luồng flex bình thường (không fixed) — khi mở rộng ra lúc rê
+          chuột vào, nội dung bên phải tự thu nhẹ lại nhường chỗ thay vì bị
+          sidebar đè lên trên. */}
       <aside
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`fixed left-0 top-0 z-30 hidden h-screen flex-col border-r border-border bg-card transition-[width] duration-200 md:flex ${
-          expanded ? "md:w-60 shadow-xl" : "md:w-[68px]"
+        className={`sticky top-0 z-30 hidden h-screen shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200 md:flex ${
+          expanded ? "md:w-60" : "md:w-[68px]"
         }`}
       >
         <div className={`flex h-14 items-center gap-2 border-b border-border px-4 ${collapsed ? "md:justify-center md:px-0" : ""}`}>
