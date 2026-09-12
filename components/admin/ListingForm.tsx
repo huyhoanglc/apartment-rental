@@ -4,14 +4,8 @@ import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  LISTING_STATUS_LABELS,
-  LISTING_TYPE_LABELS,
-  type ListingStatus,
-  type ListingType,
-  type ListingWithProject,
-  type Project,
-} from "@/lib/types";
+import { LISTING_STATUS_LABELS, LISTING_TYPE_LABELS } from "@/data/constants";
+import type { ListingStatus, ListingType, ListingWithProject, Project } from "@/lib/types";
 import type { SaveListingState } from "@/app/admin/(dashboard)/listings/actions";
 
 interface ListingFormProps {

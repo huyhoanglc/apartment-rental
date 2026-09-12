@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import ThemeToggle from "@/components/ThemeToggle";
-import LocaleSwitcher from "@/components/LocaleSwitcher";
+import ThemeToggle from "@/components/layout/ThemeToggle";
+import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 
 const ZALO_CONTACT = process.env.NEXT_PUBLIC_ZALO_CONTACT || "0901234567";
 

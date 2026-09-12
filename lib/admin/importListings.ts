@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { fileToGrid, findColumn, normalizeHeader, type UploadedFile } from "@/lib/admin/importShared";
-import { LISTING_STATUS_LABELS, LISTING_TYPE_LABELS, type ListingStatus, type ListingType } from "@/lib/types";
+import { LISTING_STATUS_LABELS, LISTING_TYPE_LABELS } from "@/data/constants";
+import type { ListingStatus, ListingType } from "@/lib/types";
 
 export interface ImportListingsResult {
   imported: number;

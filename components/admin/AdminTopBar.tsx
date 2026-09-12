@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { isActive, NAV_ITEMS } from "@/components/admin/AdminNav";
-import ThemeToggle from "@/components/ThemeToggle";
+import ThemeToggle from "@/components/layout/ThemeToggle";
 
 function currentPageLabel(pathname: string): string {
   const match = NAV_ITEMS.filter((item) => isActive(pathname, item.href)).sort(

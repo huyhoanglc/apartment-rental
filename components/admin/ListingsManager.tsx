@@ -13,7 +13,8 @@ import { useConfirm } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { saveListing } from "@/app/admin/(dashboard)/listings/actions";
 import { saveProject } from "@/app/admin/(dashboard)/projects/actions";
-import { LISTING_TYPE_LABELS, type ListingWithProject, type Project } from "@/lib/types";
+import { LISTING_TYPE_LABELS } from "@/data/constants";
+import type { ListingWithProject, Project } from "@/lib/types";
 
 interface ListingsManagerProps {
   listings: ListingWithProject[];

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { DISTRICTS } from "@/lib/types";
+import { DISTRICTS } from "@/data/constants";
 
 type Status = "idle" | "loading" | "success" | "error";
 

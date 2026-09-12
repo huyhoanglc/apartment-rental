@@ -1,6 +1,6 @@
 import { getRecentActivity } from "@/lib/admin/activity";
 import { formatVNDateTime } from "@/lib/formatDate";
-import { ACTIVITY_ACTION_LABELS, ACTIVITY_TABLE_LABELS } from "@/lib/types";
+import { ACTIVITY_ACTION_LABELS, ACTIVITY_TABLE_LABELS } from "@/data/constants";
 
 const ACTION_BADGE: Record<string, string> = {
   insert: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",

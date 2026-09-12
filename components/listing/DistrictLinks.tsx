@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { DISTRICTS } from "@/lib/types";
+import { DISTRICTS } from "@/data/constants";
 
 export default async function DistrictLinks() {
   const t = await getTranslations("DistrictLinks");

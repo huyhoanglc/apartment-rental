@@ -1,9 +1,9 @@
 import { setRequestLocale } from "next-intl/server";
-import AiFinder from "@/components/AiFinder";
-import DistrictLinks from "@/components/DistrictLinks";
-import Hero from "@/components/Hero";
-import ListingSection from "@/components/ListingSection";
-import TrustSection from "@/components/TrustSection";
+import AiFinder from "@/components/listing/AiFinder";
+import DistrictLinks from "@/components/listing/DistrictLinks";
+import Hero from "@/components/home/Hero";
+import ListingSection from "@/components/listing/ListingSection";
+import TrustSection from "@/components/home/TrustSection";
 import { getListings } from "@/lib/listings";
 
 export default async function Home({

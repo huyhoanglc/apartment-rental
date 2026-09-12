@@ -3,7 +3,8 @@
 import { useTransition } from "react";
 import { updateListingStatusAction } from "@/app/admin/(dashboard)/listings/actions";
 import { useToast } from "@/components/admin/Toast";
-import { LISTING_STATUS_LABELS, type ListingStatus } from "@/lib/types";
+import { LISTING_STATUS_LABELS } from "@/data/constants";
+import type { ListingStatus } from "@/lib/types";
 
 const STATUS_STYLES: Record<ListingStatus, string> = {
   con_phong: "bg-status-available/10 text-status-available border-status-available/30",

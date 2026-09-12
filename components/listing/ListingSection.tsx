@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import ListingCard from "@/components/ListingCard";
-import { DISTRICTS, type ListingType, type ListingWithProject } from "@/lib/types";
+import ListingCard from "@/components/listing/ListingCard";
+import { DISTRICTS } from "@/data/constants";
+import type { ListingType, ListingWithProject } from "@/lib/types";
 
 interface ListingSectionProps {
   initialListings: ListingWithProject[];

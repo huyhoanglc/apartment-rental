@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
 import { slugify } from "@/lib/slugify";
-import { DISTRICTS, type Project } from "@/lib/types";
+import { DISTRICTS } from "@/data/constants";
+import type { Project } from "@/lib/types";
 import type { SaveProjectState } from "@/app/admin/(dashboard)/projects/actions";
 
 interface ProjectFormProps {

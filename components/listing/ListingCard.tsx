@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import ZaloButton from "@/components/ZaloButton";
+import ZaloButton from "@/components/listing/ZaloButton";
 import type { ListingWithProject } from "@/lib/types";
 
 const STATUS_STYLES: Record<ListingWithProject["status"], string> = {

@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import LeadForm from "@/components/LeadForm";
-import ListingCard from "@/components/ListingCard";
-import ZaloButton from "@/components/ZaloButton";
+import LeadForm from "@/components/listing/LeadForm";
+import ListingCard from "@/components/listing/ListingCard";
+import ZaloButton from "@/components/listing/ZaloButton";
 import { getListingByCode, getListingsByProject } from "@/lib/listings";
 
 interface PageProps {
