@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
 import { slugify } from "@/lib/slugify";
+import { deriveProjectCode } from "@/lib/projectCode";
 import { DISTRICTS } from "@/data/constants";
 import type { Project } from "@/lib/types";
 import type { SaveProjectState } from "@/app/admin/(dashboard)/projects/actions";
@@ -47,6 +48,10 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
   const [amenities, setAmenities] = useState<string[]>(initialProject?.amenities ?? []);
   const [amenityInput, setAmenityInput] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialProject?.cover_image_url ?? null);
+  const [houseNumber, setHouseNumber] = useState("");
+  const [streetName, setStreetName] = useState(initialProject?.address ?? "");
+  const [district, setDistrict] = useState(initialProject?.district ?? "");
+  const previewCode = isEdit ? initialProject?.code ?? null : deriveProjectCode(houseNumber, streetName, district);
 
   function handleNameChange(value: string) {
     setName(value);
@@ -98,16 +103,6 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
               className={FIELD}
             />
           </div>
-
-          <div>
-            <label className={LABEL}>Mã nhà (tuỳ chọn)</label>
-            <input
-              name="code"
-              defaultValue={initialProject?.code ?? ""}
-              placeholder="Vd: NH001 — để Phòng import Excel tham chiếu tới dự án này"
-              className={FIELD}
-            />
-          </div>
         </div>
 
         <div className={SECTION}>
@@ -115,7 +110,13 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={LABEL}>Quận *</label>
-              <select name="district" required defaultValue={initialProject?.district ?? ""} className={FIELD}>
+              <select
+                name="district"
+                required
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                className={FIELD}
+              >
                 <option value="" disabled>
                   Chọn quận
                 </option>
@@ -135,12 +136,29 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={LABEL}>Số nhà</label>
-              <input name="house_number" className={FIELD} />
+              <input
+                name="house_number"
+                value={houseNumber}
+                onChange={(e) => setHouseNumber(e.target.value)}
+                className={FIELD}
+              />
             </div>
             <div>
               <label className={LABEL}>Tên đường</label>
-              <input name="street_name" defaultValue={initialProject?.address ?? ""} className={FIELD} />
+              <input
+                name="street_name"
+                value={streetName}
+                onChange={(e) => setStreetName(e.target.value)}
+                className={FIELD}
+              />
             </div>
+          </div>
+
+          <div>
+            <label className={LABEL}>Mã nhà</label>
+            <p className="mt-1.5 rounded-lg border border-dashed border-border bg-muted/40 px-3.5 py-2.5 text-sm text-muted-foreground">
+              {previewCode ?? "Tự sinh từ số nhà, tên đường và quận"}
+            </p>
           </div>
         </div>
 

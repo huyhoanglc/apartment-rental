@@ -6,6 +6,7 @@ import { importProjectsFromFile, type ImportProjectsResult } from "@/lib/admin/i
 import { uploadProjectImage } from "@/lib/admin/storage";
 import { getProjectBySlug } from "@/lib/projects";
 import { slugify } from "@/lib/slugify";
+import { deriveProjectCode } from "@/lib/projectCode";
 import type { ProjectInput } from "@/lib/types";
 
 export interface SaveProjectState {
@@ -20,7 +21,6 @@ export async function saveProject(
 ): Promise<SaveProjectState> {
   const name = String(formData.get("name") ?? "").trim();
   const slugRaw = String(formData.get("slug") ?? "").trim();
-  const code = String(formData.get("code") ?? "").trim();
   const district = String(formData.get("district") ?? "").trim();
   const ward = String(formData.get("ward") ?? "").trim();
   const houseNumber = String(formData.get("house_number") ?? "").trim();
@@ -62,9 +62,8 @@ export async function saveProject(
     }
   }
 
-  const baseFields: Omit<ProjectInput, "cover_image_url"> = {
+  const commonFields: Omit<ProjectInput, "cover_image_url" | "code"> = {
     slug,
-    code: code || null,
     name,
     district,
     ward: ward || null,
@@ -78,11 +77,14 @@ export async function saveProject(
     has_basement: hasBasement,
   };
 
+  // Mã nhà tự sinh từ số nhà/tên đường/quận (không cho nhập tay) — chỉ gán lúc
+  // tạo mới, sửa dự án giữ nguyên mã cũ để không phá tham chiếu Excel import Phòng.
   try {
     if (isCreate) {
-      await createProject({ ...baseFields, cover_image_url });
+      const code = deriveProjectCode(houseNumber, streetName, district);
+      await createProject({ ...commonFields, code, cover_image_url });
     } else {
-      const updateFields: Partial<ProjectInput> = { ...baseFields };
+      const updateFields: Partial<ProjectInput> = { ...commonFields };
       if (cover_image_url) updateFields.cover_image_url = cover_image_url;
       await updateProject(existingSlug, updateFields);
     }
@@ -90,7 +92,9 @@ export async function saveProject(
     console.error("[saveProject]", err);
     const code23505 = typeof err === "object" && err && "code" in err && err.code === "23505";
     return {
-      error: code23505 ? `Mã nhà "${code}" đã được dùng, vui lòng chọn mã khác.` : "Lưu dự án thất bại, vui lòng thử lại.",
+      error: code23505
+        ? "Mã nhà tự sinh bị trùng với dự án khác, vui lòng đổi số nhà/tên đường."
+        : "Lưu dự án thất bại, vui lòng thử lại.",
     };
   }
 

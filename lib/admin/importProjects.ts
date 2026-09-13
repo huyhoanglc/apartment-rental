@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slugify";
+import { deriveProjectCode } from "@/lib/projectCode";
 import { fileToGrid, findColumn, normalizeHeader, type UploadedFile } from "@/lib/admin/importShared";
 
 export interface ImportProjectsResult {
@@ -30,43 +31,6 @@ const HEADER_ALIASES = {
   ownerName: ["tên chủ", "ten chu"],
   ownerPhone: ["số điện thoại chủ", "so dien thoai chu", "sđt chủ", "sdt chu"],
 };
-
-// Viết tắt quận theo quy ước riêng (không phải cứ lấy chữ cái đầu — vd Bình
-// Thạnh dùng "BTH" chứ không phải "BT" để khỏi trùng Bình Tân). Quận đánh số
-// (Quận 1, Quận 3...) tự suy ra "Q" + số, không cần liệt kê từng quận.
-const NAMED_DISTRICT_CODES: Record<string, string> = {
-  "bình thạnh": "BTH",
-  "tân bình": "TB",
-  "tân phú": "TP",
-  "bình tân": "BT",
-  "gò vấp": "GV",
-  "thủ đức": "TĐ",
-  "phú nhuận": "PN",
-};
-
-/** Chữ cái đầu mỗi từ, in hoa, nối liền — vd "Nguyễn Hữu Cảnh" -> "NHC". */
-function initials(text: string): string {
-  return text
-    .trim()
-    .split(/\s+/)
-    .map((word) => word[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
-/** "Quận 1" -> "Q1", "Bình Thạnh"/"Quận Bình Thạnh" -> "QBTH". */
-function districtCode(district: string): string {
-  const key = district.trim().toLowerCase().replace(/^quận\s*/, "");
-  const numbered = key.match(/^(\d+)$/);
-  if (numbered) return `Q${numbered[1]}`;
-  return `Q${NAMED_DISTRICT_CODES[key] ?? initials(district)}`;
-}
-
-/** Mã nhà tự sinh khi để trống: "Số nhà.Viết tắt tên đường.Viết tắt quận" — vd "22.NHC.QBTH". */
-function deriveProjectCode(houseNumber: string, street: string, district: string): string | null {
-  if (!houseNumber && !street) return null;
-  const parts = [houseNumber, initials(street), districtCode(district)].filter(Boolean);
-  return parts.length > 0 ? parts.join(".") : null;
-}
 
 /** grid[0] là dòng tiêu đề, các dòng sau là dữ liệu. */
 function gridToRows(grid: string[][]): { rows: ParsedRow[]; skipped: number } {
