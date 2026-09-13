@@ -132,14 +132,15 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
             </div>
           </div>
 
-          <div>
-            <label className={LABEL}>Địa chỉ</label>
-            <input
-              name="address"
-              defaultValue={initialProject?.address ?? ""}
-              placeholder="Số nhà, tên đường"
-              className={FIELD}
-            />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className={LABEL}>Số nhà</label>
+              <input name="house_number" className={FIELD} />
+            </div>
+            <div>
+              <label className={LABEL}>Tên đường</label>
+              <input name="street_name" defaultValue={initialProject?.address ?? ""} className={FIELD} />
+            </div>
           </div>
         </div>
 
@@ -157,17 +158,34 @@ export default function ProjectForm({ action, initialProject, onCancel, onSucces
           </div>
 
           <div>
-            <label className={LABEL}>Tiện ích toà nhà</label>
+            <label className={LABEL}>Thang</label>
             <div className="mt-1.5 flex flex-wrap gap-x-6 gap-y-2">
               <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <input
-                  type="checkbox"
+                  type="radio"
                   name="elevator"
+                  value="on"
                   defaultChecked={initialProject?.elevator ?? false}
                   className="h-4 w-4 accent-primary-600"
                 />
-                Thang máy (bỏ chọn = thang bộ)
+                Thang máy
               </label>
+              <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <input
+                  type="radio"
+                  name="elevator"
+                  value="off"
+                  defaultChecked={!(initialProject?.elevator ?? false)}
+                  className="h-4 w-4 accent-primary-600"
+                />
+                Thang bộ
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label className={LABEL}>Tiện ích toà nhà</label>
+            <div className="mt-1.5 flex flex-wrap gap-x-6 gap-y-2">
               <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <input
                   type="checkbox"

@@ -23,7 +23,9 @@ export async function saveProject(
   const code = String(formData.get("code") ?? "").trim();
   const district = String(formData.get("district") ?? "").trim();
   const ward = String(formData.get("ward") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
+  const houseNumber = String(formData.get("house_number") ?? "").trim();
+  const streetName = String(formData.get("street_name") ?? "").trim();
+  const address = [houseNumber, streetName].filter(Boolean).join(" ").trim();
   const description = String(formData.get("description") ?? "").trim();
   const amenities = formData.getAll("amenities").map(String).filter(Boolean);
   const ownerName = String(formData.get("owner_name") ?? "").trim();
