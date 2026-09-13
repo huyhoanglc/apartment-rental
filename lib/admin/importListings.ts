@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { fileToGrid, findColumn, normalizeHeader, type UploadedFile } from "@/lib/admin/importShared";
-import { LISTING_STATUS_LABELS, LISTING_TYPE_LABELS } from "@/data/constants";
-import type { ListingStatus, ListingType } from "@/lib/types";
+import { LISTING_STATUS_LABELS, LISTING_TYPE_LABELS, ROOM_TYPE_LABELS } from "@/data/constants";
+import type { ListingStatus, ListingType, RoomType } from "@/lib/types";
 
 export interface ImportListingsResult {
   imported: number;
@@ -11,10 +11,12 @@ export interface ImportListingsResult {
 interface ParsedRow {
   projectCode: string;
   code: string;
-  title: string;
+  /** null = chưa nhập, tự sinh sau khi biết tên dự án (xem buildAutoTitle). */
+  title: string | null;
   priceMillion: number;
   area: number;
   type: ListingType;
+  roomType: RoomType | null;
   status: ListingStatus;
   imageUrl: string;
   description: string | null;
@@ -26,7 +28,8 @@ const HEADER_ALIASES = {
   title: ["tiêu đề", "tieu de"],
   price: ["giá (triệu)", "gia (trieu)", "giá", "gia"],
   area: ["diện tích (m²)", "dien tich (m2)", "diện tích", "dien tich"],
-  type: ["loại hình", "loai hinh"],
+  type: ["loại căn hộ", "loai can ho", "loại hình", "loai hinh"],
+  roomType: ["loại phòng", "loai phong"],
   status: ["trạng thái", "trang thai"],
   imageUrl: ["link ảnh", "link anh", "hình ảnh", "hinh anh"],
   description: ["mô tả", "mo ta"],
@@ -38,12 +41,24 @@ const TYPE_BY_LABEL = new Map<string, ListingType>(
     value,
   ])
 );
+const ROOM_TYPE_BY_LABEL = new Map<string, RoomType>(
+  (Object.entries(ROOM_TYPE_LABELS) as [RoomType, string][]).map(([value, label]) => [
+    normalizeHeader(label),
+    value,
+  ])
+);
 const STATUS_BY_LABEL = new Map<string, ListingStatus>(
   (Object.entries(LISTING_STATUS_LABELS) as [ListingStatus, string][]).map(([value, label]) => [
     normalizeHeader(label),
     value,
   ])
 );
+
+/** Tiêu đề tự sinh khi cột "Tiêu đề" để trống — vd "Duplex - Căn hộ dịch vụ tại 22 Nguyễn Hữu Cảnh". */
+function buildAutoTitle(type: ListingType, roomType: RoomType | null, projectName: string): string {
+  const prefix = roomType ? `${ROOM_TYPE_LABELS[roomType]} - ` : "";
+  return `${prefix}${LISTING_TYPE_LABELS[type]} tại ${projectName}`;
+}
 
 interface RowIssue {
   row: number;
@@ -61,6 +76,7 @@ function gridToRows(grid: string[][]): { rows: ParsedRow[]; issues: RowIssue[] }
   const priceIdx = findColumn(headers, HEADER_ALIASES.price);
   const areaIdx = findColumn(headers, HEADER_ALIASES.area);
   const typeIdx = findColumn(headers, HEADER_ALIASES.type);
+  const roomTypeIdx = findColumn(headers, HEADER_ALIASES.roomType);
   const statusIdx = findColumn(headers, HEADER_ALIASES.status);
   const imageUrlIdx = findColumn(headers, HEADER_ALIASES.imageUrl);
   const descriptionIdx = findColumn(headers, HEADER_ALIASES.description);
@@ -76,10 +92,11 @@ function gridToRows(grid: string[][]): { rows: ParsedRow[]; issues: RowIssue[] }
     const rowNumber = i + 2; // +1 bỏ header, +1 để đúng số dòng thấy trên Excel (dòng 1 là tiêu đề)
     const projectCode = (cells[projectCodeIdx] ?? "").trim();
     const code = (cells[codeIdx] ?? "").trim();
-    const title = titleIdx !== -1 ? (cells[titleIdx] ?? "").trim() : "";
+    const title = titleIdx !== -1 ? (cells[titleIdx] ?? "").trim() || null : null;
     const priceRaw = priceIdx !== -1 ? (cells[priceIdx] ?? "").trim() : "";
     const areaRaw = areaIdx !== -1 ? (cells[areaIdx] ?? "").trim() : "";
     const typeLabel = typeIdx !== -1 ? normalizeHeader(cells[typeIdx] ?? "") : "";
+    const roomTypeLabel = roomTypeIdx !== -1 ? normalizeHeader(cells[roomTypeIdx] ?? "") : "";
     const statusLabel = statusIdx !== -1 ? normalizeHeader(cells[statusIdx] ?? "") : "";
     const imageUrl = imageUrlIdx !== -1 ? (cells[imageUrlIdx] ?? "").trim() : "";
     const description = descriptionIdx !== -1 ? (cells[descriptionIdx] ?? "").trim() || null : null;
@@ -88,7 +105,6 @@ function gridToRows(grid: string[][]): { rows: ParsedRow[]; issues: RowIssue[] }
 
     if (!projectCode) return issues.push({ row: rowNumber, reason: "thiếu Mã nhà" });
     if (!code) return issues.push({ row: rowNumber, reason: "thiếu Mã phòng" });
-    if (!title) return issues.push({ row: rowNumber, reason: "thiếu Tiêu đề" });
 
     const priceMillion = Number(priceRaw.replace(",", "."));
     if (!Number.isFinite(priceMillion) || priceMillion <= 0) {
@@ -104,15 +120,27 @@ function gridToRows(grid: string[][]): { rows: ParsedRow[]; issues: RowIssue[] }
     if (!type) {
       return issues.push({
         row: rowNumber,
-        reason: `Loại hình "${typeLabel}" không khớp (${Object.values(LISTING_TYPE_LABELS).join(", ")})`,
+        reason: `Loại Căn Hộ "${typeLabel}" không khớp (${Object.values(LISTING_TYPE_LABELS).join(", ")})`,
       });
+    }
+
+    let roomType: RoomType | null = null;
+    if (roomTypeLabel) {
+      const matched = ROOM_TYPE_BY_LABEL.get(roomTypeLabel);
+      if (!matched) {
+        return issues.push({
+          row: rowNumber,
+          reason: `Loại Phòng "${roomTypeLabel}" không khớp (${Object.values(ROOM_TYPE_LABELS).join(", ")})`,
+        });
+      }
+      roomType = matched;
     }
 
     const status = STATUS_BY_LABEL.get(statusLabel) ?? "con_phong";
 
     if (!imageUrl) return issues.push({ row: rowNumber, reason: "thiếu Link ảnh" });
 
-    rows.push({ projectCode, code, title, priceMillion, area, type, status, imageUrl, description });
+    rows.push({ projectCode, code, title, priceMillion, area, type, roomType, status, imageUrl, description });
   });
 
   return { rows, issues };
@@ -120,9 +148,11 @@ function gridToRows(grid: string[][]): { rows: ParsedRow[]; issues: RowIssue[] }
 
 /**
  * Import hàng loạt Phòng từ file Excel (.xlsx/.xls) hoặc CSV/TSV với cấu
- * trúc cột: Mã nhà (tham chiếu Project.code), Mã phòng, Tiêu đề, Giá (triệu),
- * Diện tích (m²), Loại hình (đúng nhãn hiển thị vd "Phòng trọ"), Trạng thái
- * (để trống = "Còn phòng"), Link ảnh, Mô tả (tuỳ chọn).
+ * trúc cột: Mã nhà (tham chiếu Project.code), Mã phòng, Giá (triệu), Diện
+ * tích (m²), Loại Căn Hộ (đúng nhãn hiển thị vd "Phòng trọ"), Loại Phòng
+ * (tuỳ chọn, vd "Duplex"), Trạng thái (để trống = "Còn phòng"), Link ảnh,
+ * Tiêu đề (tuỳ chọn — để trống thì tự sinh từ Loại Phòng/Loại Căn Hộ/tên dự
+ * án, xem buildAutoTitle), Mô tả (tuỳ chọn).
  */
 export async function importListingsFromFile(file: UploadedFile): Promise<ImportListingsResult> {
   const grid = await fileToGrid(file);
@@ -132,14 +162,14 @@ export async function importListingsFromFile(file: UploadedFile): Promise<Import
   const supabase = createClient();
   const [{ data: projects, error: projectsError }, { data: existingListings, error: listingsError }] =
     await Promise.all([
-      supabase.from("projects").select("id, code").not("code", "is", null),
+      supabase.from("projects").select("id, code, name").not("code", "is", null),
       supabase.from("listings").select("code"),
     ]);
   if (projectsError) throw projectsError;
   if (listingsError) throw listingsError;
 
-  const projectIdByCode = new Map(
-    (projects ?? []).map((p: { id: string; code: string }) => [p.code, p.id])
+  const projectByCode = new Map(
+    (projects ?? []).map((p: { id: string; code: string; name: string }) => [p.code, p])
   );
   const usedCodes = new Set((existingListings ?? []).map((l: { code: string }) => l.code));
 
@@ -147,8 +177,8 @@ export async function importListingsFromFile(file: UploadedFile): Promise<Import
   let skipped = issues.length;
 
   for (const row of rows) {
-    const projectId = projectIdByCode.get(row.projectCode);
-    if (!projectId) {
+    const project = projectByCode.get(row.projectCode);
+    if (!project) {
       skipped++;
       continue;
     }
@@ -160,11 +190,12 @@ export async function importListingsFromFile(file: UploadedFile): Promise<Import
 
     toInsert.push({
       code: row.code,
-      title: row.title,
-      project_id: projectId,
+      title: row.title ?? buildAutoTitle(row.type, row.roomType, project.name),
+      project_id: project.id,
       price_million: row.priceMillion,
       area: row.area,
       type: row.type,
+      room_type: row.roomType,
       status: row.status,
       image_url: row.imageUrl,
       description: row.description,

@@ -13,7 +13,7 @@ import { useConfirm } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { saveListing } from "@/app/admin/(dashboard)/listings/actions";
 import { saveProject } from "@/app/admin/(dashboard)/projects/actions";
-import { LISTING_TYPE_LABELS } from "@/data/constants";
+import { LISTING_TYPE_LABELS, ROOM_TYPE_LABELS } from "@/data/constants";
 import type { ListingWithProject, Project } from "@/lib/types";
 
 interface ListingsManagerProps {
@@ -148,7 +148,12 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
                     <p className="text-foreground">{listing.project.name}</p>
                     <p className="text-xs">{listing.project.district}</p>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{LISTING_TYPE_LABELS[listing.type]}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {LISTING_TYPE_LABELS[listing.type]}
+                    {listing.room_type && (
+                      <span className="block text-xs">{ROOM_TYPE_LABELS[listing.room_type]}</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-medium text-foreground">{listing.price_million} triệu</td>
                   <td className="px-4 py-3">
                     <StatusSelect code={listing.code} status={listing.status} />

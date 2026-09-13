@@ -1,11 +1,10 @@
 export type ListingStatus = "con_phong" | "hot" | "het_phong";
 
-export type ListingType =
-  | "phong_tro"
-  | "studio"
-  | "can_ho_mini"
-  | "can_ho_dich_vu"
-  | "nha_nguyen_can";
+/** Loại Căn Hộ — phân loại chính của phòng/căn. */
+export type ListingType = "phong_tro" | "can_ho_dich_vu" | "nha_nguyen_can" | "chung_cu";
+
+/** Loại Phòng — kiểu mặt bằng/số phòng ngủ, độc lập với ListingType (vd 1 căn hộ dịch vụ có thể là Duplex hoặc Studio). Không phải loại nào cũng cần nên optional. */
+export type RoomType = "duplex" | "studio" | "1pn" | "2pn" | "3pn";
 
 export interface Project {
   id: string;
@@ -50,6 +49,7 @@ export interface Listing {
   project_id: string;
   price_million: number;
   type: ListingType;
+  room_type: RoomType | null;
   area: number;
   amenities: string[];
   status: ListingStatus;

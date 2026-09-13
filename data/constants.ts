@@ -1,4 +1,4 @@
-import type { ActivityLogEntry, ListingStatus, ListingType } from "@/lib/types";
+import type { ActivityLogEntry, ListingStatus, ListingType, RoomType } from "@/lib/types";
 
 export const DISTRICTS = [
   "Quận 1",
@@ -13,12 +13,21 @@ export const DISTRICTS = [
   "Thủ Đức",
 ] as const;
 
+/** Loại Căn Hộ. */
 export const LISTING_TYPE_LABELS: Record<ListingType, string> = {
   phong_tro: "Phòng trọ",
-  studio: "Studio",
-  can_ho_mini: "Căn hộ mini",
   can_ho_dich_vu: "Căn hộ dịch vụ",
+  chung_cu: "Chung cư",
   nha_nguyen_can: "Nhà nguyên căn",
+};
+
+/** Loại Phòng — độc lập với Loại Căn Hộ ở trên (vd 1 căn hộ dịch vụ có thể là Duplex hoặc Studio). */
+export const ROOM_TYPE_LABELS: Record<RoomType, string> = {
+  duplex: "Duplex",
+  studio: "Studio",
+  "1pn": "1 phòng ngủ",
+  "2pn": "2 phòng ngủ",
+  "3pn": "3 phòng ngủ",
 };
 
 export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {

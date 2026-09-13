@@ -97,6 +97,7 @@
     "priceLabel": "Rent",
     "areaLabel": "Area",
     "typeLabel": "Property type",
+    "roomTypeLabel": "Room type",
     "priceValue": "{price} million",
     "projectLabel": "Part of {name}",
     "sameProjectTitle": "Other units in {name}",
@@ -109,10 +110,16 @@
   },
   "ListingTypes": {
     "phong_tro": "Room",
-    "studio": "Studio",
-    "can_ho_mini": "Mini apartment",
     "can_ho_dich_vu": "Serviced apartment",
+    "chung_cu": "Apartment",
     "nha_nguyen_can": "Whole house"
+  },
+  "RoomTypes": {
+    "duplex": "Duplex",
+    "studio": "Studio",
+    "1pn": "1 bedroom",
+    "2pn": "2 bedrooms",
+    "3pn": "3 bedrooms"
   },
   "ListingStatus": {
     "con_phong": "Available",

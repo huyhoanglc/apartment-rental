@@ -34,6 +34,7 @@ export default async function ListingDetailPage({ params: { locale, code } }: Pa
 
   const t = await getTranslations("ListingDetail");
   const tTypes = await getTranslations("ListingTypes");
+  const tRoomTypes = await getTranslations("RoomTypes");
   const tStatus = await getTranslations("ListingStatus");
 
   const gallery = listing.image_urls.length > 0 ? listing.image_urls : [listing.image_url];
@@ -144,6 +145,12 @@ export default async function ListingDetailPage({ params: { locale, code } }: Pa
               <p className="text-xs text-muted-foreground">{t("typeLabel")}</p>
               <p className="mt-1 font-semibold text-foreground">{tTypes(listing.type)}</p>
             </div>
+            {listing.room_type && (
+              <div>
+                <p className="text-xs text-muted-foreground">{t("roomTypeLabel")}</p>
+                <p className="mt-1 font-semibold text-foreground">{tRoomTypes(listing.room_type)}</p>
+              </div>
+            )}
           </div>
 
           {listing.description && (

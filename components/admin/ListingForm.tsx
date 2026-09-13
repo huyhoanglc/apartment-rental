@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { LISTING_STATUS_LABELS, LISTING_TYPE_LABELS } from "@/data/constants";
-import type { ListingStatus, ListingType, ListingWithProject, Project } from "@/lib/types";
+import { LISTING_STATUS_LABELS, LISTING_TYPE_LABELS, ROOM_TYPE_LABELS } from "@/data/constants";
+import type { ListingStatus, ListingType, ListingWithProject, Project, RoomType } from "@/lib/types";
 import type { SaveListingState } from "@/app/admin/(dashboard)/listings/actions";
 
 interface ListingFormProps {
@@ -17,6 +17,7 @@ interface ListingFormProps {
 }
 
 const TYPE_OPTIONS = Object.entries(LISTING_TYPE_LABELS) as [ListingType, string][];
+const ROOM_TYPE_OPTIONS = Object.entries(ROOM_TYPE_LABELS) as [RoomType, string][];
 const STATUS_OPTIONS = Object.entries(LISTING_STATUS_LABELS) as [ListingStatus, string][];
 
 const LABEL = "block text-xs font-semibold uppercase tracking-wide text-muted-foreground";
@@ -164,10 +165,10 @@ export default function ListingForm({
               />
             </div>
             <div>
-              <label className={LABEL}>Loại hình *</label>
+              <label className={LABEL}>Loại Căn Hộ *</label>
               <select name="type" required defaultValue={initialListing?.type ?? ""} className={FIELD}>
                 <option value="" disabled>
-                  Chọn loại hình
+                  Chọn loại căn hộ
                 </option>
                 {TYPE_OPTIONS.map(([value, label]) => (
                   <option key={value} value={value}>
@@ -176,6 +177,18 @@ export default function ListingForm({
                 ))}
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className={LABEL}>Loại Phòng</label>
+            <select name="room_type" defaultValue={initialListing?.room_type ?? ""} className={FIELD}>
+              <option value="">Không xác định</option>
+              {ROOM_TYPE_OPTIONS.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

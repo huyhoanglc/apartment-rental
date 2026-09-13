@@ -10,21 +10,16 @@ import {
 import { importListingsFromFile, type ImportListingsResult } from "@/lib/admin/importListings";
 import { uploadListingImage } from "@/lib/admin/storage";
 import { getListingByCode } from "@/lib/listings";
-import type { ListingInput, ListingStatus, ListingType } from "@/lib/types";
+import { LISTING_TYPE_LABELS, ROOM_TYPE_LABELS } from "@/data/constants";
+import type { ListingInput, ListingStatus, ListingType, RoomType } from "@/lib/types";
 
 export interface SaveListingState {
   error?: string;
   success?: boolean;
 }
 
-const LISTING_TYPES: ListingType[] = [
-  "phong_tro",
-  "studio",
-  "can_ho_mini",
-  "can_ho_dich_vu",
-  "nha_nguyen_can",
-];
-
+const LISTING_TYPES = Object.keys(LISTING_TYPE_LABELS) as ListingType[];
+const ROOM_TYPES = Object.keys(ROOM_TYPE_LABELS) as RoomType[];
 const LISTING_STATUSES: ListingStatus[] = ["con_phong", "hot", "het_phong"];
 
 export async function saveListing(
@@ -37,6 +32,7 @@ export async function saveListing(
   const project_id = String(formData.get("project_id") ?? "").trim();
   const priceRaw = String(formData.get("price_million") ?? "");
   const type = String(formData.get("type") ?? "") as ListingType;
+  const roomTypeRaw = String(formData.get("room_type") ?? "").trim();
   const areaRaw = String(formData.get("area") ?? "");
   const status = String(formData.get("status") ?? "") as ListingStatus;
   const description = String(formData.get("description") ?? "").trim();
@@ -47,7 +43,11 @@ export async function saveListing(
     return { error: "Vui lòng nhập đầy đủ các trường bắt buộc." };
   }
   if (!LISTING_TYPES.includes(type)) {
-    return { error: "Loại hình không hợp lệ." };
+    return { error: "Loại Căn Hộ không hợp lệ." };
+  }
+  const room_type = roomTypeRaw ? (roomTypeRaw as RoomType) : null;
+  if (room_type && !ROOM_TYPES.includes(room_type)) {
+    return { error: "Loại Phòng không hợp lệ." };
   }
   if (!LISTING_STATUSES.includes(status)) {
     return { error: "Trạng thái không hợp lệ." };
@@ -90,6 +90,7 @@ export async function saveListing(
     project_id,
     price_million,
     type,
+    room_type,
     area,
     amenities,
     status,

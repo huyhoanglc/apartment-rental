@@ -15,6 +15,7 @@ const STATUS_STYLES: Record<ListingWithProject["status"], string> = {
 export default function ListingCard({ listing }: { listing: ListingWithProject }) {
   const t = useTranslations("ListingCard");
   const tTypes = useTranslations("ListingTypes");
+  const tRoomTypes = useTranslations("RoomTypes");
   const tStatus = useTranslations("ListingStatus");
 
   return (
@@ -53,6 +54,12 @@ export default function ListingCard({ listing }: { listing: ListingWithProject }
           <span>{t("area", { area: listing.area })}</span>
           <span>·</span>
           <span>{tTypes(listing.type)}</span>
+          {listing.room_type && (
+            <>
+              <span>·</span>
+              <span>{tRoomTypes(listing.room_type)}</span>
+            </>
+          )}
         </div>
 
         <div className="mt-1 flex flex-wrap gap-1.5">

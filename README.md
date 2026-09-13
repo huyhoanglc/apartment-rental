@@ -290,11 +290,14 @@ trực tiếp file `.xlsx`/`.xls` (đọc bằng `exceljs`) hoặc CSV/TSV. Kh�
   chữ cái đầu mỗi từ.
 - **Phòng** — cột: `Mã nhà` (khớp đúng cột `Mã nhà` đã đặt cho 1 Dự án — **phải tạo/đặt Mã nhà cho
   dự án trước** thì mới import Phòng vào đúng chỗ được), `Mã phòng` (→ `listings.code`, duy nhất),
-  `Tiêu đề`, `Giá (triệu)`, `Diện tích (m²)`, `Loại hình` (gõ đúng nhãn hiển thị: "Phòng trọ",
-  "Studio", "Căn hộ mini", "Căn hộ dịch vụ", "Nhà nguyên căn"), `Trạng thái` (để trống = "Còn
-  phòng"), `Link ảnh` (bắt buộc — Excel không gắn được file ảnh thật vào từng dòng nên phải dán sẵn
-  1 link ảnh có sẵn), `Mô tả` (tuỳ chọn). Dòng thiếu Mã nhà/Mã phòng/Tiêu đề/Link ảnh, giá/diện tích
-  không phải số dương, Loại hình gõ sai nhãn, hoặc Mã nhà không khớp dự án nào đều bị bỏ qua.
+  `Giá (triệu)`, `Diện tích (m²)`, `Loại Căn Hộ` (gõ đúng nhãn hiển thị: "Phòng trọ", "Căn hộ dịch
+  vụ", "Chung cư", "Nhà nguyên căn"), `Loại Phòng` (tuỳ chọn — "Duplex", "Studio", "1 phòng ngủ",
+  "2 phòng ngủ", "3 phòng ngủ"; độc lập với `Loại Căn Hộ`, vd 1 căn hộ dịch vụ có thể là Duplex hoặc
+  Studio), `Trạng thái` (để trống = "Còn phòng"), `Link ảnh` (bắt buộc — Excel không gắn được file
+  ảnh thật vào từng dòng nên phải dán sẵn 1 link ảnh có sẵn), `Tiêu đề` (tuỳ chọn — để trống thì tự
+  sinh từ Loại Phòng + Loại Căn Hộ + tên dự án, vd "Duplex - Căn hộ dịch vụ tại 22 Nguyễn Hữu
+  Cảnh"), `Mô tả` (tuỳ chọn). Dòng thiếu Mã nhà/Mã phòng/Link ảnh, giá/diện tích không phải số
+  dương, Loại Căn Hộ/Loại Phòng gõ sai nhãn, hoặc Mã nhà không khớp dự án nào đều bị bỏ qua.
 
 Cả 2 đều chỉ báo tổng số dòng tạo thành công + số dòng bị bỏ qua qua toast, không có màn xem trước
 từng dòng — kiểm tra lại kết quả trực tiếp trên trang danh sách sau khi import.

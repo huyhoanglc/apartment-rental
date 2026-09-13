@@ -11,13 +11,7 @@ interface ListingSectionProps {
   initialDistrict?: string;
 }
 
-const TYPE_OPTIONS: ListingType[] = [
-  "phong_tro",
-  "studio",
-  "can_ho_mini",
-  "can_ho_dich_vu",
-  "nha_nguyen_can",
-];
+const TYPE_OPTIONS: ListingType[] = ["phong_tro", "can_ho_dich_vu", "chung_cu", "nha_nguyen_can"];
 
 const PRICE_OPTIONS: { key: string; min?: number; max?: number }[] = [
   { key: "priceUnder3", max: 3 },

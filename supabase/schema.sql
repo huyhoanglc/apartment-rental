@@ -582,3 +582,22 @@ begin
 exception when others then
   raise notice 'pg_cron không khả dụng trên project này — tự chạy cleanup_security_logs() định kỳ qua Supabase Dashboard > Cron Jobs hoặc SQL Editor.';
 end $$;
+
+-- ==========================================================================
+-- Tách "Loại hình" (listings.type) thành 2 chiều độc lập: Loại Căn Hộ (type,
+-- giữ cột cũ) + Loại Phòng (room_type, cột mới — số phòng ngủ/kiểu mặt bằng,
+-- không phải mọi loại đều cần nên để nullable). "can_ho_mini" đổi tên thành
+-- "chung_cu"; "studio" trước đây là 1 Loại Căn Hộ riêng, giờ chuyển thành 1
+-- giá trị Loại Phòng — 2 lệnh update dưới đây chuyển dữ liệu cũ tương ứng,
+-- PHẢI chạy trước khi đổi CHECK constraint của "type" kẻo insert cũ vi phạm.
+-- ==========================================================================
+alter table listings add column if not exists room_type text
+  check (room_type in ('duplex', 'studio', '1pn', '2pn', '3pn'));
+
+update listings set room_type = 'studio' where type = 'studio' and room_type is null;
+update listings set type = 'can_ho_dich_vu' where type = 'studio';
+update listings set type = 'chung_cu' where type = 'can_ho_mini';
+
+alter table listings drop constraint if exists listings_type_check;
+alter table listings add constraint listings_type_check
+  check (type in ('phong_tro', 'can_ho_dich_vu', 'nha_nguyen_can', 'chung_cu'));

@@ -96,7 +96,8 @@
     "code": "房源编号: {code}",
     "priceLabel": "租金",
     "areaLabel": "面积",
-    "typeLabel": "房型",
+    "typeLabel": "房屋类型",
+    "roomTypeLabel": "户型",
     "priceValue": "{price} 百万",
     "projectLabel": "属于 {name}",
     "sameProjectTitle": "{name} 的其他房源",
@@ -109,10 +110,16 @@
   },
   "ListingTypes": {
     "phong_tro": "单间",
-    "studio": "开间公寓",
-    "can_ho_mini": "迷你公寓",
     "can_ho_dich_vu": "服务式公寓",
+    "chung_cu": "公寓",
     "nha_nguyen_can": "整栋住宅"
+  },
+  "RoomTypes": {
+    "duplex": "复式",
+    "studio": "开间公寓",
+    "1pn": "一室",
+    "2pn": "两室",
+    "3pn": "三室"
   },
   "ListingStatus": {
     "con_phong": "有房",
