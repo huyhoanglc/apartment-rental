@@ -37,7 +37,8 @@
   },
   "DistrictLinks": {
     "title": "按区域查找",
-    "subtitle": "选择您想居住的区域,立即查看可租房源。"
+    "subtitle": "选择您想居住的区域,立即查看可租房源。",
+    "districtStats": "{projects} 栋楼 - {listings} 间房"
   },
   "AiFinder": {
     "badge": "即将推出",

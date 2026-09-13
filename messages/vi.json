@@ -37,7 +37,8 @@
   },
   "DistrictLinks": {
     "title": "Tìm theo khu vực",
-    "subtitle": "Chọn quận bạn muốn ở để xem ngay các tin thuê đang có."
+    "subtitle": "Chọn quận bạn muốn ở để xem ngay các tin thuê đang có.",
+    "districtStats": "{projects} căn - {listings} phòng"
   },
   "AiFinder": {
     "badge": "Sắp ra mắt",

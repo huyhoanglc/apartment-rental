@@ -71,6 +71,49 @@ export async function getListingByCode(code: string): Promise<ListingWithProject
   return data as ListingWithProject | null;
 }
 
+export interface DistrictStats {
+  projectCount: number;
+  listingCount: number;
+}
+
+/** Số căn (dự án)/số phòng (listing) theo từng quận — dùng cho card ở DistrictLinks.tsx. */
+export async function getDistrictStats(): Promise<Record<string, DistrictStats>> {
+  const stats: Record<string, DistrictStats> = {};
+
+  if (!isSupabaseConfigured || !supabase) {
+    for (const project of demoProjects) {
+      (stats[project.district] ??= { projectCount: 0, listingCount: 0 }).projectCount++;
+    }
+    for (const listing of demoListings) {
+      const district = demoProjects.find((p) => p.id === listing.project_id)?.district;
+      if (district) (stats[district] ??= { projectCount: 0, listingCount: 0 }).listingCount++;
+    }
+    return stats;
+  }
+
+  const [{ data: projects, error: projectsError }, { data: listings, error: listingsError }] =
+    await Promise.all([
+      supabase.from("projects").select("id, district"),
+      supabase.from("listings").select("project_id"),
+    ]);
+  if (projectsError) throw projectsError;
+  if (listingsError) throw listingsError;
+
+  const districtByProjectId = new Map(
+    (projects ?? []).map((p: { id: string; district: string }) => [p.id, p.district])
+  );
+
+  for (const project of projects ?? []) {
+    (stats[project.district] ??= { projectCount: 0, listingCount: 0 }).projectCount++;
+  }
+  for (const listing of listings ?? []) {
+    const district = districtByProjectId.get(listing.project_id);
+    if (district) (stats[district] ??= { projectCount: 0, listingCount: 0 }).listingCount++;
+  }
+
+  return stats;
+}
+
 /** Các phòng khác cùng 1 dự án — dùng cho mục "Phòng khác cùng dự án" ở trang chi tiết. */
 export async function getListingsByProject(
   project: Project,

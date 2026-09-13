@@ -37,7 +37,8 @@
   },
   "DistrictLinks": {
     "title": "Browse by district",
-    "subtitle": "Pick the district you want to live in to see available listings right away."
+    "subtitle": "Pick the district you want to live in to see available listings right away.",
+    "districtStats": "{projects} buildings - {listings} rooms"
   },
   "AiFinder": {
     "badge": "Coming soon",
