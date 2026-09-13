@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getVerifiedTotpFactor } from "@/lib/admin/mfa";
+import { logout } from "@/app/admin/(dashboard)/actions";
 import MfaChallengeClient from "./MfaChallengeClient";
 
 /**
@@ -29,6 +30,12 @@ export default async function MfaChallengePage() {
         <div className="mt-6">
           <MfaChallengeClient factorId={factor.id} />
         </div>
+
+        <form action={logout} className="mt-4 border-t border-border pt-4">
+          <button type="submit" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            Đăng xuất, đăng nhập lại tài khoản khác
+          </button>
+        </form>
       </div>
     </div>
   );

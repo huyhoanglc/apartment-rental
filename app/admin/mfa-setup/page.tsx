@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { hasVerifiedMfa } from "@/lib/admin/mfa";
+import { logout } from "@/app/admin/(dashboard)/actions";
 import MfaSetupClient from "./MfaSetupClient";
 
 /**
@@ -28,6 +29,12 @@ export default async function MfaSetupPage() {
         <div className="mt-6">
           <MfaSetupClient />
         </div>
+
+        <form action={logout} className="mt-4 border-t border-border pt-4">
+          <button type="submit" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            Đăng xuất, đăng nhập lại tài khoản khác
+          </button>
+        </form>
       </div>
     </div>
   );
