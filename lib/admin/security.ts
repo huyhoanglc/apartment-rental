@@ -249,11 +249,13 @@ export function parseUserAgent(userAgent: string | null): string {
   else if (/firefox\//i.test(userAgent)) browser = "Firefox";
   else if (/safari\//i.test(userAgent)) browser = "Safari";
 
+  // iPhone/iPad phải kiểm tra TRƯỚC macOS: UA của iOS luôn có cụm "like Mac OS
+  // X" nên nếu để nhánh macOS đứng trước sẽ khớp nhầm mọi thiết bị iOS.
   let os = "Hệ điều hành khác";
   if (/windows/i.test(userAgent)) os = "Windows";
+  else if (/iphone|ipad/i.test(userAgent)) os = "iOS";
   else if (/mac os/i.test(userAgent)) os = "macOS";
   else if (/android/i.test(userAgent)) os = "Android";
-  else if (/iphone|ipad/i.test(userAgent)) os = "iOS";
   else if (/linux/i.test(userAgent)) os = "Linux";
 
   return `${browser} · ${os}`;

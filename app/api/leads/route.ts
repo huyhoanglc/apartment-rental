@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createLead } from "@/lib/leads";
 import { sendTelegramMessage } from "@/lib/telegram";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const allowed = await checkRateLimit("leads_submit", ip, 5, 10);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Bạn gửi yêu cầu quá nhiều lần, vui lòng thử lại sau ít phút." },
+      { status: 429 }
+    );
+  }
+
   const body = await request.json().catch(() => null);
 
   if (!body || typeof body.phone !== "string" || body.phone.trim().length < 8) {

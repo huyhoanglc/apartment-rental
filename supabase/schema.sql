@@ -525,3 +525,60 @@ create trigger blog_posts_log_activity
 
 -- leads và staff KHÔNG ghi log: leads là dữ liệu khách gửi công khai (không có
 -- khái niệm "sửa nội dung"), staff là danh bạ đơn giản, ngoài phạm vi log này.
+
+-- ==========================================================================
+-- Rate limit cho API công khai (app/api/leads, app/api/listings) — mỗi request
+-- ghi 1 dòng theo (endpoint, IP), lib/rateLimit.ts đếm số dòng trong cửa sổ
+-- thời gian để chặn spam/abuse. Dùng bảng (thay vì in-memory) vì app chạy
+-- serverless (Vercel) — nhiều instance không share được bộ nhớ.
+-- ==========================================================================
+create table if not exists public_api_rate_limits (
+  id uuid primary key default gen_random_uuid(),
+  endpoint text not null,
+  rate_key text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public_api_rate_limits enable row level security;
+
+-- Không có policy nào cho authenticated/anon: chỉ service-role (lib/rateLimit.ts)
+-- được đọc/ghi bảng này.
+
+create index if not exists public_api_rate_limits_lookup_idx
+  on public_api_rate_limits (endpoint, rate_key, created_at desc);
+
+-- ==========================================================================
+-- Dọn log định kỳ — admin_login_events/security_audit_log/public_api_rate_limits
+-- ghi liên tục, không có TTL sẽ phình vô hạn theo thời gian.
+-- ==========================================================================
+create or replace function cleanup_security_logs()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from public_api_rate_limits where created_at < now() - interval '1 day';
+  delete from admin_login_events where created_at < now() - interval '180 days';
+  delete from security_audit_log where created_at < now() - interval '180 days';
+end;
+$$;
+
+-- Best effort: tự đăng ký chạy cleanup_security_logs() mỗi ngày lúc 3h sáng
+-- qua pg_cron nếu extension này khả dụng trên project (Supabase > Database >
+-- Extensions/Cron Jobs). KHÔNG làm hỏng cả file nếu chưa bật được (project
+-- free tier cũ, hoặc thiếu quyền) — khi đó tự chạy thủ công định kỳ bằng
+-- `select cleanup_security_logs();`, hoặc tự tạo Cron Job trong Supabase
+-- Dashboard trỏ vào hàm này.
+do $$
+begin
+  create extension if not exists pg_cron;
+
+  if exists (select 1 from cron.job where jobname = 'cleanup_security_logs_daily') then
+    perform cron.unschedule('cleanup_security_logs_daily');
+  end if;
+
+  perform cron.schedule('cleanup_security_logs_daily', '0 3 * * *', 'select cleanup_security_logs();');
+exception when others then
+  raise notice 'pg_cron không khả dụng trên project này — tự chạy cleanup_security_logs() định kỳ qua Supabase Dashboard > Cron Jobs hoặc SQL Editor.';
+end $$;
