@@ -65,6 +65,15 @@ export async function createAccountAction(
     };
   }
 
+  const actor = await getCurrentUser();
+  await logSecurityEvent("account_created", {
+    actorUserId: actor?.id,
+    actorEmail: actor?.email,
+    targetEmail: email,
+    metadata: { role },
+    telegramNote: `Tài khoản mới: "${email}" (vai trò ${role === "admin" ? "Admin" : "Cá nhân"}).`,
+  });
+
   revalidatePath("/admin/accounts");
   return { success: true };
 }
@@ -134,7 +143,8 @@ export async function updateAccountRoleAction(
 
 export async function setAccountLockedAction(
   id: string,
-  locked: boolean
+  locked: boolean,
+  targetEmail: string
 ): Promise<{ error?: string }> {
   if (!(await isCurrentUserAdmin())) {
     return { error: "Bạn không có quyền khoá/mở khoá tài khoản." };
@@ -152,13 +162,24 @@ export async function setAccountLockedAction(
     return { error: locked ? "Khoá tài khoản thất bại, vui lòng thử lại." : "Mở khoá thất bại, vui lòng thử lại." };
   }
 
+  await logSecurityEvent(locked ? "account_locked" : "account_unlocked", {
+    actorUserId: actor?.id,
+    actorEmail: actor?.email,
+    targetUserId: id,
+    targetEmail,
+    telegramNote: locked
+      ? `Tài khoản "${targetEmail}" vừa bị khoá — không đăng nhập được cho tới khi mở khoá lại.`
+      : `Tài khoản "${targetEmail}" vừa được mở khoá.`,
+  });
+
   revalidatePath("/admin/accounts");
   return {};
 }
 
 export async function resetAccountPasswordAction(
   id: string,
-  phone: string
+  phone: string,
+  targetEmail: string
 ): Promise<{ error?: string }> {
   if (!(await isCurrentUserAdmin())) {
     return { error: "Bạn không có quyền reset mật khẩu." };
@@ -174,6 +195,15 @@ export async function resetAccountPasswordAction(
     console.error("[resetAccountPasswordAction]", err);
     return { error: "Reset mật khẩu thất bại, vui lòng thử lại." };
   }
+
+  const actor = await getCurrentUser();
+  await logSecurityEvent("password_reset_by_admin", {
+    actorUserId: actor?.id,
+    actorEmail: actor?.email,
+    targetUserId: id,
+    targetEmail,
+    telegramNote: `Mật khẩu của "${targetEmail}" vừa bị đặt lại (về số điện thoại).`,
+  });
 
   revalidatePath("/admin/accounts");
   return {};

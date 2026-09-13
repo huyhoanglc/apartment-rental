@@ -6,7 +6,15 @@ import { useConfirm } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
 
-export default function ResetPasswordButton({ id, phone }: { id: string; phone: string | null }) {
+export default function ResetPasswordButton({
+  id,
+  email,
+  phone,
+}: {
+  id: string;
+  email: string;
+  phone: string | null;
+}) {
   const [isPending, startTransition] = useTransition();
   const confirm = useConfirm();
   const toast = useToast();
@@ -34,7 +42,7 @@ export default function ResetPasswordButton({ id, phone }: { id: string; phone: 
     startTransition(async () => {
       loading.show("Đang đặt lại mật khẩu...");
       try {
-        const result = await resetAccountPasswordAction(id, validPhone);
+        const result = await resetAccountPasswordAction(id, validPhone, email);
         if (result.error) toast.error(result.error);
         else toast.success(`Đã đặt lại mật khẩu về "${validPhone}".`);
       } catch {

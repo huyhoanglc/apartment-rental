@@ -107,7 +107,7 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
                     {!isSelf && (
                       <div className="flex items-center gap-3">
                         <AccountLockToggle id={account.id} email={account.email} locked={account.locked} />
-                        <ResetPasswordButton id={account.id} phone={account.phone} />
+                        <ResetPasswordButton id={account.id} email={account.email} phone={account.phone} />
                         {account.has_mfa && <ResetMfaButton id={account.id} email={account.email} />}
                         <DeleteAccountButton id={account.id} email={account.email} />
                       </div>

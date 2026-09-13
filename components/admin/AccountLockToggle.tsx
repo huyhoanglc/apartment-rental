@@ -34,7 +34,7 @@ export default function AccountLockToggle({
     startTransition(async () => {
       loading.show(locked ? "Đang mở khoá..." : "Đang khoá tài khoản...");
       try {
-        const result = await setAccountLockedAction(id, !locked);
+        const result = await setAccountLockedAction(id, !locked, email);
         if (result.error) toast.error(result.error);
         else toast.success(locked ? "Đã mở khoá tài khoản." : "Đã khoá tài khoản.");
       } catch {
