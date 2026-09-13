@@ -4,10 +4,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import {
-  checkEmailExists,
   checkLoginRateLimit,
   logLoginAttempt,
   logSecurityEvent,
+  lookupAccountByEmail,
   recordAdminLogin,
 } from "@/lib/admin/security";
 
@@ -50,10 +50,15 @@ export async function login(formData: FormData) {
     // dùng chung 1 thông báo — đây vốn là user enumeration (lộ email nào có
     // tài khoản thật), nhưng chấp nhận đánh đổi vì app nội bộ ít tài khoản,
     // ưu tiên UX rõ ràng hơn. Sai email -> không giữ lại giá trị đã gõ (reset
-    // ô nhập); sai mật khẩu -> giữ nguyên email đã gõ.
-    const exists = await checkEmailExists(email);
-    if (!exists) {
+    // ô nhập); sai mật khẩu -> giữ nguyên email đã gõ. RIÊNG role admin vẫn
+    // dùng thông báo chung khi sai mật khẩu — đây là nhóm tài khoản toàn
+    // quyền, không lộ thêm "email này chắc chắn là admin".
+    const account = await lookupAccountByEmail(email);
+    if (!account.exists) {
       redirect("/admin/login?error=wrong_email");
+    }
+    if (account.role === "admin") {
+      redirect(`/admin/login?error=1${emailParam}`);
     }
     redirect(`/admin/login?error=wrong_password${emailParam}`);
   }

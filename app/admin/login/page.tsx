@@ -40,6 +40,9 @@ export default function AdminLoginPage({
             {searchParams.error === "wrong_password" && (
               <p className="text-sm text-rose-600">Sai mật khẩu, vui lòng thử lại.</p>
             )}
+            {searchParams.error === "1" && (
+              <p className="text-sm text-rose-600">Đăng nhập thất bại, vui lòng thử lại.</p>
+            )}
             {searchParams.error === "oauth_failed" && (
               <p className="text-sm text-rose-600">Đăng nhập Google thất bại, vui lòng thử lại.</p>
             )}

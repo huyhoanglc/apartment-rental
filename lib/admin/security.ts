@@ -34,23 +34,33 @@ const TELEGRAM_ALERT_EVENTS = new Set([
   "reauth_failed",
 ]);
 
+export interface AccountLookup {
+  exists: boolean;
+  role: "admin" | "member" | null;
+}
+
 /**
- * Kiểm tra email có ứng với tài khoản admin nào không — dùng để phân biệt
- * thông báo "email không tồn tại" vs "sai mật khẩu" ở app/admin/login/actions.ts.
- * Chấp nhận đánh đổi: đây vốn là thông tin user enumeration (kẻ tấn công dò
- * được email nào có tài khoản thật), nhưng UX rõ ràng được ưu tiên hơn cho
- * app nội bộ ít tài khoản này. Số tài khoản admin nhỏ nên list hết 1 trang
- * (perPage mặc định 50) là đủ, không cần phân trang.
+ * Tra email ứng với tài khoản nào (có tồn tại không, role gì) — dùng để phân
+ * biệt thông báo "email không tồn tại" vs "sai mật khẩu" ở
+ * app/admin/login/actions.ts. Chấp nhận đánh đổi: đây vốn là thông tin user
+ * enumeration (kẻ tấn công dò được email nào có tài khoản thật), nhưng UX rõ
+ * ràng được ưu tiên hơn cho app nội bộ ít tài khoản này — RIÊNG role admin
+ * vẫn được che (login.ts trả thông báo chung khi role=admin sai mật khẩu) vì
+ * đây là nhóm tài khoản có toàn quyền, đáng bị nhắm tới nhất. Số tài khoản
+ * nhỏ nên list hết 1 trang (perPage mặc định 50) là đủ, không cần phân trang.
  */
-export async function checkEmailExists(email: string): Promise<boolean> {
+export async function lookupAccountByEmail(email: string): Promise<AccountLookup> {
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.listUsers();
   if (error) {
-    console.error("[checkEmailExists]", error);
-    return false;
+    console.error("[lookupAccountByEmail]", error);
+    return { exists: false, role: null };
   }
   const normalized = email.trim().toLowerCase();
-  return data.users.some((u) => u.email?.toLowerCase() === normalized);
+  const user = data.users.find((u) => u.email?.toLowerCase() === normalized);
+  if (!user) return { exists: false, role: null };
+
+  return { exists: true, role: user.app_metadata?.role === "member" ? "member" : "admin" };
 }
 
 function getRequestMeta(): { ip: string | null; userAgent: string | null } {

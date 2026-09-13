@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { checkLoginRateLimit, detectNewDevice, parseUserAgent } from "./security";
+import { checkLoginRateLimit, detectNewDevice, lookupAccountByEmail, parseUserAgent } from "./security";
 
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: vi.fn(),
@@ -25,6 +25,16 @@ function mockAdminFrom(result: { data?: unknown; error?: unknown; count?: number
     from: vi.fn(() => builder),
   } as unknown as ReturnType<typeof createAdminClient>);
   return builder;
+}
+
+function mockListUsers(users: { email: string; app_metadata?: { role?: string } }[]) {
+  vi.mocked(createAdminClient).mockReturnValue({
+    auth: {
+      admin: {
+        listUsers: vi.fn(() => Promise.resolve({ data: { users }, error: null })),
+      },
+    },
+  } as unknown as ReturnType<typeof createAdminClient>);
 }
 
 beforeEach(() => {
@@ -71,6 +81,36 @@ describe("checkLoginRateLimit", () => {
     mockAdminFrom({ count: undefined, error: new Error("db down") });
     const result = await checkLoginRateLimit("a@b.com");
     expect(result.blocked).toBe(false);
+  });
+});
+
+describe("lookupAccountByEmail", () => {
+  it("email không tồn tại -> exists=false, role=null", async () => {
+    mockListUsers([{ email: "a@b.com", app_metadata: { role: "admin" } }]);
+    expect(await lookupAccountByEmail("khong-ton-tai@b.com")).toEqual({
+      exists: false,
+      role: null,
+    });
+  });
+
+  it("email tồn tại, role admin -> exists=true, role=admin", async () => {
+    mockListUsers([{ email: "admin@b.com", app_metadata: { role: "admin" } }]);
+    expect(await lookupAccountByEmail("admin@b.com")).toEqual({ exists: true, role: "admin" });
+  });
+
+  it("email tồn tại, role member -> exists=true, role=member", async () => {
+    mockListUsers([{ email: "staff@b.com", app_metadata: { role: "member" } }]);
+    expect(await lookupAccountByEmail("staff@b.com")).toEqual({ exists: true, role: "member" });
+  });
+
+  it("so khớp email không phân biệt hoa thường", async () => {
+    mockListUsers([{ email: "Admin@B.com", app_metadata: { role: "admin" } }]);
+    expect(await lookupAccountByEmail("admin@b.com")).toEqual({ exists: true, role: "admin" });
+  });
+
+  it("tài khoản không có app_metadata.role -> mặc định coi là admin", async () => {
+    mockListUsers([{ email: "legacy@b.com" }]);
+    expect(await lookupAccountByEmail("legacy@b.com")).toEqual({ exists: true, role: "admin" });
   });
 });
 
