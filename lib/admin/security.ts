@@ -17,8 +17,11 @@ const RATE_LIMIT_WINDOW_MINUTES = 15;
 
 /**
  * Event có tín hiệu cao mới báo Telegram — login thành công thường/logout chỉ
- * ghi DB (xem logLoginAttempt/logSecurityEvent), tránh spam kênh Telegram
- * đang dùng chung với thông báo lead mới.
+ * ghi DB (xem logLoginAttempt/logSecurityEvent), tránh spam group Telegram.
+ * Mọi cảnh báo bảo mật (kể cả login thành công, xem recordAdminLogin) ưu
+ * tiên gửi vào TELEGRAM_SECURITY_CHAT_ID (group riêng, tách khỏi
+ * TELEGRAM_CHAT_ID đang dùng cho thông báo lead mới) — chưa set thì tự rơi
+ * về chung TELEGRAM_CHAT_ID.
  */
 const TELEGRAM_ALERT_EVENTS = new Set([
   "login_blocked_rate_limit",
@@ -191,7 +194,8 @@ export async function logSecurityEvent(
         (details.targetEmail ? `Tài khoản liên quan: ${details.targetEmail}\n` : "") +
         (details.telegramNote ? `${details.telegramNote}\n` : "") +
         `Thời gian: ${formatVNDateTime(new Date())}\n` +
-        `IP: ${ip ?? "không rõ"}`
+        `IP: ${ip ?? "không rõ"}`,
+      process.env.TELEGRAM_SECURITY_CHAT_ID || process.env.TELEGRAM_CHAT_ID
     );
   }
 }
@@ -255,7 +259,8 @@ export async function recordAdminLogin(
       (phone ? `Số điện thoại: ${phone}\n` : "") +
       `Thời gian: ${formatVNDateTime(new Date())}\n` +
       `IP: ${ip ?? "không rõ"}\n` +
-      `Thiết bị: ${device}`
+      `Thiết bị: ${device}`,
+    process.env.TELEGRAM_SECURITY_CHAT_ID || process.env.TELEGRAM_CHAT_ID
   );
 }
 

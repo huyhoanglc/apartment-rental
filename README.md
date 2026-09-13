@@ -198,7 +198,8 @@ giữ nguyên cho cả 2 chế độ.
    - `NEXT_PUBLIC_ZALO_CONTACT` (số điện thoại/Zalo OA thật để nhận tin nhắn khách thuê)
    - `NEXT_PUBLIC_SITE_URL` (domain Vercel thật, cho sitemap)
    - `ADMIN_ALLOWED_EMAILS` nếu dùng đăng nhập Google (xem mục 3)
-   - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` nếu dùng thông báo Telegram (xem mục 7)
+   - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_SECURITY_CHAT_ID` (tuỳ chọn) nếu dùng
+     thông báo Telegram (xem mục 7)
 4. Deploy. Vercel cấp domain tạm dạng `*.vercel.app`; gắn domain riêng sau trong
    **Project Settings > Domains** khi đã mua domain.
 
@@ -218,15 +219,19 @@ họ đang cầm về mặt chữ ký vẫn còn hạn, nhưng `getUser()` ở l
 bại vì session đã bị xoá — hiệu lực gần như ngay lập tức, không phải khoá tài khoản (họ đăng nhập
 lại bình thường được).
 
-**Thông báo Telegram khi có admin đăng nhập / lead mới** (tuỳ chọn, bỏ trống 2 biến env thì tự
-tắt, không lỗi):
+**Thông báo Telegram khi có lead mới / sự kiện bảo mật** (tuỳ chọn, bỏ trống thì tự tắt, không
+lỗi). Có thể tách làm 2 group riêng để khỏi lẫn lead (tần suất cao, cho team sale) với cảnh báo
+bảo mật (đăng nhập, MFA, khoá/tạo/xoá tài khoản... cho người quản trị hệ thống):
 
 1. Mở Telegram, nhắn cho [@BotFather](https://t.me/BotFather) → gõ `/newbot` → làm theo hướng dẫn
    để tạo bot, lấy `TELEGRAM_BOT_TOKEN`.
 2. Nhắn thử 1 tin bất kỳ cho bot vừa tạo (hoặc thêm bot vào 1 group).
 3. Mở trình duyệt vào `https://api.telegram.org/bot<TOKEN>/getUpdates`, tìm field
    `"chat":{"id": ...}` — đó là `TELEGRAM_CHAT_ID`.
-4. Thêm 2 biến này vào `.env.local` (và Vercel Environment Variables khi deploy thật).
+4. (Tuỳ chọn) Tạo thêm 1 group Telegram riêng, add bot vào, lặp lại bước 2-3 để lấy
+   `TELEGRAM_SECURITY_CHAT_ID` — cảnh báo bảo mật sẽ ưu tiên gửi vào đây; bỏ trống thì tự rơi về
+   chung `TELEGRAM_CHAT_ID`.
+5. Thêm các biến này vào `.env.local` (và Vercel Environment Variables khi deploy thật).
 
 `TELEGRAM_BOT_TOKEN` chỉ dùng trong `lib/telegram.ts`, gọi từ Server Action/Route Handler — không
 bao giờ lộ ra client.
