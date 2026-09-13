@@ -13,33 +13,48 @@ interface ListingSectionProps {
 
 const TYPE_OPTIONS: ListingType[] = ["phong_tro", "can_ho_dich_vu", "chung_cu", "nha_nguyen_can"];
 
-const PRICE_OPTIONS: { key: string; min?: number; max?: number }[] = [
-  { key: "priceUnder3", max: 3 },
-  { key: "price3to6", min: 3, max: 6 },
-  { key: "price6to10", min: 6, max: 10 },
-  { key: "priceOver10", min: 10 },
-];
+/** Chạm mốc PRICE_MAX = không giới hạn trên (giống "Trên 10 triệu" của dropdown cũ). */
+const PRICE_MIN = 0;
+const PRICE_MAX = 30;
+const PRICE_STEP = 0.5;
+const DEFAULT_PRICE_RANGE: [number, number] = [PRICE_MIN, PRICE_MAX];
+
+const THUMB_CLASS =
+  "pointer-events-none absolute inset-x-0 top-1/2 h-0 w-full -translate-y-1/2 appearance-none bg-transparent " +
+  "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 " +
+  "[&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full " +
+  "[&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-primary-600 [&::-webkit-slider-thumb]:shadow " +
+  "[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:cursor-pointer " +
+  "[&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white " +
+  "[&::-moz-range-thumb]:bg-primary-600 [&::-moz-range-thumb]:shadow";
 
 export default function ListingSection({ initialListings, initialDistrict = "" }: ListingSectionProps) {
   const t = useTranslations("ListingSection");
   const tTypes = useTranslations("ListingTypes");
   const [district, setDistrict] = useState(initialDistrict);
   const [type, setType] = useState<ListingType | "">("");
-  const [priceIdx, setPriceIdx] = useState<number | "">("");
+  const [priceRange, setPriceRange] = useState<[number, number]>(DEFAULT_PRICE_RANGE);
+  const [committedPriceRange, setCommittedPriceRange] = useState<[number, number]>(DEFAULT_PRICE_RANGE);
   const [listings, setListings] = useState<ListingWithProject[]>(initialListings);
   const [loading, setLoading] = useState(false);
   const isFirstRun = useRef(true);
+
+  // Kéo thanh trượt bắn onChange liên tục — chỉ "chốt" giá trị (kích hoạt fetch)
+  // sau 400ms ngừng kéo, tránh gọi API dồn dập theo từng nấc kéo. Lần đầu mount
+  // priceRange/committedPriceRange cùng trỏ tới DEFAULT_PRICE_RANGE (cùng
+  // reference) nên setCommittedPriceRange ở đây là no-op, React tự bailout.
+  useEffect(() => {
+    const timer = setTimeout(() => setCommittedPriceRange(priceRange), 400);
+    return () => clearTimeout(timer);
+  }, [priceRange]);
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
     if (district) params.set("district", district);
     if (type) params.set("type", type);
-    if (priceIdx !== "") {
-      const opt = PRICE_OPTIONS[priceIdx];
-      if (opt.min != null) params.set("minPrice", String(opt.min));
-      if (opt.max != null) params.set("maxPrice", String(opt.max));
-    }
+    if (committedPriceRange[0] > PRICE_MIN) params.set("minPrice", String(committedPriceRange[0]));
+    if (committedPriceRange[1] < PRICE_MAX) params.set("maxPrice", String(committedPriceRange[1]));
     try {
       const res = await fetch(`/api/listings?${params.toString()}`);
       const data = await res.json();
@@ -47,7 +62,7 @@ export default function ListingSection({ initialListings, initialDistrict = "" }
     } finally {
       setLoading(false);
     }
-  }, [district, type, priceIdx]);
+  }, [district, type, committedPriceRange]);
 
   useEffect(() => {
     if (isFirstRun.current) {
@@ -56,6 +71,14 @@ export default function ListingSection({ initialListings, initialDistrict = "" }
     }
     fetchListings();
   }, [fetchListings]);
+
+  const hasPriceFilter = priceRange[0] > PRICE_MIN || priceRange[1] < PRICE_MAX;
+  const priceLabel =
+    priceRange[1] >= PRICE_MAX
+      ? priceRange[0] > PRICE_MIN
+        ? t("priceRangeOpenMax", { min: priceRange[0] })
+        : t("priceAny")
+      : t("priceRange", { min: priceRange[0], max: priceRange[1] });
 
   return (
     <section id="listings" className="container-page scroll-mt-20 py-16">
@@ -94,26 +117,54 @@ export default function ListingSection({ initialListings, initialDistrict = "" }
           ))}
         </select>
 
-        <select
-          value={priceIdx}
-          onChange={(e) => setPriceIdx(e.target.value === "" ? "" : Number(e.target.value))}
-          className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary-500 focus:outline-none"
-        >
-          <option value="">{t("allBudgets")}</option>
-          {PRICE_OPTIONS.map((opt, idx) => (
-            <option key={opt.key} value={idx}>
-              {t(opt.key)}
-            </option>
-          ))}
-        </select>
+        <div className="min-w-[220px] flex-1 rounded-lg border border-border bg-card px-3 py-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-medium text-muted-foreground">{t("priceLabel")}</span>
+            <span className="font-semibold text-primary-700 dark:text-primary-300">{priceLabel}</span>
+          </div>
+          <div className="relative mt-2.5 h-4">
+            <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-muted" />
+            <div
+              className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-primary-600"
+              style={{
+                left: `${((priceRange[0] - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100}%`,
+                right: `${100 - ((priceRange[1] - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100}%`,
+              }}
+            />
+            <input
+              type="range"
+              aria-label={t("priceMinAriaLabel")}
+              min={PRICE_MIN}
+              max={PRICE_MAX}
+              step={PRICE_STEP}
+              value={priceRange[0]}
+              onChange={(e) =>
+                setPriceRange(([, max]) => [Math.min(Number(e.target.value), max - PRICE_STEP), max])
+              }
+              className={THUMB_CLASS}
+            />
+            <input
+              type="range"
+              aria-label={t("priceMaxAriaLabel")}
+              min={PRICE_MIN}
+              max={PRICE_MAX}
+              step={PRICE_STEP}
+              value={priceRange[1]}
+              onChange={(e) =>
+                setPriceRange(([min]) => [min, Math.max(Number(e.target.value), min + PRICE_STEP)])
+              }
+              className={THUMB_CLASS}
+            />
+          </div>
+        </div>
 
-        {(district || type || priceIdx !== "") && (
+        {(district || type || hasPriceFilter) && (
           <button
             type="button"
             onClick={() => {
               setDistrict("");
               setType("");
-              setPriceIdx("");
+              setPriceRange(DEFAULT_PRICE_RANGE);
             }}
             className="rounded-lg px-3 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/40"
           >
