@@ -1,14 +1,10 @@
 import GoogleLoginButton from "@/components/admin/GoogleLoginButton";
-import { login } from "./actions";
-
-const LABEL = "block text-xs font-semibold uppercase tracking-wide text-muted-foreground";
-const FIELD =
-  "mt-1.5 w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm text-foreground shadow-sm transition focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/10";
+import LoginForm from "@/components/admin/LoginForm";
 
 export default function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: { error?: string; email?: string };
 }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -32,23 +28,20 @@ export default function AdminLoginPage({
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          <form action={login} className="space-y-4">
-            <div>
-              <label className={LABEL}>Email</label>
-              <input type="email" name="email" required className={FIELD} />
-            </div>
-            <div>
-              <label className={LABEL}>Mật khẩu</label>
-              <input type="password" name="password" required className={FIELD} />
-            </div>
-
+          <LoginForm defaultEmail={searchParams.email ?? ""}>
             {searchParams.error === "config" && (
               <p className="text-sm text-rose-600">
                 Chưa cấu hình SUPABASE_URL/SUPABASE_ANON_KEY trong .env.local.
               </p>
             )}
-            {searchParams.error === "1" && (
-              <p className="text-sm text-rose-600">Đăng nhập thất bại, vui lòng thử lại.</p>
+            {searchParams.error === "wrong_email" && (
+              <p className="text-sm text-rose-600">Email không tồn tại, vui lòng kiểm tra lại.</p>
+            )}
+            {searchParams.error === "wrong_password" && (
+              <p className="text-sm text-rose-600">Sai mật khẩu, vui lòng thử lại.</p>
+            )}
+            {searchParams.error === "oauth_failed" && (
+              <p className="text-sm text-rose-600">Đăng nhập Google thất bại, vui lòng thử lại.</p>
             )}
             {searchParams.error === "not_allowed" && (
               <p className="text-sm text-rose-600">
@@ -62,14 +55,7 @@ export default function AdminLoginPage({
                 lòng thử lại sau.
               </p>
             )}
-
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700"
-            >
-              Đăng nhập
-            </button>
-          </form>
+          </LoginForm>
         </div>
       </div>
     </div>

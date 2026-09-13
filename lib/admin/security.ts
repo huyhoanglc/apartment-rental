@@ -34,6 +34,25 @@ const TELEGRAM_ALERT_EVENTS = new Set([
   "reauth_failed",
 ]);
 
+/**
+ * Kiểm tra email có ứng với tài khoản admin nào không — dùng để phân biệt
+ * thông báo "email không tồn tại" vs "sai mật khẩu" ở app/admin/login/actions.ts.
+ * Chấp nhận đánh đổi: đây vốn là thông tin user enumeration (kẻ tấn công dò
+ * được email nào có tài khoản thật), nhưng UX rõ ràng được ưu tiên hơn cho
+ * app nội bộ ít tài khoản này. Số tài khoản admin nhỏ nên list hết 1 trang
+ * (perPage mặc định 50) là đủ, không cần phân trang.
+ */
+export async function checkEmailExists(email: string): Promise<boolean> {
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.listUsers();
+  if (error) {
+    console.error("[checkEmailExists]", error);
+    return false;
+  }
+  const normalized = email.trim().toLowerCase();
+  return data.users.some((u) => u.email?.toLowerCase() === normalized);
+}
+
 function getRequestMeta(): { ip: string | null; userAgent: string | null } {
   const headerList = headers();
   return {

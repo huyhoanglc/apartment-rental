@@ -3,7 +3,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { checkLoginRateLimit, logLoginAttempt, logSecurityEvent, recordAdminLogin } from "@/lib/admin/security";
+import {
+  checkEmailExists,
+  checkLoginRateLimit,
+  logLoginAttempt,
+  logSecurityEvent,
+  recordAdminLogin,
+} from "@/lib/admin/security";
 
 export async function login(formData: FormData) {
   if (!isSupabaseConfigured) {
@@ -13,13 +19,17 @@ export async function login(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
+  // Giữ lại email đã gõ khi redirect về do lỗi — chỉ email (không phải bí
+  // mật), tuyệt đối không đưa password vào query string.
+  const emailParam = `&email=${encodeURIComponent(email)}`;
+
   const rateLimit = await checkLoginRateLimit(email);
   if (rateLimit.blocked) {
     await logSecurityEvent("login_blocked_rate_limit", {
       actorEmail: email,
       telegramNote: "Sai mật khẩu quá nhiều lần liên tiếp — tạm chặn 15 phút.",
     });
-    redirect("/admin/login?error=locked");
+    redirect(`/admin/login?error=locked${emailParam}`);
   }
 
   const supabase = createClient();
@@ -36,7 +46,16 @@ export async function login(formData: FormData) {
       });
     }
 
-    redirect("/admin/login?error=1");
+    // Theo yêu cầu: tách rõ "email không tồn tại" vs "sai mật khẩu" thay vì
+    // dùng chung 1 thông báo — đây vốn là user enumeration (lộ email nào có
+    // tài khoản thật), nhưng chấp nhận đánh đổi vì app nội bộ ít tài khoản,
+    // ưu tiên UX rõ ràng hơn. Sai email -> không giữ lại giá trị đã gõ (reset
+    // ô nhập); sai mật khẩu -> giữ nguyên email đã gõ.
+    const exists = await checkEmailExists(email);
+    if (!exists) {
+      redirect("/admin/login?error=wrong_email");
+    }
+    redirect(`/admin/login?error=wrong_password${emailParam}`);
   }
 
   const phone = typeof data.user.user_metadata?.phone === "string" ? data.user.user_metadata.phone : null;

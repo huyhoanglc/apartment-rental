@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/admin/login?error=1`);
+    return NextResponse.redirect(`${origin}/admin/login?error=oauth_failed`);
   }
 
   const supabase = createClient();
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !data.user) {
-    return NextResponse.redirect(`${origin}/admin/login?error=1`);
+    return NextResponse.redirect(`${origin}/admin/login?error=oauth_failed`);
   }
 
   if (!isLinking) {
