@@ -53,9 +53,9 @@ Supabase thật vì cần đăng nhập (xem mục 4).
 
 ## 3. Trang quản trị (/admin)
 
-Trang admin cho phép đăng nhập rồi tự quản lý dự án, phòng, blog, nhân viên và xem danh sách lead —
-không cần vào thẳng Supabase Dashboard nữa (dù vẫn dùng được nếu muốn). Chi tiết cấu trúc Dự
-án/Phòng/Nhân viên xem mục 9.
+Trang admin cho phép đăng nhập rồi tự quản lý dự án, phòng, blog và xem danh sách lead — không cần
+vào thẳng Supabase Dashboard nữa (dù vẫn dùng được nếu muốn). Chi tiết cấu trúc Dự án/Phòng xem mục
+9.
 
 **Tạo tài khoản admin đầu tiên** (bắt buộc qua Supabase Dashboard vì lúc này chưa có ai đăng nhập
 được để dùng tính năng trong app):
@@ -85,8 +85,8 @@ lên chính mình):
 
 Sau khi đăng nhập, `/admin` hiển thị danh sách phòng (đổi trạng thái nhanh bằng dropdown, sửa/xoá
 từng phòng qua popup ngay trên trang — không điều hướng sang trang khác), `/admin/leads` để xem và
-đánh dấu đã liên hệ các yêu cầu gửi từ form trên trang chủ. Dự án/Blog/Nhân viên cũng thêm/sửa qua
-popup tương tự trên trang danh sách của từng mục.
+đánh dấu đã liên hệ các yêu cầu gửi từ form trên trang chủ. Dự án/Blog cũng thêm/sửa qua popup
+tương tự trên trang danh sách của từng mục.
 
 ### Vai trò (Admin + role tuỳ ý)
 
@@ -105,8 +105,8 @@ mọi role khác (mặc định có sẵn **Staff**, và role tự thêm sau nà
   `/admin/accounts` quyết định — Admin tích/bỏ tích rồi Lưu, lưu ở bảng `admin_role_permissions`,
   áp dụng ngay cho mọi tài khoản mang vai trò đó (không cần chỉnh code). Vào thẳng URL 1 trang chưa
   được cấp cũng bị chặn (404) ở tầng server (`requirePageAccess`), không chỉ ẩn link trên menu —
-  nhưng các thao tác nhạy cảm bên trong Nhân viên/Tài khoản/Phiên đăng nhập/Nhật ký bảo mật
-  (tạo/xoá/đổi vai trò tài khoản, ép đăng xuất...) vẫn luôn đòi role Admin thật ở tầng server action
+  nhưng các thao tác nhạy cảm bên trong Tài khoản/Phiên đăng nhập/Nhật ký bảo mật (tạo/xoá/đổi vai
+  trò tài khoản, ép đăng xuất...) vẫn luôn đòi role Admin thật ở tầng server action
   dù trang có được cấp
   xem hay không — bảng phân quyền chỉ quyết định hiện/ẩn trang, không nới quyền thao tác.
   **`/admin/security`** (`Tài khoản của tôi` — tự sửa hồ sơ cá nhân: họ tên, ngày sinh, chức vụ,
@@ -273,7 +273,7 @@ không cần cập nhật tay. Nhớ set `NEXT_PUBLIC_SITE_URL` đúng domain th
 `admin_login_events` (lịch sử đăng nhập, RLS chỉ cho user xem/ghi dòng của chính mình),
 `blog_posts` (bài viết, RLS: đọc công khai bài `published = true`, ghi cho user đã đăng nhập).
 
-## 9. Dự án → Phòng, Nhân viên
+## 9. Dự án → Phòng
 
 Mỗi phòng cho thuê giờ thuộc về 1 **Dự án** (tòa nhà/chung cư) — địa chỉ, quận/phường, tiện ích
 chung, thông tin chủ nhà/quản lý (tên + SĐT, nội bộ — không hiện công khai) và tiện ích toà nhà
@@ -316,16 +316,12 @@ trực tiếp file `.xlsx`/`.xls` (đọc bằng `exceljs`) hoặc CSV/TSV. Kh�
 Cả 2 đều chỉ báo tổng số dòng tạo thành công + số dòng bị bỏ qua qua toast, không có màn xem trước
 từng dòng — kiểm tra lại kết quả trực tiếp trên trang danh sách sau khi import.
 
-`/admin/staff` là **danh bạ nhân viên nội bộ** đơn giản (tên, SĐT, email, chức vụ, đang làm/nghỉ)
-— không liên quan tài khoản đăng nhập `/admin` (tài khoản đăng nhập vẫn tạo thủ công qua Supabase
-Dashboard như mục 3).
-
 Trang chi tiết phòng (`/tin/[code]`) hiện thêm mục "Phòng khác cùng dự án" nếu dự án có nhiều
 phòng. Chưa có trang công khai duyệt riêng theo Dự án (`/du-an`) — có thể làm sau, bảng `projects`
 đã có sẵn `slug` để dùng ngay không cần đổi schema.
 
-**Bảng mới:** `projects` (RLS: đọc công khai, ghi cho user đã đăng nhập), `staff` (RLS: không có
-đọc công khai, chỉ user đã đăng nhập). Bucket Storage mới `project-images`.
+**Bảng mới:** `projects` (RLS: đọc công khai, ghi cho user đã đăng nhập). Bucket Storage mới
+`project-images`.
 
 ## Cấu trúc chính
 
@@ -333,8 +329,8 @@ phòng. Chưa có trang công khai duyệt riêng theo Dự án (`/du-an`) — c
   (`tin/[code]`), blog (`blog/`, `blog/[slug]`), layout gốc (`layout.tsx`, bọc
   `NextIntlClientProvider` + `ThemeProvider` + Header/Footer)
 - `app/admin/` — trang quản trị, root layout riêng (không đa ngôn ngữ); `login/` (đăng nhập công
-  khai); `(dashboard)/` (route group yêu cầu đăng nhập — phòng, dự án, leads, blog, nhân viên,
-  bảo mật)
+  khai); `(dashboard)/` (route group yêu cầu đăng nhập — phòng, dự án, leads, blog, tài khoản &
+  phân quyền, bảo mật)
 - `app/api/` — route handlers `listings`, `leads` (dùng chung cho cả trang công khai)
 - `app/auth/callback/route.ts` — callback OAuth (Google...), ngoài `/admin` và ngoài matcher của
   `middleware.ts` để không bị chặn/redirect ngôn ngữ giữa chừng

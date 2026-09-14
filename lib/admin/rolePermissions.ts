@@ -96,9 +96,9 @@ export async function setAllowedPages(role: AdminRole, hrefs: string[]): Promise
   if (error) throw error;
 }
 
-/** Dùng ở đầu các trang phân quyền theo bảng admin_role_permissions (staff,
- * accounts, sessions, audit-log) — 404 nếu vai trò hiện tại không được cấp
- * xem trang này. Admin luôn qua (xem getAllowedPages). */
+/** Dùng ở đầu các trang phân quyền theo bảng admin_role_permissions (accounts,
+ * sessions, audit-log) — 404 nếu vai trò hiện tại không được cấp xem trang
+ * này. Admin luôn qua (xem getAllowedPages). */
 export async function requirePageAccess(href: string): Promise<void> {
   const role = await getCurrentRole();
   if (role === ADMIN_ROLE_KEY) return;

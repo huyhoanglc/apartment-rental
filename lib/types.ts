@@ -100,20 +100,6 @@ export interface LeadRecord extends Required<Pick<Lead, "id" | "phone" | "create
   contacted: boolean;
 }
 
-export interface Staff {
-  id: string;
-  full_name: string;
-  phone: string | null;
-  email: string | null;
-  role: string | null;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-/** Field admin nhập ở form thêm/sửa nhân viên. */
-export type StaffInput = Omit<Staff, "id" | "created_at" | "updated_at">;
-
 export interface BlogPost {
   id: string;
   slug: string;
