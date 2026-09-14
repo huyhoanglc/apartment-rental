@@ -43,6 +43,16 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
   const { data, error } = await admin.auth.admin.listUsers();
   if (error) throw error;
 
+  // listUsers() không trả kèm MFA factors (luôn rỗng) — phải gọi riêng
+  // mfa.listFactors cho từng user mới biết chính xác đã bật MFA hay chưa.
+  const mfaByUserId = new Map<string, boolean>();
+  await Promise.all(
+    data.users.map(async (u) => {
+      const { data: factorsData } = await admin.auth.admin.mfa.listFactors({ userId: u.id });
+      mfaByUserId.set(u.id, (factorsData?.factors ?? []).some((f) => f.status === "verified"));
+    })
+  );
+
   return data.users
     .map((u) => ({
       id: u.id,
@@ -51,7 +61,7 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
       phone: typeof u.user_metadata?.phone === "string" ? u.user_metadata.phone : null,
       role: roleOf(u.app_metadata),
       locked: Boolean(u.banned_until) && new Date(u.banned_until as string) > new Date(),
-      has_mfa: (u.factors ?? []).some((f) => f.status === "verified"),
+      has_mfa: mfaByUserId.get(u.id) ?? false,
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at ?? null,
       providers: (u.identities ?? []).map((i) => i.provider),
