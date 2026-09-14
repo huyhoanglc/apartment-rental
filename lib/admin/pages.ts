@@ -17,7 +17,7 @@ export const ADMIN_PAGES: AdminPageDef[] = [
   { href: "/admin/blog", label: "Blog" },
   { href: "/admin/activity", label: "Lịch sử" },
   { href: "/admin/staff", label: "Nhân viên" },
-  { href: "/admin/accounts", label: "Tài khoản và phân quyền" },
+  { href: "/admin/accounts", label: "Tài khoản & Phân quyền" },
   { href: "/admin/sessions", label: "Phiên đăng nhập" },
   { href: "/admin/audit-log", label: "Nhật ký bảo mật" },
 ];
