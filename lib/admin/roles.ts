@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export type AdminRole = "admin" | "member";
@@ -25,9 +24,4 @@ export async function getCurrentRole(): Promise<AdminRole> {
 
 export async function isCurrentUserAdmin(): Promise<boolean> {
   return (await getCurrentRole()) === "admin";
-}
-
-/** Dùng ở đầu các trang chỉ-admin (accounts, staff, security) — 404 nếu không phải admin. */
-export async function requireAdminPage(): Promise<void> {
-  if (!(await isCurrentUserAdmin())) notFound();
 }

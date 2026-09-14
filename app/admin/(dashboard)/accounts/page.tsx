@@ -1,18 +1,19 @@
 import AccountsManager from "@/components/admin/AccountsManager";
 import { getAdminAccounts } from "@/lib/admin/accounts";
-import { requireAdminPage } from "@/lib/admin/roles";
+import { requirePageAccess, getAllRolePermissions } from "@/lib/admin/rolePermissions";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminAccountsPage() {
-  await requireAdminPage();
+  await requirePageAccess("/admin/accounts");
 
   const supabase = createClient();
   const [
     accounts,
+    permissions,
     {
       data: { user: currentUser },
     },
-  ] = await Promise.all([getAdminAccounts(), supabase.auth.getUser()]);
+  ] = await Promise.all([getAdminAccounts(), getAllRolePermissions(), supabase.auth.getUser()]);
 
-  return <AccountsManager accounts={accounts} currentUserId={currentUser?.id} />;
+  return <AccountsManager accounts={accounts} currentUserId={currentUser?.id} permissions={permissions} />;
 }

@@ -1,10 +1,10 @@
 import SessionsManager from "@/components/admin/SessionsManager";
 import { getAdminAccounts } from "@/lib/admin/accounts";
-import { requireAdminPage } from "@/lib/admin/roles";
+import { requirePageAccess } from "@/lib/admin/rolePermissions";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminSessionsPage() {
-  await requireAdminPage();
+  await requirePageAccess("/admin/sessions");
 
   const supabase = createClient();
   const [

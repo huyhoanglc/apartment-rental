@@ -11,6 +11,7 @@ import {
   updateAdminAccountRole,
 } from "@/lib/admin/accounts";
 import { isCurrentUserAdmin, type AdminRole } from "@/lib/admin/roles";
+import { setAllowedPages } from "@/lib/admin/rolePermissions";
 import { logSecurityEvent } from "@/lib/admin/security";
 
 export interface CreateAccountState {
@@ -206,6 +207,34 @@ export async function resetAccountPasswordAction(
   });
 
   revalidatePath("/admin/accounts");
+  return {};
+}
+
+export async function updateRolePermissionsAction(role: AdminRole, allowedHrefs: string[]): Promise<{ error?: string }> {
+  if (!(await isCurrentUserAdmin())) {
+    return { error: "Bạn không có quyền đổi phân quyền." };
+  }
+  if (role === "admin") {
+    return { error: "Admin luôn có toàn quyền, không chỉnh được." };
+  }
+
+  try {
+    await setAllowedPages(role, allowedHrefs);
+  } catch (err) {
+    console.error("[updateRolePermissionsAction]", err);
+    return { error: "Đổi phân quyền thất bại, vui lòng thử lại." };
+  }
+
+  const actor = await getCurrentUser();
+  await logSecurityEvent("role_permissions_updated", {
+    actorUserId: actor?.id,
+    actorEmail: actor?.email,
+    metadata: { role, allowedHrefs },
+    telegramNote: `Phân quyền vai trò "${role}" vừa được đổi — ${allowedHrefs.length} trang được xem.`,
+  });
+
+  revalidatePath("/admin/accounts");
+  revalidatePath("/admin", "layout");
   return {};
 }
 

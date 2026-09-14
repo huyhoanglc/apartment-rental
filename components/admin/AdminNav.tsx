@@ -10,6 +10,7 @@ import PresenceIndicator from "@/components/admin/PresenceIndicator";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
 import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
 import type { AdminRole } from "@/lib/admin/roles";
+import { ADMIN_PAGES, ALWAYS_VISIBLE_PAGES } from "@/lib/admin/pages";
 
 interface AdminNavProps {
   userId: string;
@@ -17,6 +18,8 @@ interface AdminNavProps {
   fullName: string | null;
   avatarUrl: string | null;
   role: AdminRole;
+  /** Trang role hiện tại được xem, tính sẵn ở layout.tsx (bảng phân quyền + /admin/security luôn có). */
+  allowedHrefs: string[];
 }
 
 /** Thêm role mới: khai vào AdminRole (lib/admin/roles.ts), thêm vào đây và
@@ -166,32 +169,38 @@ function MonitorIcon({ className }: { className?: string }) {
   );
 }
 
-export const NAV_ITEMS: { href: string; label: string; icon: typeof HomeIcon; roles: AdminRole[] }[] = [
-  { href: "/admin", label: "Phòng", icon: HomeIcon, roles: ["admin", "member"] },
-  { href: "/admin/projects", label: "Dự án", icon: BuildingIcon, roles: ["admin", "member"] },
-  { href: "/admin/leads", label: "Yêu cầu khách hàng", icon: InboxIcon, roles: ["admin", "member"] },
-  { href: "/admin/blog", label: "Blog", icon: DocumentIcon, roles: ["admin", "member"] },
-  { href: "/admin/activity", label: "Lịch sử", icon: ClockIcon, roles: ["admin", "member"] },
-  { href: "/admin/staff", label: "Nhân viên", icon: UsersIcon, roles: ["admin"] },
-  { href: "/admin/accounts", label: "Tài khoản", icon: KeyIcon, roles: ["admin"] },
-  { href: "/admin/sessions", label: "Phiên đăng nhập", icon: MonitorIcon, roles: ["admin"] },
-  { href: "/admin/audit-log", label: "Nhật ký bảo mật", icon: ShieldIcon, roles: ["admin"] },
-  { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon, roles: ["admin", "member"] },
-];
+const PAGE_ICONS: Record<string, typeof HomeIcon> = {
+  "/admin": HomeIcon,
+  "/admin/projects": BuildingIcon,
+  "/admin/leads": InboxIcon,
+  "/admin/blog": DocumentIcon,
+  "/admin/activity": ClockIcon,
+  "/admin/staff": UsersIcon,
+  "/admin/accounts": KeyIcon,
+  "/admin/sessions": MonitorIcon,
+  "/admin/audit-log": ShieldIcon,
+  "/admin/security": ShieldIcon,
+};
+
+/** Nguồn: lib/admin/pages.ts (ADMIN_PAGES phân quyền theo bảng + ALWAYS_VISIBLE_PAGES luôn hiện). */
+export const NAV_ITEMS = [...ADMIN_PAGES, ...ALWAYS_VISIBLE_PAGES].map((page) => ({
+  ...page,
+  icon: PAGE_ICONS[page.href],
+}));
 
 export function isActive(pathname: string, href: string): boolean {
   if (href === "/admin") return pathname === "/admin";
   return pathname.startsWith(href);
 }
 
-export default function AdminNav({ userId, email, fullName, avatarUrl, role }: AdminNavProps) {
+export default function AdminNav({ userId, email, fullName, avatarUrl, role, allowedHrefs }: AdminNavProps) {
   const pathname = usePathname();
   const displayName = fullName || email;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const collapseTimer = useRef<ReturnType<typeof setTimeout>>();
-  const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const visibleItems = NAV_ITEMS.filter((item) => allowedHrefs.includes(item.href));
   const collapsed = !expanded;
   const confirm = useConfirm();
   const loading = useGlobalLoading();

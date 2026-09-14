@@ -1,5 +1,5 @@
 import { getSecurityAuditLog } from "@/lib/admin/security";
-import { requireAdminPage } from "@/lib/admin/roles";
+import { requirePageAccess } from "@/lib/admin/rolePermissions";
 import { formatVNDateTime } from "@/lib/formatDate";
 
 const EVENT_LABELS: Record<string, string> = {
@@ -15,11 +15,12 @@ const EVENT_LABELS: Record<string, string> = {
   mfa_reset_by_admin: "Admin gỡ MFA tài khoản khác",
   mfa_challenge_failed: "Sai mã MFA",
   reauth_failed: "Xác thực lại thất bại",
+  role_permissions_updated: "Đổi phân quyền trang",
 };
 
-/** Chỉ admin xem được (requireAdminPage + RLS trên security_audit_log). */
+/** Chỉ role được cấp xem (bảng phân quyền /admin/accounts) + RLS trên security_audit_log. */
 export default async function SecurityLogPage() {
-  await requireAdminPage();
+  await requirePageAccess("/admin/audit-log");
   const entries = await getSecurityAuditLog();
 
   return (

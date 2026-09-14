@@ -93,13 +93,22 @@ popup tương tự trên trang danh sách của từng mục.
 Mỗi tài khoản có 1 trong 2 vai trò, lưu ở `app_metadata.role` của Supabase Auth user (chỉ set được
 qua Admin API — user không tự nâng quyền được):
 
-- **Admin**: thấy và dùng được tất cả, kể cả Nhân viên và Tài khoản (quản lý người khác).
-- **Staff**: thấy Phòng, Dự án, Blog, Leads, và **Tài khoản của tôi** (`/admin/security` — tự sửa
-  hồ sơ cá nhân: họ tên, ngày sinh, chức vụ, hình thức làm việc, ngày vào làm — kèm số phòng tự
-  đăng (đếm từ `listings.created_by`); xem lịch sử đăng nhập; tự liên kết thêm Google. Menu "Hồ
-  sơ"/"Cài đặt" ở dropdown avatar đều dẫn tới đây). Không thấy Nhân viên/Tài khoản trên nav — vào
-  thẳng URL 2 trang đó cũng bị chặn (404), không chỉ ẩn link. `/admin/security` không chặn theo
-  role vì chỉ hiện dữ liệu của chính tài khoản đang đăng nhập, không phải quản trị người khác.
+- **Admin**: luôn thấy và dùng được **tất cả** trang trong khu quản trị — khoá cứng trong code
+  (`lib/admin/rolePermissions.ts`), không cấu hình được qua bảng phân quyền bên dưới, để không lỡ
+  tay tự khoá Admin ra khỏi hệ thống.
+- **Staff** (và role khác Admin thêm sau này): trang nào xem được do **bảng phân quyền** ở
+  `/admin/accounts` quyết định — Admin tích/bỏ tích rồi Lưu, lưu ở bảng `admin_role_permissions`,
+  áp dụng ngay cho mọi tài khoản mang vai trò đó (không cần chỉnh code). Mặc định (role chưa từng
+  cấu hình) chỉ thấy Phòng, Dự án, Blog, Leads, Lịch sử. Vào thẳng URL 1 trang chưa được cấp cũng bị
+  chặn (404) ở tầng server (`requirePageAccess`), không chỉ ẩn link trên menu — nhưng các thao tác
+  nhạy cảm bên trong Nhân viên/Tài khoản/Phiên đăng nhập/Nhật ký bảo mật (tạo/xoá/đổi vai trò tài
+  khoản, ép đăng xuất...) vẫn luôn đòi role Admin thật ở tầng server action dù trang có được cấp
+  xem hay không — bảng phân quyền chỉ quyết định hiện/ẩn trang, không nới quyền thao tác.
+  **`/admin/security`** (`Tài khoản của tôi` — tự sửa hồ sơ cá nhân: họ tên, ngày sinh, chức vụ,
+  hình thức làm việc, ngày vào làm, kèm số phòng tự đăng, xem lịch sử đăng nhập, tự liên kết thêm
+  Google; menu "Hồ sơ"/"Cài đặt" ở dropdown avatar đều dẫn tới đây) nằm **ngoài** bảng phân quyền,
+  luôn xem được bất kể vai trò, vì chỉ hiện dữ liệu của chính tài khoản đang đăng nhập, không phải
+  quản trị người khác.
 
 Tài khoản tạo **trước khi có tính năng này** (kể cả tài khoản đầu tiên tạo qua Supabase Dashboard)
 không có `role` trong `app_metadata` — app coi thiếu role = **Admin** để không tự khoá bạn ra khỏi

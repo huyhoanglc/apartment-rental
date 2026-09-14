@@ -7,19 +7,21 @@ import AccountRoleSelect from "@/components/admin/AccountRoleSelect";
 import CreateAccountForm from "@/components/admin/CreateAccountForm";
 import DeleteAccountButton from "@/components/admin/DeleteAccountButton";
 import FormModal from "@/components/admin/FormModal";
-import PermissionsMatrix from "@/components/admin/PermissionsMatrix";
+import PermissionsMatrixEditor from "@/components/admin/PermissionsMatrixEditor";
 import ResetMfaButton from "@/components/admin/ResetMfaButton";
 import ResetPasswordButton from "@/components/admin/ResetPasswordButton";
 import { useToast } from "@/components/admin/Toast";
 import { formatVNDateTime } from "@/lib/formatDate";
 import type { AdminAccount } from "@/lib/admin/accounts";
+import type { AdminRole } from "@/lib/admin/roles";
 
 interface AccountsManagerProps {
   accounts: AdminAccount[];
   currentUserId: string | undefined;
+  permissions: Record<AdminRole, string[]>;
 }
 
-export default function AccountsManager({ accounts, currentUserId }: AccountsManagerProps) {
+export default function AccountsManager({ accounts, currentUserId, permissions }: AccountsManagerProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const toast = useToast();
@@ -128,7 +130,7 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
         </table>
       </div>
 
-      <PermissionsMatrix />
+      <PermissionsMatrixEditor permissions={permissions} />
 
       {modalOpen && (
         <FormModal title="Thêm tài khoản đăng nhập mới" onClose={() => setModalOpen(false)}>

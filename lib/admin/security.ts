@@ -29,6 +29,7 @@ const TELEGRAM_ALERT_EVENTS = new Set([
   "account_locked_auto",
   "new_device",
   "role_changed",
+  "role_permissions_updated",
   "session_revoked",
   "account_created",
   "account_deleted",

@@ -548,6 +548,35 @@ create index if not exists public_api_rate_limits_lookup_idx
   on public_api_rate_limits (endpoint, rate_key, created_at desc);
 
 -- ==========================================================================
+-- Phân quyền theo vai trò (bảng phân quyền ở /admin/accounts) — trang nào
+-- role nào (khác Admin) được xem. Admin luôn toàn quyền, cố tình KHÔNG có
+-- hàng ở đây (khoá cứng ở lib/admin/rolePermissions.ts) để không lỡ tay tự
+-- khoá Admin ra khỏi trang quản trị. Role chưa có hàng (chưa cấu hình lần
+-- nào) dùng DEFAULT_MEMBER_PAGES trong lib/admin/pages.ts.
+-- ==========================================================================
+create table if not exists admin_role_permissions (
+  role text primary key,
+  allowed_pages text[] not null default '{}',
+  updated_at timestamptz not null default now()
+);
+
+alter table admin_role_permissions enable row level security;
+
+drop policy if exists "admin can select role permissions" on admin_role_permissions;
+create policy "admin can select role permissions"
+  on admin_role_permissions for select
+  to authenticated
+  using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
+
+-- Không có policy insert/update/delete cho authenticated: chỉ ghi qua
+-- service-role (lib/admin/rolePermissions.ts setAllowedPages), gọi từ Server
+-- Action đã tự kiểm tra người gọi là Admin.
+
+insert into admin_role_permissions (role, allowed_pages)
+values ('member', array['/admin', '/admin/projects', '/admin/leads', '/admin/blog', '/admin/activity'])
+on conflict (role) do nothing;
+
+-- ==========================================================================
 -- Dọn log định kỳ — admin_login_events/security_audit_log/public_api_rate_limits
 -- ghi liên tục, không có TTL sẽ phình vô hạn theo thời gian.
 -- ==========================================================================
