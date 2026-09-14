@@ -134,10 +134,6 @@ export default async function AdminSecurityPage() {
 
       <div className="mt-4 rounded-xl2 border border-border bg-card p-6 shadow-card">
         <h2 className="text-sm font-semibold text-foreground">Xác thực 2 lớp (MFA)</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Yêu cầu thêm mã từ app authenticator (Google Authenticator, Authy...) mỗi khi đăng nhập
-          lại.
-        </p>
         <div className="mt-3">
           <MfaManager hasFactor={Boolean(mfaFactor)} factorId={mfaFactor?.id ?? null} isAdmin={isAdmin} />
         </div>
