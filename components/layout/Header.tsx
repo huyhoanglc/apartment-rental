@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import ThemeToggle from "@/components/layout/ThemeToggle";
 import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 
 const ZALO_CONTACT = process.env.NEXT_PUBLIC_ZALO_CONTACT || "0901234567";
@@ -49,7 +48,6 @@ export default function Header() {
 
         <div className="hidden items-center gap-3 md:flex">
           <LocaleSwitcher />
-          <ThemeToggle />
           <a
             href={`https://zalo.me/${ZALO_CONTACT}`}
             target="_blank"
@@ -61,7 +59,6 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}

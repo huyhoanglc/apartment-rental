@@ -5,6 +5,7 @@ import { getAllowedPages, getAllRoles } from "@/lib/admin/rolePermissions";
 import AdminNav from "@/components/admin/AdminNav";
 import AdminTopBar from "@/components/admin/AdminTopBar";
 import AdminUIProvider from "@/components/admin/AdminUIProvider";
+import FloatingActions from "@/components/layout/FloatingActions";
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -54,6 +55,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
           </div>
         </main>
       </div>
+      <FloatingActions />
     </AdminUIProvider>
   );
 }

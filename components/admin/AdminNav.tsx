@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 import { logout } from "@/app/admin/(dashboard)/actions";
-import ThemeToggle from "@/components/layout/ThemeToggle";
 import Avatar from "@/components/admin/Avatar";
 import PresenceIndicator from "@/components/admin/PresenceIndicator";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
@@ -318,17 +317,14 @@ export default function AdminNav({ userId, email, fullName, avatarUrl, roleLabel
           </span>
           Quản trị
         </Link>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <button
-            type="button"
-            onClick={() => setMobileOpen((v) => !v)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground"
-            aria-label="Mở menu"
-          >
-            <span className="text-lg">{mobileOpen ? "✕" : "☰"}</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setMobileOpen((v) => !v)}
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground"
+          aria-label="Mở menu"
+        >
+          <span className="text-lg">{mobileOpen ? "✕" : "☰"}</span>
+        </button>
       </header>
 
       {mobileOpen && (

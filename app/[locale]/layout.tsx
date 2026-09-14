@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import FloatingActions from "@/components/layout/FloatingActions";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
@@ -46,6 +47,7 @@ export default function LocaleLayout({
             <Header />
             <main>{children}</main>
             <Footer />
+            <FloatingActions />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

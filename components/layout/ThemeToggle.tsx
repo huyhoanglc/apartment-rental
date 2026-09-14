@@ -10,7 +10,7 @@ export default function ThemeToggle() {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="h-10 w-10" aria-hidden />;
+    return <div className="h-11 w-11" aria-hidden />;
   }
 
   const isDark = resolvedTheme === "dark";
@@ -19,7 +19,7 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground transition hover:bg-muted"
+      className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-lg transition hover:bg-muted"
       aria-label={isDark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}
     >
       {isDark ? (
