@@ -31,6 +31,9 @@
     "priceRangeOpenMax": "Từ {min} triệu/tháng",
     "priceMinAriaLabel": "Giá thấp nhất",
     "priceMaxAriaLabel": "Giá cao nhất",
+    "priceChipUnder": "Dưới {max}tr",
+    "priceChipRange": "{min}-{max}tr",
+    "priceChipOver": "Trên {min}tr",
     "clearFilters": "Xoá lọc",
     "loading": "Đang tải...",
     "empty": "Không có tin nào phù hợp với bộ lọc hiện tại."

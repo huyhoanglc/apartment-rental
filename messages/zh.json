@@ -31,6 +31,9 @@
     "priceRangeOpenMax": "{min} 百万/月起",
     "priceMinAriaLabel": "最低价格",
     "priceMaxAriaLabel": "最高价格",
+    "priceChipUnder": "{max}百万以下",
+    "priceChipRange": "{min}-{max}百万",
+    "priceChipOver": "{min}百万以上",
     "clearFilters": "清除筛选",
     "loading": "加载中...",
     "empty": "没有符合当前筛选条件的房源。"

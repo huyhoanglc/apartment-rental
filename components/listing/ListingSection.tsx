@@ -19,6 +19,16 @@ const PRICE_MAX = 30;
 const PRICE_STEP = 0.5;
 const DEFAULT_PRICE_RANGE: [number, number] = [PRICE_MIN, PRICE_MAX];
 
+/** Mốc chọn nhanh bên dưới thanh trượt — bấm là chốt luôn, không cần chờ debounce. */
+const PRICE_PRESETS: [number, number][] = [
+  [0, 3],
+  [3, 6],
+  [6, 10],
+  [10, 15],
+  [15, 20],
+  [20, PRICE_MAX],
+];
+
 const THUMB_CLASS =
   "pointer-events-none absolute inset-x-0 top-1/2 h-0 w-full -translate-y-1/2 appearance-none bg-transparent " +
   "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 " +
@@ -79,6 +89,17 @@ export default function ListingSection({ initialListings, initialDistrict = "" }
         ? t("priceRangeOpenMax", { min: priceRange[0] })
         : t("priceAny")
       : t("priceRange", { min: priceRange[0], max: priceRange[1] });
+
+  function selectPricePreset(preset: [number, number]) {
+    setPriceRange(preset);
+    setCommittedPriceRange(preset); // bấm mốc có sẵn -> chốt lọc ngay, khỏi chờ debounce
+  }
+
+  function presetLabel([min, max]: [number, number]): string {
+    if (min === PRICE_MIN) return t("priceChipUnder", { max });
+    if (max >= PRICE_MAX) return t("priceChipOver", { min });
+    return t("priceChipRange", { min, max });
+  }
 
   return (
     <section id="listings" className="container-page scroll-mt-20 py-16">
@@ -155,6 +176,26 @@ export default function ListingSection({ initialListings, initialDistrict = "" }
               }
               className={THUMB_CLASS}
             />
+          </div>
+
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {PRICE_PRESETS.map((preset) => {
+              const active = priceRange[0] === preset[0] && priceRange[1] === preset[1];
+              return (
+                <button
+                  key={preset.join("-")}
+                  type="button"
+                  onClick={() => selectPricePreset(preset)}
+                  className={`rounded-full border px-2.5 py-1 text-xs font-medium transition ${
+                    active
+                      ? "border-primary-600 bg-primary-600 text-white"
+                      : "border-border text-muted-foreground hover:border-primary-300 hover:text-primary-700 dark:hover:text-primary-300"
+                  }`}
+                >
+                  {presetLabel(preset)}
+                </button>
+              );
+            })}
           </div>
         </div>
 

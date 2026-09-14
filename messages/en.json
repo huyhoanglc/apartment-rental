@@ -31,6 +31,9 @@
     "priceRangeOpenMax": "From {min} million/month",
     "priceMinAriaLabel": "Minimum price",
     "priceMaxAriaLabel": "Maximum price",
+    "priceChipUnder": "Under {max}M",
+    "priceChipRange": "{min}-{max}M",
+    "priceChipOver": "Over {min}M",
     "clearFilters": "Clear filters",
     "loading": "Loading...",
     "empty": "No listings match the current filters."
