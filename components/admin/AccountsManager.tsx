@@ -7,6 +7,7 @@ import AccountRoleSelect from "@/components/admin/AccountRoleSelect";
 import CreateAccountForm from "@/components/admin/CreateAccountForm";
 import DeleteAccountButton from "@/components/admin/DeleteAccountButton";
 import FormModal from "@/components/admin/FormModal";
+import PermissionsMatrix from "@/components/admin/PermissionsMatrix";
 import ResetMfaButton from "@/components/admin/ResetMfaButton";
 import ResetPasswordButton from "@/components/admin/ResetPasswordButton";
 import { useToast } from "@/components/admin/Toast";
@@ -126,6 +127,8 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
           </tbody>
         </table>
       </div>
+
+      <PermissionsMatrix />
 
       {modalOpen && (
         <FormModal title="Thêm tài khoản đăng nhập mới" onClose={() => setModalOpen(false)}>

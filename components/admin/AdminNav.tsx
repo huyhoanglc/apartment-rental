@@ -19,10 +19,16 @@ interface AdminNavProps {
   role: AdminRole;
 }
 
-const ROLE_LABELS: Record<AdminRole, string> = {
+/** Thêm role mới: khai vào AdminRole (lib/admin/roles.ts), thêm vào đây và
+ * ALL_ROLES, rồi liệt kê role đó vào `roles` của từng NAV_ITEMS được phép
+ * xem — menu và bảng phân quyền ở /admin/accounts tự cập nhật theo, không
+ * phải sửa logic lọc ở đâu khác. */
+export const ROLE_LABELS: Record<AdminRole, string> = {
   admin: "Admin",
   member: "Staff",
 };
+
+export const ALL_ROLES: AdminRole[] = ["admin", "member"];
 
 /** Thời gian chờ trước khi thu gọn lại sau khi rê chuột ra khỏi sidebar. */
 const COLLAPSE_DELAY_MS = 2500;
@@ -160,17 +166,17 @@ function MonitorIcon({ className }: { className?: string }) {
   );
 }
 
-export const NAV_ITEMS = [
-  { href: "/admin", label: "Phòng", icon: HomeIcon, adminOnly: false },
-  { href: "/admin/projects", label: "Dự án", icon: BuildingIcon, adminOnly: false },
-  { href: "/admin/leads", label: "Yêu cầu khách hàng", icon: InboxIcon, adminOnly: false },
-  { href: "/admin/blog", label: "Blog", icon: DocumentIcon, adminOnly: false },
-  { href: "/admin/activity", label: "Lịch sử", icon: ClockIcon, adminOnly: false },
-  { href: "/admin/staff", label: "Nhân viên", icon: UsersIcon, adminOnly: true },
-  { href: "/admin/accounts", label: "Tài khoản", icon: KeyIcon, adminOnly: true },
-  { href: "/admin/sessions", label: "Phiên đăng nhập", icon: MonitorIcon, adminOnly: true },
-  { href: "/admin/audit-log", label: "Nhật ký bảo mật", icon: ShieldIcon, adminOnly: true },
-  { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon, adminOnly: false },
+export const NAV_ITEMS: { href: string; label: string; icon: typeof HomeIcon; roles: AdminRole[] }[] = [
+  { href: "/admin", label: "Phòng", icon: HomeIcon, roles: ["admin", "member"] },
+  { href: "/admin/projects", label: "Dự án", icon: BuildingIcon, roles: ["admin", "member"] },
+  { href: "/admin/leads", label: "Yêu cầu khách hàng", icon: InboxIcon, roles: ["admin", "member"] },
+  { href: "/admin/blog", label: "Blog", icon: DocumentIcon, roles: ["admin", "member"] },
+  { href: "/admin/activity", label: "Lịch sử", icon: ClockIcon, roles: ["admin", "member"] },
+  { href: "/admin/staff", label: "Nhân viên", icon: UsersIcon, roles: ["admin"] },
+  { href: "/admin/accounts", label: "Tài khoản", icon: KeyIcon, roles: ["admin"] },
+  { href: "/admin/sessions", label: "Phiên đăng nhập", icon: MonitorIcon, roles: ["admin"] },
+  { href: "/admin/audit-log", label: "Nhật ký bảo mật", icon: ShieldIcon, roles: ["admin"] },
+  { href: "/admin/security", label: "Bảo mật", icon: ShieldIcon, roles: ["admin", "member"] },
 ];
 
 export function isActive(pathname: string, href: string): boolean {
@@ -185,7 +191,7 @@ export default function AdminNav({ userId, email, fullName, avatarUrl, role }: A
   const [menuOpen, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const collapseTimer = useRef<ReturnType<typeof setTimeout>>();
-  const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || role === "admin");
+  const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
   const collapsed = !expanded;
   const confirm = useConfirm();
   const loading = useGlobalLoading();
