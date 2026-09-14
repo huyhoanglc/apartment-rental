@@ -11,7 +11,7 @@ import { formatVNDateTime } from "@/lib/formatDate";
 
 // Không chặn theo role: trang này chỉ hiện thông tin của CHÍNH tài khoản
 // đang đăng nhập (hồ sơ, lịch sử đăng nhập, phương thức liên kết) — không
-// phải quản trị người khác, nên cả Admin lẫn Cá nhân đều tự quản lý được.
+// phải quản trị người khác, nên cả Admin lẫn Staff đều tự quản lý được.
 // Menu "Hồ sơ" và "Cài đặt" ở dropdown tài khoản đều dẫn về đây.
 
 function GoogleIcon({ className }: { className?: string }) {

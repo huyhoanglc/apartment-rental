@@ -26,14 +26,14 @@ export default function AccountRoleSelect({
   if (isSelf) {
     return (
       <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold uppercase text-muted-foreground">
-        {role === "admin" ? "Admin" : "Cá nhân"}
+        {role === "admin" ? "Admin" : "Staff"}
       </span>
     );
   }
 
   async function handleChange(newRole: AdminRole) {
     const ok = await reauth({
-      title: `Đổi vai trò "${email}" thành ${newRole === "admin" ? "Admin" : "Cá nhân"}?`,
+      title: `Đổi vai trò "${email}" thành ${newRole === "admin" ? "Admin" : "Staff"}?`,
       description: "Nhập mã TOTP để xác nhận thay đổi quyền hạn.",
       confirmLabel: "Đổi vai trò",
     });
@@ -64,7 +64,7 @@ export default function AccountRoleSelect({
           : "border-border bg-muted text-muted-foreground"
       }`}
     >
-      <option value="member">Cá nhân</option>
+      <option value="member">Staff</option>
       <option value="admin">Admin</option>
     </select>
   );

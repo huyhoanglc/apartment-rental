@@ -88,13 +88,13 @@ từng phòng qua popup ngay trên trang — không điều hướng sang trang 
 đánh dấu đã liên hệ các yêu cầu gửi từ form trên trang chủ. Dự án/Blog/Nhân viên cũng thêm/sửa qua
 popup tương tự trên trang danh sách của từng mục.
 
-### Vai trò (Admin / Cá nhân)
+### Vai trò (Admin / Staff)
 
 Mỗi tài khoản có 1 trong 2 vai trò, lưu ở `app_metadata.role` của Supabase Auth user (chỉ set được
 qua Admin API — user không tự nâng quyền được):
 
 - **Admin**: thấy và dùng được tất cả, kể cả Nhân viên và Tài khoản (quản lý người khác).
-- **Cá nhân**: thấy Phòng, Dự án, Blog, Leads, và **Tài khoản của tôi** (`/admin/security` — tự sửa
+- **Staff**: thấy Phòng, Dự án, Blog, Leads, và **Tài khoản của tôi** (`/admin/security` — tự sửa
   hồ sơ cá nhân: họ tên, ngày sinh, chức vụ, hình thức làm việc, ngày vào làm — kèm số phòng tự
   đăng (đếm từ `listings.created_by`); xem lịch sử đăng nhập; tự liên kết thêm Google. Menu "Hồ
   sơ"/"Cài đặt" ở dropdown avatar đều dẫn tới đây). Không thấy Nhân viên/Tài khoản trên nav — vào
@@ -107,7 +107,7 @@ hệ thống. Muốn đổi vai trò 1 tài khoản, admin vào `/admin/accounts
 tự đổi được vai trò của chính tài khoản đang đăng nhập).
 
 **Lưu ý phạm vi:** vai trò chỉ giới hạn **thấy được trang nào**, chưa lọc theo dữ liệu — trong 4
-trang dùng chung (Phòng/Dự án/Blog/Leads), Admin và Cá nhân thấy và sửa/xoá được **toàn bộ** dữ
+trang dùng chung (Phòng/Dự án/Blog/Leads), Admin và Staff thấy và sửa/xoá được **toàn bộ** dữ
 liệu như nhau (RLS vẫn `to authenticated using (true)` cho các bảng này, không phân biệt ai tạo).
 Cố ý không giới hạn "ai tạo người đó sửa" vì bất động sản có nhiều dự án, một người có thể cần sửa
 phòng do đồng nghiệp tạo. Thay vào đó, Phòng/Dự án/Blog tự ghi lại người tạo (`created_by`,
@@ -116,12 +116,12 @@ ghi vào bảng `activity_log` — xem ở trang **`/admin/Lịch sử`** (`/adm
 2 vai trò) để biết ai đã thao tác gì và khi nào.
 
 **Quan trọng:** RLS cho `listings`/`leads`/... cấp quyền ghi cho **bất kỳ** user `authenticated`
-nào ở tầng database (vai trò Admin/Cá nhân chỉ chặn ở tầng ứng dụng, không đổi RLS). Vì app không
+nào ở tầng database (vai trò Admin/Staff chỉ chặn ở tầng ứng dụng, không đổi RLS). Vì app không
 có trang tự đăng ký nên bình thường chỉ ai được bạn tạo tài khoản mới đăng nhập được — nhưng nếu
 Supabase project của bạn đang bật đăng ký công khai (mặc định), ai đó vẫn có thể tự tạo tài khoản
 thẳng qua Supabase Auth API (không qua UI của web) — tài khoản tự tạo kiểu này **không có role**,
-nên theo đúng quy tắc "thiếu role = Admin" ở trên, họ sẽ có **toàn quyền Admin**, không phải Cá
-nhân. Vào **Authentication → Providers → Email** và tắt "Allow new users to sign up" để chặn việc
+nên theo đúng quy tắc "thiếu role = Admin" ở trên, họ sẽ có **toàn quyền Admin**, không phải
+Staff. Vào **Authentication → Providers → Email** và tắt "Allow new users to sign up" để chặn việc
 này — càng quan trọng hơn từ khi có vai trò, vì hậu quả của việc bỏ sót còn nặng hơn trước.
 
 ### Đăng nhập bằng Google (tuỳ chọn)

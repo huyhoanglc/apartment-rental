@@ -57,7 +57,7 @@ export default function CreateAccountForm({ onCancel, onSuccess }: CreateAccount
         <div>
           <label className={LABEL}>Vai trò *</label>
           <select name="role" required defaultValue="member" className={FIELD}>
-            <option value="member">Cá nhân — chỉ Phòng, Dự án, Blog, Leads</option>
+            <option value="member">Staff — chỉ Phòng, Dự án, Blog, Leads</option>
             <option value="admin">Admin — toàn quyền</option>
           </select>
         </div>

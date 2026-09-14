@@ -21,7 +21,7 @@ interface AdminNavProps {
 
 const ROLE_LABELS: Record<AdminRole, string> = {
   admin: "Admin",
-  member: "Cá nhân",
+  member: "Staff",
 };
 
 /** Thời gian chờ trước khi thu gọn lại sau khi rê chuột ra khỏi sidebar. */

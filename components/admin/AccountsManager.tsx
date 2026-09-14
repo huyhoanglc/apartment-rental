@@ -36,7 +36,7 @@ export default function AccountsManager({ accounts, currentUserId }: AccountsMan
           <h1 className="text-xl font-bold text-foreground">Tài khoản đăng nhập</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
             Quản lý ai đăng nhập được vào trang quản trị. Vai trò <strong>Admin</strong> thấy toàn bộ
-            mục quản trị; <strong>Cá nhân</strong> chỉ thấy Phòng, Dự án, Blog, Leads.
+            mục quản trị; <strong>Staff</strong> chỉ thấy Phòng, Dự án, Blog, Leads.
           </p>
         </div>
         <button

@@ -71,7 +71,7 @@ export async function createAccountAction(
     actorEmail: actor?.email,
     targetEmail: email,
     metadata: { role },
-    telegramNote: `Tài khoản mới: "${email}" (vai trò ${role === "admin" ? "Admin" : "Cá nhân"}).`,
+    telegramNote: `Tài khoản mới: "${email}" (vai trò ${role === "admin" ? "Admin" : "Staff"}).`,
   });
 
   revalidatePath("/admin/accounts");
