@@ -144,5 +144,11 @@
     "vi": "Tiếng Việt",
     "en": "English",
     "zh": "中文"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "back": "Go back",
+    "home": "Back to home"
   }
 }

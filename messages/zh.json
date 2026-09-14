@@ -144,5 +144,11 @@
     "vi": "Tiếng Việt",
     "en": "English",
     "zh": "中文"
+  },
+  "NotFound": {
+    "title": "找不到页面",
+    "description": "您要查找的页面不存在或已被移动。",
+    "back": "返回上一页",
+    "home": "返回首页"
   }
 }
