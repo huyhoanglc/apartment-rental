@@ -6,6 +6,12 @@ import { getDistrictStats } from "@/lib/listings";
 export default async function DistrictLinks() {
   const t = await getTranslations("DistrictLinks");
   const stats = await getDistrictStats();
+  const districtsWithData = DISTRICTS.filter((district) => {
+    const districtStats = stats[district];
+    return districtStats && (districtStats.projectCount > 0 || districtStats.listingCount > 0);
+  });
+
+  if (districtsWithData.length === 0) return null;
 
   return (
     <section id="districts" className="scroll-mt-20 bg-card py-16">
@@ -14,8 +20,8 @@ export default async function DistrictLinks() {
         <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-          {DISTRICTS.map((district) => {
-            const districtStats = stats[district] ?? { projectCount: 0, listingCount: 0 };
+          {districtsWithData.map((district) => {
+            const districtStats = stats[district]!;
             return (
               <Link
                 key={district}
