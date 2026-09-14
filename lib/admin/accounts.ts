@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { AdminRole } from "@/lib/admin/roles";
+import { ADMIN_ROLE_KEY, type AdminRole } from "@/lib/admin/roles";
 
 export interface AdminAccount {
   id: string;
@@ -29,8 +29,11 @@ async function requireAuthenticated(): Promise<void> {
   if (!user) throw new Error("Chưa đăng nhập.");
 }
 
+/** Thiếu/rỗng role coi là Admin (an toàn) — role hợp lệ khác dùng nguyên
+ * chuỗi lưu trong app_metadata, không còn giới hạn "member" vs "admin". */
 function roleOf(appMetadata: Record<string, unknown> | undefined): AdminRole {
-  return appMetadata?.role === "member" ? "member" : "admin";
+  const role = appMetadata?.role;
+  return typeof role === "string" && role ? role : ADMIN_ROLE_KEY;
 }
 
 /** Supabase không có "khoá vĩnh viễn" thật sự — dùng ban_duration rất dài để mô phỏng. */

@@ -26,6 +26,3 @@ export const ADMIN_PAGES: AdminPageDef[] = [
  * (hồ sơ, MFA, lịch sử đăng nhập), không phải quản trị người khác nên luôn
  * xem được bất kể vai trò (xem comment ở app/admin/(dashboard)/security/page.tsx). */
 export const ALWAYS_VISIBLE_PAGES: AdminPageDef[] = [{ href: "/admin/security", label: "Bảo mật" }];
-
-/** Role chưa có hàng nào trong admin_role_permissions (chưa từng cấu hình) dùng mặc định này. */
-export const DEFAULT_MEMBER_PAGES = ["/admin", "/admin/projects", "/admin/leads", "/admin/blog", "/admin/activity"];

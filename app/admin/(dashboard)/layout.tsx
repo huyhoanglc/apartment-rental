@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentRole } from "@/lib/admin/roles";
-import { getAllowedPages } from "@/lib/admin/rolePermissions";
+import { getAllowedPages, getAllRoles } from "@/lib/admin/rolePermissions";
 import AdminNav from "@/components/admin/AdminNav";
 import AdminTopBar from "@/components/admin/AdminTopBar";
 import AdminUIProvider from "@/components/admin/AdminUIProvider";
@@ -15,10 +15,11 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   if (!user) redirect("/admin/login");
 
   const role = await getCurrentRole();
-  const allowedPages = await getAllowedPages(role);
+  const [allowedPages, roles] = await Promise.all([getAllowedPages(role), getAllRoles()]);
   // /admin/security là trang tự quản lý tài khoản CHÍNH MÌNH, không nằm trong
   // bảng phân quyền, luôn hiện bất kể vai trò — xem lib/admin/pages.ts.
   const allowedHrefs = [...allowedPages, "/admin/security"];
+  const roleLabel = roles.find((r) => r.key === role)?.label ?? role;
   // full_name/avatar_url do Supabase tự điền từ Google khi đăng nhập OAuth;
   // tài khoản email/mật khẩu tạo qua /admin/accounts chỉ có full_name (do
   // admin nhập), không có avatar — fallback về chữ cái đầu tên là đủ.
@@ -43,7 +44,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
           email={user.email ?? ""}
           fullName={fullName}
           avatarUrl={avatarUrl}
-          role={role}
+          roleLabel={roleLabel}
           allowedHrefs={allowedHrefs}
         />
         <main className="min-w-0 flex-1">

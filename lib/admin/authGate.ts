@@ -1,7 +1,8 @@
 export interface AdminAuthState {
   pathname: string;
   isAuthenticated: boolean;
-  role: "admin" | "member";
+  /** Vai trò tuỳ ý (bảng admin_roles) — chỉ đúng "admin" mới có ý nghĩa đặc biệt ở dưới. */
+  role: string;
   /** true nếu user đã có 1 factor TOTP verified (bất kể session hiện đang ở aal1 hay aal2). */
   hasVerifiedMfaFactor: boolean;
   /** true nếu có factor verified nhưng session hiện tại mới ở aal1 — cần step-up. */

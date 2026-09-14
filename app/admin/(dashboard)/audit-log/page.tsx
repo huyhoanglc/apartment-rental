@@ -16,6 +16,7 @@ const EVENT_LABELS: Record<string, string> = {
   mfa_challenge_failed: "Sai mã MFA",
   reauth_failed: "Xác thực lại thất bại",
   role_permissions_updated: "Đổi phân quyền trang",
+  role_created: "Thêm vai trò mới",
 };
 
 /** Chỉ role được cấp xem (bảng phân quyền /admin/accounts) + RLS trên security_audit_log. */

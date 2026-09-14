@@ -548,11 +548,35 @@ create index if not exists public_api_rate_limits_lookup_idx
   on public_api_rate_limits (endpoint, rate_key, created_at desc);
 
 -- ==========================================================================
+-- Vai trò (khác Admin) — "Thêm role" ở bảng phân quyền /admin/accounts ghi
+-- vào đây. Admin là hằng đặc biệt khoá cứng trong code
+-- (lib/admin/roles.ts ADMIN_ROLE_KEY), luôn toàn quyền, cố tình KHÔNG có
+-- hàng ở đây nên không thể lỡ tay xoá/đổi tên/bớt quyền Admin qua bảng này.
+-- ==========================================================================
+create table if not exists admin_roles (
+  key text primary key,
+  label text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table admin_roles enable row level security;
+
+drop policy if exists "admin can select roles" on admin_roles;
+create policy "admin can select roles"
+  on admin_roles for select
+  to authenticated
+  using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
+
+-- Không có policy insert/update/delete cho authenticated: chỉ ghi qua
+-- service-role (lib/admin/rolePermissions.ts createRole), gọi từ Server
+-- Action đã tự kiểm tra người gọi là Admin.
+
+insert into admin_roles (key, label) values ('member', 'Staff') on conflict (key) do nothing;
+
+-- ==========================================================================
 -- Phân quyền theo vai trò (bảng phân quyền ở /admin/accounts) — trang nào
--- role nào (khác Admin) được xem. Admin luôn toàn quyền, cố tình KHÔNG có
--- hàng ở đây (khoá cứng ở lib/admin/rolePermissions.ts) để không lỡ tay tự
--- khoá Admin ra khỏi trang quản trị. Role chưa có hàng (chưa cấu hình lần
--- nào) dùng DEFAULT_MEMBER_PAGES trong lib/admin/pages.ts.
+-- role nào (khác Admin) được xem. Role chưa có hàng ở đây (vừa tạo lỗi giữa
+-- chừng, hoặc thêm thủ công ngoài app) coi như chưa được cấp trang nào.
 -- ==========================================================================
 create table if not exists admin_role_permissions (
   role text primary key,
@@ -569,8 +593,8 @@ create policy "admin can select role permissions"
   using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
 
 -- Không có policy insert/update/delete cho authenticated: chỉ ghi qua
--- service-role (lib/admin/rolePermissions.ts setAllowedPages), gọi từ Server
--- Action đã tự kiểm tra người gọi là Admin.
+-- service-role (lib/admin/rolePermissions.ts setAllowedPages/createRole),
+-- gọi từ Server Action đã tự kiểm tra người gọi là Admin.
 
 insert into admin_role_permissions (role, allowed_pages)
 values ('member', array['/admin', '/admin/projects', '/admin/leads', '/admin/blog', '/admin/activity'])

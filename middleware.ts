@@ -12,10 +12,14 @@ export default async function middleware(request: NextRequest) {
   if (pathname.startsWith("/admin")) {
     const { response, user, hasVerifiedMfaFactor, needsMfaChallenge } = await updateSession(request);
 
+    const roleClaim = user?.app_metadata?.role;
     const redirectPath = resolveAdminRedirect({
       pathname,
       isAuthenticated: Boolean(user),
-      role: user?.app_metadata?.role === "member" ? "member" : "admin",
+      // Thiếu/rỗng role coi là Admin (an toàn) — role khác dùng nguyên chuỗi,
+      // không còn ép về "admin" như trước (mọi role != "member" từng bị coi
+      // là Admin, vô tình bắt buộc MFA cho cả role tuỳ ý mới thêm).
+      role: typeof roleClaim === "string" && roleClaim ? roleClaim : "admin",
       hasVerifiedMfaFactor,
       needsMfaChallenge,
     });

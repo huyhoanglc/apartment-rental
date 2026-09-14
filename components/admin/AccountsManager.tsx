@@ -14,14 +14,16 @@ import { useToast } from "@/components/admin/Toast";
 import { formatVNDateTime } from "@/lib/formatDate";
 import type { AdminAccount } from "@/lib/admin/accounts";
 import type { AdminRole } from "@/lib/admin/roles";
+import type { AdminRoleDef } from "@/lib/admin/rolePermissions";
 
 interface AccountsManagerProps {
   accounts: AdminAccount[];
   currentUserId: string | undefined;
+  roles: AdminRoleDef[];
   permissions: Record<AdminRole, string[]>;
 }
 
-export default function AccountsManager({ accounts, currentUserId, permissions }: AccountsManagerProps) {
+export default function AccountsManager({ accounts, currentUserId, roles, permissions }: AccountsManagerProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const toast = useToast();
@@ -38,8 +40,9 @@ export default function AccountsManager({ accounts, currentUserId, permissions }
         <div>
           <h1 className="text-xl font-bold text-foreground">Tài khoản đăng nhập</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Quản lý ai đăng nhập được vào trang quản trị. Vai trò <strong>Admin</strong> thấy toàn bộ
-            mục quản trị; <strong>Staff</strong> chỉ thấy Phòng, Dự án, Blog, Leads.
+            Quản lý ai đăng nhập được vào trang quản trị. Vai trò <strong>Admin</strong> luôn thấy
+            toàn bộ mục quản trị; vai trò khác xem được trang nào do bảng phân quyền bên dưới quyết
+            định.
           </p>
         </div>
         <button
@@ -77,7 +80,13 @@ export default function AccountsManager({ accounts, currentUserId, permissions }
                   <td className="px-4 py-3 text-muted-foreground">{account.email}</td>
                   <td className="px-4 py-3 text-muted-foreground">{account.phone ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <AccountRoleSelect id={account.id} email={account.email} role={account.role} isSelf={isSelf} />
+                    <AccountRoleSelect
+                      id={account.id}
+                      email={account.email}
+                      role={account.role}
+                      roles={roles}
+                      isSelf={isSelf}
+                    />
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -130,11 +139,11 @@ export default function AccountsManager({ accounts, currentUserId, permissions }
         </table>
       </div>
 
-      <PermissionsMatrixEditor permissions={permissions} />
+      <PermissionsMatrixEditor roles={roles} permissions={permissions} />
 
       {modalOpen && (
         <FormModal title="Thêm tài khoản đăng nhập mới" onClose={() => setModalOpen(false)}>
-          <CreateAccountForm onCancel={() => setModalOpen(false)} onSuccess={handleSuccess} />
+          <CreateAccountForm roles={roles} onCancel={() => setModalOpen(false)} onSuccess={handleSuccess} />
         </FormModal>
       )}
     </div>

@@ -10,8 +10,8 @@ import {
   setAdminAccountLocked,
   updateAdminAccountRole,
 } from "@/lib/admin/accounts";
-import { isCurrentUserAdmin, type AdminRole } from "@/lib/admin/roles";
-import { setAllowedPages } from "@/lib/admin/rolePermissions";
+import { isCurrentUserAdmin, ADMIN_ROLE_KEY, type AdminRole } from "@/lib/admin/roles";
+import { createRole, getAllRoles, setAllowedPages } from "@/lib/admin/rolePermissions";
 import { logSecurityEvent } from "@/lib/admin/security";
 
 export interface CreateAccountState {
@@ -39,7 +39,7 @@ export async function createAccountAction(
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("full_name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
-  const role = formData.get("role") === "admin" ? "admin" : "member";
+  const role = String(formData.get("role") ?? "").trim();
 
   if (!fullName) {
     return { error: "Vui lòng nhập họ và tên." };
@@ -52,6 +52,12 @@ export async function createAccountAction(
   }
   if (password.length < 8) {
     return { error: "Mật khẩu phải có ít nhất 8 ký tự." };
+  }
+
+  const roles = await getAllRoles();
+  const roleDef = roles.find((r) => r.key === role);
+  if (!roleDef) {
+    return { error: "Vai trò không hợp lệ." };
   }
 
   try {
@@ -72,7 +78,7 @@ export async function createAccountAction(
     actorEmail: actor?.email,
     targetEmail: email,
     metadata: { role },
-    telegramNote: `Tài khoản mới: "${email}" (vai trò ${role === "admin" ? "Admin" : "Staff"}).`,
+    telegramNote: `Tài khoản mới: "${email}" (vai trò ${roleDef.label}).`,
   });
 
   revalidatePath("/admin/accounts");
@@ -120,6 +126,11 @@ export async function updateAccountRoleAction(
   const actor = await getCurrentUser();
   if (actor?.id === id) {
     return { error: "Không thể tự đổi vai trò của tài khoản đang đăng nhập." };
+  }
+
+  const roles = await getAllRoles();
+  if (!roles.some((r) => r.key === role)) {
+    return { error: "Vai trò không hợp lệ." };
   }
 
   try {
@@ -210,11 +221,36 @@ export async function resetAccountPasswordAction(
   return {};
 }
 
+export async function createRoleAction(label: string): Promise<{ error?: string }> {
+  if (!(await isCurrentUserAdmin())) {
+    return { error: "Bạn không có quyền thêm vai trò." };
+  }
+
+  let role: { key: string; label: string };
+  try {
+    role = await createRole(label);
+  } catch (err) {
+    console.error("[createRoleAction]", err);
+    return { error: err instanceof Error ? err.message : "Thêm vai trò thất bại, vui lòng thử lại." };
+  }
+
+  const actor = await getCurrentUser();
+  await logSecurityEvent("role_created", {
+    actorUserId: actor?.id,
+    actorEmail: actor?.email,
+    metadata: { role: role.key, label: role.label },
+    telegramNote: `Vai trò mới "${role.label}" (${role.key}) vừa được tạo — mặc định chưa xem được trang nào.`,
+  });
+
+  revalidatePath("/admin/accounts");
+  return {};
+}
+
 export async function updateRolePermissionsAction(role: AdminRole, allowedHrefs: string[]): Promise<{ error?: string }> {
   if (!(await isCurrentUserAdmin())) {
     return { error: "Bạn không có quyền đổi phân quyền." };
   }
-  if (role === "admin") {
+  if (role === ADMIN_ROLE_KEY) {
     return { error: "Admin luôn có toàn quyền, không chỉnh được." };
   }
 

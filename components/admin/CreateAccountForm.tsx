@@ -3,8 +3,11 @@
 import { useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { createAccountAction, type CreateAccountState } from "@/app/admin/(dashboard)/accounts/actions";
+import { ADMIN_ROLE_KEY } from "@/lib/admin/adminRoleKey";
+import type { AdminRoleDef } from "@/lib/admin/rolePermissions";
 
 interface CreateAccountFormProps {
+  roles: AdminRoleDef[];
   onCancel: () => void;
   onSuccess: () => void;
 }
@@ -26,12 +29,19 @@ function SubmitButton() {
   );
 }
 
-export default function CreateAccountForm({ onCancel, onSuccess }: CreateAccountFormProps) {
+export default function CreateAccountForm({ roles, onCancel, onSuccess }: CreateAccountFormProps) {
   const [state, formAction] = useFormState<CreateAccountState, FormData>(createAccountAction, {});
 
   useEffect(() => {
     if (state.success) onSuccess();
   }, [state.success, onSuccess]);
+
+  // Admin luôn để cuối danh sách — vai trò mặc định chọn sẵn nên là 1 vai trò
+  // hạn chế hơn (member/role tự thêm), không phải Admin.
+  const nonAdminRoles = roles.filter((r) => r.key !== ADMIN_ROLE_KEY);
+  const adminRole = roles.find((r) => r.key === ADMIN_ROLE_KEY);
+  const orderedRoles = [...nonAdminRoles, ...(adminRole ? [adminRole] : [])];
+  const defaultRole = nonAdminRoles[0]?.key ?? ADMIN_ROLE_KEY;
 
   return (
     <form action={formAction}>
@@ -56,9 +66,12 @@ export default function CreateAccountForm({ onCancel, onSuccess }: CreateAccount
         </div>
         <div>
           <label className={LABEL}>Vai trò *</label>
-          <select name="role" required defaultValue="member" className={FIELD}>
-            <option value="member">Staff — chỉ Phòng, Dự án, Blog, Leads</option>
-            <option value="admin">Admin — toàn quyền</option>
+          <select name="role" required defaultValue={defaultRole} className={FIELD}>
+            {orderedRoles.map((r) => (
+              <option key={r.key} value={r.key}>
+                {r.key === ADMIN_ROLE_KEY ? `${r.label} — toàn quyền` : r.label}
+              </option>
+            ))}
           </select>
         </div>
 

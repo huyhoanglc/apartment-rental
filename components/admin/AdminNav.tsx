@@ -9,7 +9,6 @@ import Avatar from "@/components/admin/Avatar";
 import PresenceIndicator from "@/components/admin/PresenceIndicator";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
 import { useGlobalLoading } from "@/components/admin/LoadingOverlay";
-import type { AdminRole } from "@/lib/admin/roles";
 import { ADMIN_PAGES, ALWAYS_VISIBLE_PAGES } from "@/lib/admin/pages";
 
 interface AdminNavProps {
@@ -17,21 +16,11 @@ interface AdminNavProps {
   email: string;
   fullName: string | null;
   avatarUrl: string | null;
-  role: AdminRole;
+  /** Nhãn vai trò hiện tại đã tính sẵn ở layout.tsx (vai trò giờ tuỳ ý, xem lib/admin/rolePermissions.ts getAllRoles). */
+  roleLabel: string;
   /** Trang role hiện tại được xem, tính sẵn ở layout.tsx (bảng phân quyền + /admin/security luôn có). */
   allowedHrefs: string[];
 }
-
-/** Thêm role mới: khai vào AdminRole (lib/admin/roles.ts), thêm vào đây và
- * ALL_ROLES, rồi liệt kê role đó vào `roles` của từng NAV_ITEMS được phép
- * xem — menu và bảng phân quyền ở /admin/accounts tự cập nhật theo, không
- * phải sửa logic lọc ở đâu khác. */
-export const ROLE_LABELS: Record<AdminRole, string> = {
-  admin: "Admin",
-  member: "Staff",
-};
-
-export const ALL_ROLES: AdminRole[] = ["admin", "member"];
 
 /** Thời gian chờ trước khi thu gọn lại sau khi rê chuột ra khỏi sidebar. */
 const COLLAPSE_DELAY_MS = 2500;
@@ -193,7 +182,7 @@ export function isActive(pathname: string, href: string): boolean {
   return pathname.startsWith(href);
 }
 
-export default function AdminNav({ userId, email, fullName, avatarUrl, role, allowedHrefs }: AdminNavProps) {
+export default function AdminNav({ userId, email, fullName, avatarUrl, roleLabel, allowedHrefs }: AdminNavProps) {
   const pathname = usePathname();
   const displayName = fullName || email;
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -288,7 +277,7 @@ export default function AdminNav({ userId, email, fullName, avatarUrl, role, all
             }`}
           >
             <span className="block truncate text-sm font-medium text-foreground">{displayName}</span>
-            <span className="block truncate text-xs text-muted-foreground">{ROLE_LABELS[role]}</span>
+            <span className="block truncate text-xs text-muted-foreground">{roleLabel}</span>
           </span>
         </button>
 
@@ -299,7 +288,7 @@ export default function AdminNav({ userId, email, fullName, avatarUrl, role, all
               <div className="border-b border-border px-4 py-3">
                 <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {email} · {ROLE_LABELS[role]}
+                  {email} · {roleLabel}
                 </p>
               </div>
               <Link

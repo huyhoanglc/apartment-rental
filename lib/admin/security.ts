@@ -29,6 +29,7 @@ const TELEGRAM_ALERT_EVENTS = new Set([
   "account_locked_auto",
   "new_device",
   "role_changed",
+  "role_created",
   "role_permissions_updated",
   "session_revoked",
   "account_created",
@@ -44,7 +45,7 @@ const TELEGRAM_ALERT_EVENTS = new Set([
 
 export interface AccountLookup {
   exists: boolean;
-  role: "admin" | "member" | null;
+  role: string | null;
 }
 
 /**
@@ -68,7 +69,8 @@ export async function lookupAccountByEmail(email: string): Promise<AccountLookup
   const user = data.users.find((u) => u.email?.toLowerCase() === normalized);
   if (!user) return { exists: false, role: null };
 
-  return { exists: true, role: user.app_metadata?.role === "member" ? "member" : "admin" };
+  const roleClaim = user.app_metadata?.role;
+  return { exists: true, role: typeof roleClaim === "string" && roleClaim ? roleClaim : "admin" };
 }
 
 function getRequestMeta(): { ip: string | null; userAgent: string | null } {
