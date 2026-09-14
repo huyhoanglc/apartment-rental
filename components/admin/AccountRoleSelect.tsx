@@ -25,8 +25,8 @@ export default function AccountRoleSelect({
 
   if (isSelf) {
     return (
-      <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
-        {role === "admin" ? "Admin" : "Cá nhân"} (bạn)
+      <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold uppercase text-muted-foreground">
+        {role === "admin" ? "Admin" : "Cá nhân"}
       </span>
     );
   }
@@ -58,7 +58,7 @@ export default function AccountRoleSelect({
       value={role}
       disabled={isPending}
       onChange={(e) => handleChange(e.target.value as AdminRole)}
-      className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-wait disabled:opacity-50 ${
+      className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold uppercase transition disabled:cursor-wait disabled:opacity-50 ${
         role === "admin"
           ? "border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-800 dark:bg-primary-900/40 dark:text-primary-300"
           : "border-border bg-muted text-muted-foreground"
