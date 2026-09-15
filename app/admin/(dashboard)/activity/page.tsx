@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { getRecentActivity } from "@/lib/admin/activity";
 import { formatVNDateTime } from "@/lib/formatDate";
 import { ACTIVITY_ACTION_LABELS, ACTIVITY_TABLE_LABELS } from "@/data/constants";
+import type { ActivityLogEntry } from "@/lib/types";
 
 const ACTION_BADGE: Record<string, string> = {
   insert: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
@@ -8,8 +10,20 @@ const ACTION_BADGE: Record<string, string> = {
   delete: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300",
 };
 
-export default async function ActivityLogPage() {
-  const entries = await getRecentActivity();
+const TABS: { value: ActivityLogEntry["table_name"] | "all"; label: string }[] = [
+  { value: "all", label: "Tất cả" },
+  { value: "projects", label: ACTIVITY_TABLE_LABELS.projects },
+  { value: "listings", label: ACTIVITY_TABLE_LABELS.listings },
+  { value: "blog_posts", label: ACTIVITY_TABLE_LABELS.blog_posts },
+];
+
+export default async function ActivityLogPage({
+  searchParams,
+}: {
+  searchParams: { table?: string };
+}) {
+  const activeTab = TABS.find((t) => t.value === searchParams.table)?.value ?? "all";
+  const entries = await getRecentActivity(activeTab === "all" ? undefined : activeTab);
 
   return (
     <div>
@@ -18,6 +32,22 @@ export default async function ActivityLogPage() {
         50 thao tác gần nhất trên Phòng, Dự án và Blog — ai tạo/sửa/xoá và khi nào. Quyền chỉnh
         sửa vẫn dùng chung cho cả admin và cá nhân, trang này chỉ để tra cứu.
       </p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {TABS.map((tab) => (
+          <Link
+            key={tab.value}
+            href={tab.value === "all" ? "/admin/activity" : { pathname: "/admin/activity", query: { table: tab.value } }}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+              activeTab === tab.value
+                ? "bg-primary-600 text-white"
+                : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+            }`}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
 
       <div className="mt-4 overflow-x-auto rounded-xl2 border border-border bg-card shadow-card">
         <table className="w-full text-sm">
