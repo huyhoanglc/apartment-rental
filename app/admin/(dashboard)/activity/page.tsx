@@ -33,23 +33,28 @@ export default async function ActivityLogPage({
         sửa vẫn dùng chung cho cả admin và cá nhân, trang này chỉ để tra cứu.
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {TABS.map((tab) => (
-          <Link
-            key={tab.value}
-            href={tab.value === "all" ? "/admin/activity" : { pathname: "/admin/activity", query: { table: tab.value } }}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-              activeTab === tab.value
-                ? "bg-primary-600 text-white"
-                : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-            }`}
-          >
-            {tab.label}
-          </Link>
-        ))}
+      <div className="mt-4 flex items-end gap-1 overflow-x-auto">
+        {TABS.map((tab) => {
+          const active = activeTab === tab.value;
+          return (
+            <Link
+              key={tab.value}
+              href={
+                tab.value === "all" ? "/admin/activity" : { pathname: "/admin/activity", query: { table: tab.value } }
+              }
+              className={`shrink-0 rounded-t-lg border px-4 py-2 text-sm font-medium transition ${
+                active
+                  ? "-mb-px border-border border-b-card bg-card text-foreground"
+                  : "border-transparent bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </Link>
+          );
+        })}
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl2 border border-border bg-card shadow-card">
+      <div className="overflow-x-auto rounded-xl2 border border-border bg-card shadow-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/50 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
