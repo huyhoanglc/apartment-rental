@@ -23,6 +23,17 @@ const CSP = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    // Client Router Cache: quay lại 1 trang admin (dynamic route, không có
+    // cache mặc định) trong vòng 30s sau khi rời đi thì dùng lại bản đã
+    // render thay vì gọi lại Supabase — chuyển tab qua lại không bị giật/chờ
+    // load lại. Sau 30s hoặc sau khi có action ghi dữ liệu, lần vào tiếp theo
+    // vẫn tự fetch mới nên không lo hiện dữ liệu cũ lâu.
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
+  },
   async headers() {
     // Chỉ áp ở production: CSP/HSTS chặt sẽ phá WebSocket Fast Refresh (HMR)
     // của `next dev`, và HSTS vô nghĩa (thậm chí gây phiền) trên localhost http.
