@@ -55,6 +55,40 @@ export async function getListings(filters: ListingFilters = {}): Promise<Listing
   return (data as ListingWithProject[] | null) ?? [];
 }
 
+export interface ListingsPage {
+  listings: ListingWithProject[];
+  total: number;
+}
+
+/**
+ * Bản có phân trang của getListings(), dùng riêng cho trang quản lý "Phòng"
+ * trong admin (bảng danh sách) — KHÔNG dùng cho danh sách dự án truyền vào
+ * dropdown chọn dự án (ListingsManager vẫn cần getProjects() đầy đủ, không
+ * phân trang, cho phần đó).
+ */
+export async function getListingsPage(page: number = 1, pageSize: number = 20): Promise<ListingsPage> {
+  if (!isSupabaseConfigured || !supabase) {
+    const sorted = [...demoListings].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+    const withProject = sorted
+      .map(attachDemoProject)
+      .filter((l): l is ListingWithProject => l !== null);
+    const from = (page - 1) * pageSize;
+    return { listings: withProject.slice(from, from + pageSize), total: withProject.length };
+  }
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
+    .from("listings")
+    .select("*, project:projects!inner(*)", { count: "exact" })
+    .order("updated_at", { ascending: false })
+    .range(from, to);
+
+  if (error) throw error;
+  return { listings: (data as ListingWithProject[] | null) ?? [], total: count ?? 0 };
+}
+
 export async function getListingByCode(code: string): Promise<ListingWithProject | null> {
   if (!isSupabaseConfigured || !supabase) {
     const listing = demoListings.find((l) => l.code === code);

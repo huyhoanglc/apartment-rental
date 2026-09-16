@@ -39,15 +39,22 @@ function roleOf(appMetadata: Record<string, unknown> | undefined): AdminRole {
 /** Supabase không có "khoá vĩnh viễn" thật sự — dùng ban_duration rất dài để mô phỏng. */
 const LOCK_DURATION = "876000h";
 
-export async function getAdminAccounts(): Promise<AdminAccount[]> {
+export interface AdminAccountsPage {
+  accounts: AdminAccount[];
+  total: number;
+}
+
+export async function getAdminAccounts(page: number = 1, pageSize: number = 20): Promise<AdminAccountsPage> {
   await requireAuthenticated();
   const admin = createAdminClient();
 
-  const { data, error } = await admin.auth.admin.listUsers();
+  const { data, error } = await admin.auth.admin.listUsers({ page, perPage: pageSize });
   if (error) throw error;
 
   // listUsers() không trả kèm MFA factors (luôn rỗng) — phải gọi riêng
   // mfa.listFactors cho từng user mới biết chính xác đã bật MFA hay chưa.
+  // Chỉ gọi cho đúng số user của TRANG hiện tại (không phải toàn bộ), nhẹ hơn
+  // nhiều khi số tài khoản tăng lên.
   const mfaByUserId = new Map<string, boolean>();
   await Promise.all(
     data.users.map(async (u) => {
@@ -56,7 +63,7 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
     })
   );
 
-  return data.users
+  const accounts = data.users
     .map((u) => ({
       id: u.id,
       email: u.email ?? "",
@@ -70,6 +77,8 @@ export async function getAdminAccounts(): Promise<AdminAccount[]> {
       providers: (u.identities ?? []).map((i) => i.provider),
     }))
     .sort((a, b) => a.email.localeCompare(b.email));
+
+  return { accounts, total: data.total ?? accounts.length };
 }
 
 export async function createAdminAccount(

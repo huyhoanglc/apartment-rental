@@ -1,6 +1,9 @@
+import Pagination from "@/components/admin/Pagination";
 import { getSecurityAuditLog } from "@/lib/admin/security";
 import { requirePageAccess } from "@/lib/admin/rolePermissions";
 import { formatVNDateTime } from "@/lib/formatDate";
+
+const PAGE_SIZE = 20;
 
 const EVENT_LABELS: Record<string, string> = {
   login_blocked_rate_limit: "Chặn đăng nhập (rate limit)",
@@ -20,19 +23,21 @@ const EVENT_LABELS: Record<string, string> = {
 };
 
 /** Chỉ role được cấp xem (bảng phân quyền /admin/accounts) + RLS trên security_audit_log. */
-export default async function SecurityLogPage() {
+export default async function SecurityLogPage({ searchParams }: { searchParams: { page?: string } }) {
   await requirePageAccess("/admin/audit-log");
-  const entries = await getSecurityAuditLog();
+  const page = Math.max(1, Number(searchParams.page) || 1);
+  const { entries, total } = await getSecurityAuditLog(page, PAGE_SIZE);
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-foreground">Nhật ký bảo mật</h1>
+      <h1 className="text-xl font-bold text-foreground">Nhật ký bảo mật ({total})</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        50 sự kiện bảo mật gần nhất — chặn đăng nhập, khoá tự động, thiết bị mới, đổi vai trò, ép
-        đăng xuất, MFA... Khác trang Lịch sử chỉnh sửa (chỉ ghi sửa dữ liệu Phòng/Dự án/Blog).
+        Chặn đăng nhập, khoá tự động, thiết bị mới, đổi vai trò, ép đăng xuất, MFA... Khác trang
+        Lịch sử chỉnh sửa (chỉ ghi sửa dữ liệu Phòng/Dự án/Blog).
       </p>
 
-      <div className="mt-4 overflow-x-auto rounded-xl2 border border-border bg-card shadow-card">
+      <div className="mt-4 overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/50 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -66,6 +71,9 @@ export default async function SecurityLogPage() {
             )}
           </tbody>
         </table>
+        </div>
+
+        <Pagination page={page} pageSize={PAGE_SIZE} total={total} basePath="/admin/audit-log" />
       </div>
     </div>
   );

@@ -1,8 +1,11 @@
 import ProjectsManager from "@/components/admin/ProjectsManager";
-import { getProjects } from "@/lib/projects";
+import { getProjectsPage } from "@/lib/projects";
 
-export default async function AdminProjectsPage() {
-  const projects = await getProjects();
+const PAGE_SIZE = 20;
 
-  return <ProjectsManager projects={projects} />;
+export default async function AdminProjectsPage({ searchParams }: { searchParams: { page?: string } }) {
+  const page = Math.max(1, Number(searchParams.page) || 1);
+  const { projects, total } = await getProjectsPage(page, PAGE_SIZE);
+
+  return <ProjectsManager projects={projects} total={total} page={page} pageSize={PAGE_SIZE} />;
 }

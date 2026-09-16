@@ -6,6 +6,7 @@ import Image from "next/image";
 import DeleteProjectButton from "@/components/admin/DeleteProjectButton";
 import FormModal from "@/components/admin/FormModal";
 import ImportProjectsButton from "@/components/admin/ImportProjectsButton";
+import Pagination from "@/components/admin/Pagination";
 import ProjectForm from "@/components/admin/ProjectForm";
 import { useToast } from "@/components/admin/Toast";
 import { saveProject } from "@/app/admin/(dashboard)/projects/actions";
@@ -13,11 +14,14 @@ import type { Project } from "@/lib/types";
 
 interface ProjectsManagerProps {
   projects: Project[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 type ModalState = { mode: "create" } | { mode: "edit"; project: Project } | null;
 
-export default function ProjectsManager({ projects }: ProjectsManagerProps) {
+export default function ProjectsManager({ projects, total, page, pageSize }: ProjectsManagerProps) {
   const [modal, setModal] = useState<ModalState>(null);
   const router = useRouter();
   const toast = useToast();
@@ -37,7 +41,7 @@ export default function ProjectsManager({ projects }: ProjectsManagerProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">Dự án</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">{projects.length} dự án đang quản lý</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{total} dự án đang quản lý</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
           <ImportProjectsButton />
@@ -112,6 +116,7 @@ export default function ProjectsManager({ projects }: ProjectsManagerProps) {
             </tbody>
           </table>
         )}
+        <Pagination page={page} pageSize={pageSize} total={total} basePath="/admin/projects" />
       </div>
 
       {modal && (

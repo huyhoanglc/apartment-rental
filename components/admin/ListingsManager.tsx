@@ -8,6 +8,7 @@ import StatusSelect from "@/components/admin/StatusSelect";
 import FormModal from "@/components/admin/FormModal";
 import ImportListingsButton from "@/components/admin/ImportListingsButton";
 import ListingForm from "@/components/admin/ListingForm";
+import Pagination from "@/components/admin/Pagination";
 import ProjectForm from "@/components/admin/ProjectForm";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
@@ -18,6 +19,9 @@ import type { ListingWithProject, Project } from "@/lib/types";
 
 interface ListingsManagerProps {
   listings: ListingWithProject[];
+  total: number;
+  page: number;
+  pageSize: number;
   projects: Project[];
 }
 
@@ -27,7 +31,7 @@ type ModalState =
   | { mode: "create-project" }
   | null;
 
-export default function ListingsManager({ listings, projects }: ListingsManagerProps) {
+export default function ListingsManager({ listings, total, page, pageSize, projects }: ListingsManagerProps) {
   const [modal, setModal] = useState<ModalState>(null);
   const router = useRouter();
   const toast = useToast();
@@ -81,7 +85,7 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">Phòng</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">{listings.length} phòng đang quản lý</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{total} phòng đang quản lý</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
           <ImportListingsButton />
@@ -175,6 +179,7 @@ export default function ListingsManager({ listings, projects }: ListingsManagerP
             </tbody>
           </table>
         )}
+        <Pagination page={page} pageSize={pageSize} total={total} basePath="/admin" />
       </div>
 
       {modal && modal.mode !== "create-project" && (

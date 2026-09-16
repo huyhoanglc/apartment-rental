@@ -1,15 +1,24 @@
 import { createClient } from "@/lib/supabase/server";
 import type { BlogPost, BlogPostInput } from "@/lib/types";
 
-export async function getAllBlogPostsAdmin(): Promise<BlogPost[]> {
+export interface BlogPostsPage {
+  posts: BlogPost[];
+  total: number;
+}
+
+export async function getAllBlogPostsAdmin(page: number = 1, pageSize: number = 20): Promise<BlogPostsPage> {
   const supabase = createClient();
-  const { data, error } = await supabase
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
     .from("blog_posts")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw error;
-  return data ?? [];
+  return { posts: data ?? [], total: count ?? 0 };
 }
 
 export async function getBlogPostBySlugAdmin(slug: string): Promise<BlogPost | null> {

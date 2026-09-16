@@ -7,6 +7,7 @@ import AccountRoleSelect from "@/components/admin/AccountRoleSelect";
 import CreateAccountForm from "@/components/admin/CreateAccountForm";
 import DeleteAccountButton from "@/components/admin/DeleteAccountButton";
 import FormModal from "@/components/admin/FormModal";
+import Pagination from "@/components/admin/Pagination";
 import PermissionsMatrixEditor from "@/components/admin/PermissionsMatrixEditor";
 import ResetMfaButton from "@/components/admin/ResetMfaButton";
 import ResetPasswordButton from "@/components/admin/ResetPasswordButton";
@@ -18,12 +19,23 @@ import type { AdminRoleDef } from "@/lib/admin/rolePermissions";
 
 interface AccountsManagerProps {
   accounts: AdminAccount[];
+  total: number;
+  page: number;
+  pageSize: number;
   currentUserId: string | undefined;
   roles: AdminRoleDef[];
   permissions: Record<AdminRole, string[]>;
 }
 
-export default function AccountsManager({ accounts, currentUserId, roles, permissions }: AccountsManagerProps) {
+export default function AccountsManager({
+  accounts,
+  total,
+  page,
+  pageSize,
+  currentUserId,
+  roles,
+  permissions,
+}: AccountsManagerProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
   const toast = useToast();
@@ -38,7 +50,7 @@ export default function AccountsManager({ accounts, currentUserId, roles, permis
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Tài khoản đăng nhập</h1>
+          <h1 className="text-xl font-bold text-foreground">Tài khoản đăng nhập ({total})</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
             Quản lý ai đăng nhập được vào trang quản trị. Vai trò <strong>Admin</strong> luôn thấy
             toàn bộ mục quản trị; vai trò khác xem được trang nào do bảng phân quyền bên dưới quyết
@@ -57,7 +69,8 @@ export default function AccountsManager({ accounts, currentUserId, roles, permis
         </button>
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-xl2 border border-border bg-card shadow-card">
+      <div className="mt-6 overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/50 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -137,6 +150,9 @@ export default function AccountsManager({ accounts, currentUserId, roles, permis
             )}
           </tbody>
         </table>
+        </div>
+
+        <Pagination page={page} pageSize={pageSize} total={total} basePath="/admin/accounts" />
       </div>
 
       <PermissionsMatrixEditor roles={roles} permissions={permissions} />

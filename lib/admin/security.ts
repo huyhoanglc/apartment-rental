@@ -213,17 +213,25 @@ export interface SecurityAuditLogEntry {
   created_at: string;
 }
 
-/** 50 sự kiện bảo mật gần nhất — trang /admin/security-log (chỉ admin, theo RLS trên security_audit_log). */
-export async function getSecurityAuditLog(): Promise<SecurityAuditLogEntry[]> {
+export interface SecurityAuditLogPage {
+  entries: SecurityAuditLogEntry[];
+  total: number;
+}
+
+/** Sự kiện bảo mật, phân trang — trang /admin/audit-log (chỉ admin, theo RLS trên security_audit_log). */
+export async function getSecurityAuditLog(page: number = 1, pageSize: number = 20): Promise<SecurityAuditLogPage> {
   const supabase = createClient();
-  const { data, error } = await supabase
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
     .from("security_audit_log")
-    .select("id, event_type, actor_email, target_email, ip_address, metadata, created_at")
+    .select("id, event_type, actor_email, target_email, ip_address, metadata, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
-    .limit(50);
+    .range(from, to);
 
   if (error) throw error;
-  return data ?? [];
+  return { entries: data ?? [], total: count ?? 0 };
 }
 
 /**
@@ -267,17 +275,25 @@ export async function recordAdminLogin(
   );
 }
 
-export async function getLoginEvents(): Promise<LoginEvent[]> {
+export interface LoginEventsPage {
+  events: LoginEvent[];
+  total: number;
+}
+
+export async function getLoginEvents(page: number = 1, pageSize: number = 20): Promise<LoginEventsPage> {
   const supabase = createClient();
-  const { data, error } = await supabase
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, error, count } = await supabase
     .from("admin_login_events")
-    .select("id, ip_address, user_agent, created_at")
+    .select("id, ip_address, user_agent, created_at", { count: "exact" })
     .eq("success", true)
     .order("created_at", { ascending: false })
-    .limit(20);
+    .range(from, to);
 
   if (error) throw error;
-  return data ?? [];
+  return { events: data ?? [], total: count ?? 0 };
 }
 
 /** Parse gọn user-agent thành "Trình duyệt · Hệ điều hành", không dùng thư viện. */

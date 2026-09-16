@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DeleteBlogPostButton from "@/components/admin/DeleteBlogPostButton";
+import Pagination from "@/components/admin/Pagination";
 import PublishedToggle from "@/components/admin/PublishedToggle";
 import FormModal from "@/components/admin/FormModal";
 import BlogPostForm from "@/components/admin/BlogPostForm";
@@ -12,11 +13,14 @@ import type { BlogPost } from "@/lib/types";
 
 interface BlogManagerProps {
   posts: BlogPost[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 type ModalState = { mode: "create" } | { mode: "edit"; post: BlogPost } | null;
 
-export default function BlogManager({ posts }: BlogManagerProps) {
+export default function BlogManager({ posts, total, page, pageSize }: BlogManagerProps) {
   const [modal, setModal] = useState<ModalState>(null);
   const router = useRouter();
   const toast = useToast();
@@ -34,7 +38,7 @@ export default function BlogManager({ posts }: BlogManagerProps) {
   return (
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-bold text-foreground">Blog ({posts.length})</h1>
+        <h1 className="text-xl font-bold text-foreground">Blog ({total})</h1>
         <button
           type="button"
           onClick={() => setModal({ mode: "create" })}
@@ -44,7 +48,8 @@ export default function BlogManager({ posts }: BlogManagerProps) {
         </button>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl2 bg-card shadow-card">
+      <div className="mt-4 overflow-hidden rounded-xl2 bg-card shadow-card">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-muted-foreground">
@@ -87,6 +92,9 @@ export default function BlogManager({ posts }: BlogManagerProps) {
             )}
           </tbody>
         </table>
+        </div>
+
+        <Pagination page={page} pageSize={pageSize} total={total} basePath="/admin/blog" />
       </div>
 
       {modal && (

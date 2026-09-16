@@ -1,5 +1,6 @@
 import LinkGoogleButton from "@/components/admin/LinkGoogleButton";
 import MfaManager from "@/components/admin/MfaManager";
+import Pagination from "@/components/admin/Pagination";
 import ProfileForm from "@/components/admin/ProfileForm";
 import SignOutOthersButton from "@/components/admin/SignOutOthersButton";
 import { createClient } from "@/lib/supabase/server";
@@ -53,14 +54,22 @@ function ZaloIcon({ className }: { className?: string }) {
   );
 }
 
-export default async function AdminSecurityPage() {
+const LOGIN_EVENTS_PAGE_SIZE = 20;
+
+export default async function AdminSecurityPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [events, identitiesResult, listingsCount, mfaFactor, isAdmin] = await Promise.all([
-    getLoginEvents(),
+  const page = Math.max(1, Number(searchParams.page) || 1);
+
+  const [{ events, total }, identitiesResult, listingsCount, mfaFactor, isAdmin] = await Promise.all([
+    getLoginEvents(page, LOGIN_EVENTS_PAGE_SIZE),
     supabase.auth.getUserIdentities(),
     user ? countListingsCreatedBy(user.id) : Promise.resolve(0),
     getVerifiedTotpFactor(),
@@ -142,7 +151,7 @@ export default async function AdminSecurityPage() {
       <div className="mt-4 overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
         <div className="p-6">
           <h2 className="text-sm font-semibold text-foreground">Lịch sử đăng nhập</h2>
-          <p className="mt-1 text-sm text-muted-foreground">20 lần đăng nhập gần nhất của tài khoản bạn đang dùng.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Toàn bộ lịch sử đăng nhập của tài khoản bạn đang dùng.</p>
         </div>
 
         <div className="overflow-x-auto">
@@ -174,6 +183,8 @@ export default async function AdminSecurityPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination page={page} pageSize={LOGIN_EVENTS_PAGE_SIZE} total={total} basePath="/admin/security" />
       </div>
     </div>
   );
