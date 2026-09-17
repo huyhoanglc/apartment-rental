@@ -1,5 +1,6 @@
 import GoogleLoginButton from "@/components/admin/GoogleLoginButton";
 import LoginForm from "@/components/admin/LoginForm";
+import LoginMascot from "@/components/admin/LoginMascot";
 
 export default function AdminLoginPage({
   searchParams,
@@ -7,7 +8,8 @@ export default function AdminLoginPage({
   searchParams: { error?: string; email?: string };
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+      <LoginMascot />
       <div className="w-full max-w-sm overflow-hidden rounded-xl2 border border-border bg-card shadow-card">
         <div className="p-6">
           <div className="flex items-center gap-2 text-lg font-bold text-primary-700 dark:text-primary-300">

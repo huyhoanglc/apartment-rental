@@ -9,7 +9,9 @@ import {
 } from "@/lib/admin/listings";
 import { importListingsFromFile, type ImportListingsResult } from "@/lib/admin/importListings";
 import { uploadListingImage } from "@/lib/admin/storage";
+import { getProjectNameById } from "@/lib/admin/projects";
 import { getListingByCode } from "@/lib/listings";
+import { mirrorImageToDrive } from "@/lib/googleDrive";
 import { LISTING_TYPE_LABELS, ROOM_TYPE_LABELS } from "@/data/constants";
 import type { ListingInput, ListingStatus, ListingType, RoomType } from "@/lib/types";
 
@@ -78,6 +80,13 @@ export async function saveListing(
     } catch {
       return { error: "Upload ảnh thất bại, vui lòng thử lại." };
     }
+
+    // Mirror sang Google Drive để sale xem/tải trực tiếp — best-effort, không
+    // làm hỏng luồng lưu tin nếu Drive lỗi hoặc chưa cấu hình (xem lib/googleDrive.ts).
+    const projectName = await getProjectNameById(project_id).catch(() => null);
+    const dotIndex = imageFile.name.lastIndexOf(".");
+    const ext = dotIndex >= 0 ? imageFile.name.slice(dotIndex) : "";
+    await mirrorImageToDrive(projectName ?? "Chưa rõ dự án", `${code} - ${title}${ext}`, imageFile);
   }
 
   if (isCreate && !image_url) {

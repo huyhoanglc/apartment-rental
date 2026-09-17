@@ -11,15 +11,18 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "drive:auth": "tsx scripts/getGoogleDriveRefreshToken.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "exceljs": "^4.4.0",
+    "googleapis": "^181.0.0",
     "next": "14.2.35",
     "next-intl": "^4.14.2",
     "next-themes": "^0.4.6",
+    "page-mascot": "^0.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0"

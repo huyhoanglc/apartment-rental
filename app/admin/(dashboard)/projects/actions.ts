@@ -7,6 +7,7 @@ import { uploadProjectImage } from "@/lib/admin/storage";
 import { getProjectBySlug } from "@/lib/projects";
 import { slugify } from "@/lib/slugify";
 import { deriveProjectCode } from "@/lib/projectCode";
+import { mirrorImageToDrive } from "@/lib/googleDrive";
 import type { ProjectInput } from "@/lib/types";
 
 export interface SaveProjectState {
@@ -60,6 +61,11 @@ export async function saveProject(
     } catch {
       return { error: "Upload ảnh thất bại, vui lòng thử lại." };
     }
+
+    // Mirror sang Google Drive để sale xem/tải trực tiếp — best-effort, xem lib/googleDrive.ts.
+    const dotIndex = coverFile.name.lastIndexOf(".");
+    const ext = dotIndex >= 0 ? coverFile.name.slice(dotIndex) : "";
+    await mirrorImageToDrive(name, `Cover${ext}`, coverFile);
   }
 
   const commonFields: Omit<ProjectInput, "cover_image_url" | "code"> = {

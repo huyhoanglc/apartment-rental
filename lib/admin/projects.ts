@@ -18,3 +18,16 @@ export async function deleteProject(slug: string): Promise<void> {
   const { error } = await supabase.from("projects").delete().eq("slug", slug);
   if (error) throw error;
 }
+
+// Dùng để đặt tên folder Drive khi mirror ảnh phòng (lib/googleDrive.ts) — chỉ
+// cần tên, không cần cả bản ghi dự án.
+export async function getProjectNameById(id: string): Promise<string | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select("name")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.name ?? null;
+}
